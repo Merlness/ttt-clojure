@@ -5,11 +5,37 @@
 
 (describe "Updating board"
 
+  (it "is an invalid move"
+    (should= true (sut/invalid-move? 1 ["X" 2 3 4 5 6 7 8 9])))
+
+  (it "is a valid move"
+    (should= false (sut/invalid-move? 1 [1 2 3 4 5 6 7 8 9])))
+
   (it "updates board for X"
     (with-redefs [read-line (fn [] "1")]
-      (should= ["X" 2 3 4 5 6 7 8 9] (sut/update-board [1 2 3 4 5 6 7 8 9] true))))
+      (should= ["X" 2 3 4 5 6 7 8 9]
+               (sut/update-board [1 2 3 4 5 6 7 8 9] true))))
 
   (it "updates board for O"
     (with-redefs [read-line (fn [] "1")]
-      (should= ["O" 2 3 4 5 6 7 8 9] (sut/update-board [1 2 3 4 5 6 7 8 9] false))))
+      (should= ["O" 2 3 4 5 6 7 8 9]
+               (sut/update-board [1 2 3 4 5 6 7 8 9] false))))
+
+  (it "knows O winner"
+    (should= "Congrats O is the winner!"
+             (sut/endgame-result ["O" "O" "O" 4 5 6 7 8 9])))
+
+  (it "knows X winner"
+    (should= "Congrats X is the winner!"
+             (sut/endgame-result [1 2 3 "X" "X" "X" 7 8 9])))
+
+  (it "knows its a tie"
+    (should= "Womp, its a tie"
+             (sut/endgame-result ["X" "O" "X"
+                                  "O" "X" "X"
+                                  "O" "X" "O"])))
+
+  (it "knows game is still going"
+    (should= nil
+             (sut/endgame-result [1 2 3 4 5 6 7 8 9])))
   )

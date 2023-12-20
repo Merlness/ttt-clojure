@@ -10,20 +10,20 @@
 
     (it "checks game-over? O"
       (should= "Congrats O is the winner!"
-               (sut/game-over? ["O" 2 3 "O" 5 6 "O" 8 9])))
+               (sut/endgame-result ["O" 2 3 "O" 5 6 "O" 8 9])))
 
     (it "checks game-over? X"
       (should= "Congrats X is the winner!"
-               (sut/game-over? [1 2 3 "X" "X" "X" 7 8 9])))
+               (sut/endgame-result [1 2 3 "X" "X" "X" 7 8 9])))
 
     (it "checks game-over? tie"
       (should= "Womp, its a tie"
-               (sut/game-over? ["O" "O" "X"
+               (sut/endgame-result ["O" "O" "X"
                                 "X" "O" "O"
                                 "O" "X" "X"])))
     (it "checks game-over? for not game over"
       (should= nil
-               (sut/game-over? [1 2 3 4 5 6 7 8 9])))
+               (sut/endgame-result [1 2 3 4 5 6 7 8 9])))
 
     ;(it "should work"
     ;  (should= [1 2 3 4 5 6 7 8 9]

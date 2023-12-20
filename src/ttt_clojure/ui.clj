@@ -1,4 +1,5 @@
-(ns ttt-clojure.ui)
+(ns ttt-clojure.ui
+  (:require [ttt-clojure.board :as board]))
 
 (defn X? [bool]
   (if bool
@@ -12,7 +13,7 @@
        %)
     grid))
 
-(defn valid-move? [num grid]
+(defn invalid-move? [num grid]
   (not-any? #{num} grid))
 
 (defn invalid-message []
@@ -27,9 +28,19 @@
 (defn update-board [grid xo]
   (loop []
     (let [move (get-move)]
-      (if (valid-move? move grid)
+      (if (invalid-move? move grid)
         (do (invalid-message) (recur))
         (place-xo grid move (X? xo))))))
 
-;(defn display-board [board])
-;(defn game-over [board])
+(defn endgame-result [grid]                                 ; result, outcome, ...
+  (cond
+    (board/x-wins grid) "Congrats X is the winner!"
+    (board/o-wins grid) "Congrats O is the winner!"
+    (board/tie grid) "Womp, its a tie"))
+
+(defn print-board [grid]
+  (println (board/display grid)))
+
+(defn print-end [grid]
+  (println (board/display grid))
+  (println (endgame-result grid)))
