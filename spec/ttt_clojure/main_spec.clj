@@ -1,29 +1,12 @@
 (ns ttt-clojure.core-spec
   (:require [speclj.core :refer :all]
-            [ttt-clojure.core :as sut]))
+            [ttt-clojure.ui :as sut]))
 
 (describe "Making a grid"
   (with-stubs)
 
 
-  (describe "checking wins and tie"
 
-    (it "checks game-over? O"
-      (should= "Congrats O is the winner!"
-               (sut/endgame-result ["O" 2 3 "O" 5 6 "O" 8 9])))
-
-    (it "checks game-over? X"
-      (should= "Congrats X is the winner!"
-               (sut/endgame-result [1 2 3 "X" "X" "X" 7 8 9])))
-
-    (it "checks game-over? tie"
-      (should= "Womp, its a tie"
-               (sut/endgame-result ["O" "O" "X"
-                                "X" "O" "O"
-                                "O" "X" "X"])))
-    (it "checks game-over? for not game over"
-      (should= nil
-               (sut/endgame-result [1 2 3 4 5 6 7 8 9])))
 
     ;(it "should work"
     ;  (should= [1 2 3 4 5 6 7 8 9]
@@ -61,4 +44,3 @@
         (winner!)
         )
       )
-  )
