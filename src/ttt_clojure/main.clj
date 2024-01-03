@@ -1,11 +1,15 @@
-(ns ttt-clojure.core
-  (:require [ttt-clojure.ui :as ui]))
+(ns ttt-clojure.main
+  (:require [ttt-clojure.two-player :as tp])
+  (:require [ttt-clojure.computer :as ai]))
 
 (defn -main []
-  (loop [grid [1 2 3 4 5 6 7 8 9]
-         X? true]
-    (ui/print-board grid)
-    (let [new-grid (ui/update-board grid X?)]
-      (if (ui/endgame-result new-grid)
-        (ui/print-end new-grid)
-        (recur new-grid (not X?))))))
+  (loop []
+    (let [user-input
+          (do (println "Please press 1 for Tic Tac Toe vs AI,
+          or 2 for Two Player Tic Tac Toe ")
+              (read-line))]
+      (cond
+        (= user-input "1") (ai/computer)
+        (= user-input "2") (tp/two-player)
+        :else (recur))))
+  )

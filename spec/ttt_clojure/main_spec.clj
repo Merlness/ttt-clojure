@@ -1,17 +1,11 @@
-(ns ttt-clojure.core-spec
-  (:require [speclj.core :refer :all]
-            [ttt-clojure.ui :as sut]))
+(ns ttt-clojure.main-spec
+  (:require [speclj.core :refer :all]))
 
 (describe "Making a grid"
   (with-stubs)
 
 
 
-
-    ;(it "should work"
-    ;  (should= [1 2 3 4 5 6 7 8 9]
-    ;           (sut/game-loop )))
-    )
 
   #_(it "captures console out"
       (should= "hello merl!\n" (with-out-str (println "hello merl!")))
@@ -44,3 +38,4 @@
         (winner!)
         )
       )
+  )

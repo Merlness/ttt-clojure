@@ -11,6 +11,11 @@
   (it "is a valid move"
     (should= false (sut/invalid-move? 1 [1 2 3 4 5 6 7 8 9])))
 
+  (it "get-move"
+    (with-in-str "1\n"
+      (let [output (with-out-str (sut/get-move))]
+        (should= "Choose your position\n" output))))
+
   (it "updates board for X"
     (with-redefs [read-line (fn [] "1")]
       (should= ["X" 2 3 4 5 6 7 8 9]
@@ -20,6 +25,12 @@
     (with-redefs [read-line (fn [] "1")]
       (should= ["O" 2 3 4 5 6 7 8 9]
                (sut/update-board [1 2 3 4 5 6 7 8 9] false))))
+
+  (it "updates board after two moves"
+    (with-in-str "1\n2\n"
+      (should= ["X" "O" 3 4 5 6 7 8 9]
+               (-> (sut/update-board [1 2 3 4 5 6 7 8 9] true)
+                   (sut/update-board false)))))
 
   (it "knows O winner"
     (should= "Congrats O is the winner!"
