@@ -18,19 +18,22 @@
 
   (it "updates board for X"
     (with-redefs [read-line (fn [] "1")]
-      (should= ["X" 2 3 4 5 6 7 8 9]
-               (sut/update-board [1 2 3 4 5 6 7 8 9] true))))
+      (with-out-str
+        (should= ["X" 2 3 4 5 6 7 8 9]
+                 (sut/update-board [1 2 3 4 5 6 7 8 9] true)))))
 
   (it "updates board for O"
     (with-redefs [read-line (fn [] "1")]
+      (with-out-str
       (should= ["O" 2 3 4 5 6 7 8 9]
-               (sut/update-board [1 2 3 4 5 6 7 8 9] false))))
+               (sut/update-board [1 2 3 4 5 6 7 8 9] false)))))
 
   (it "updates board after two moves"
     (with-in-str "1\n2\n"
-      (should= ["X" "O" 3 4 5 6 7 8 9]
+      (with-out-str
+        (should= ["X" "O" 3 4 5 6 7 8 9]
                (-> (sut/update-board [1 2 3 4 5 6 7 8 9] true)
-                   (sut/update-board false)))))
+                   (sut/update-board false))))))
 
   (it "knows O winner"
     (should= "Congrats O is the winner!"

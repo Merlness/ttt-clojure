@@ -35,10 +35,13 @@
                                "O" 5 6
                                7 8 9])))
 
-  (it "tests end move"
+  (it "tests first move"
     (let [board [1 2 3
                  4 5 6
                  7 8 9]]
       (should-contain (sut/next-move board) [1 3 7 9])))
 
   )
+
+;remove print statements from test
+; use similar minimax in tests to prove it never loses

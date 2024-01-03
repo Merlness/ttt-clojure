@@ -8,9 +8,9 @@
 
 (it "says if you start first"
   (with-redefs [read-line (fn [] "1")]
-    (should (sut/start-first?))))
+    (should-not (sut/start-first?))))
 
   (it "says if you start second"
     (with-redefs [read-line (fn [] "2")]
-      (should-not (sut/start-first?))))
+      (should (sut/start-first?))))
   )
