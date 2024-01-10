@@ -43,3 +43,4 @@
   (min-or-max board depth false))
 
 (defn next-move [board] (second (maximize board 1)))
+(defn next-move-2 [board] (second (minimize board 1)))
