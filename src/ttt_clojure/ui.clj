@@ -28,13 +28,14 @@
                (Integer/parseInt input)
                (catch NumberFormatException e
                  nil))]
-    (and move (<= 1 move 9))))
+    (and move (<= 1 move 16))))
+;potential problem        ^
 
 (defn get-move []
   (println "Choose your position")
   (loop []
     (let [user-input (read-line)]
-      (if (valid-input? user-input)
+      (if (valid-input? user-input )
         (Integer/parseInt user-input)
         (do
           (println "Invalid input. Please enter a number between 1 and 9.")
@@ -42,7 +43,7 @@
 
 (defn update-board [grid xo]
   (loop []
-    (let [move (get-move)]
+    (let [move (get-move )]
       (if (invalid-move? move grid)
         (do (invalid-message) (recur))
         (place-xo grid move (X? xo))))))
@@ -77,6 +78,13 @@
              2 for Two Player Tic Tac Toe
              3 for Computer vs Computer Tic Tac Toe")
   (read-line))
+
+(defn get-user-input-3-4 []
+  (println "Welcome to Merl's Tic Tac Toe
+  Please press 3 if you would like to play on a 3x3 board
+    4 if you would like to play on a 4x4 board")
+  (read-line))
+
 
 (defn get-user-input-difficulty []
   (println "Please press 1 for an easy AI

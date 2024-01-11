@@ -2,8 +2,8 @@
   (:require [ttt-clojure.ui :as ui]))
 
 
-(defn two-player []
- (loop [grid [1 2 3 4 5 6 7 8 9]
+(defn two-player [board]
+ (loop [grid board
        X? true]
   (ui/print-board grid)
   (let [new-grid (ui/update-board grid X?)]

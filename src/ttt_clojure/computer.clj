@@ -29,8 +29,8 @@
 ;(defmethod next-move :human [{:keys [board x o]}]
 ;  4)
 
-(defn ai [difficulty]
-  (loop [grid [1 2 3 4 5 6 7 8 9]
+(defn ai [board difficulty]
+  (loop [grid board
          x-turn? (ui/start-first?)]
     (let [move (difficulty grid)
           new-grid (grid-after-comp x-turn? grid move)]
@@ -38,15 +38,15 @@
       (if (not (ui/endgame-result new-grid))
         (recur new-grid (not x-turn?))
         (ui/print-end-computer new-grid)))))
+;added board for all AI
+(defn easy-ai [board]
+  (ai board ec/place-easy-move))
 
-(defn easy-ai []
-  (ai ec/place-easy-move))
+(defn hard-ai [board]
+  (ai board mm/next-move))
 
-(defn hard-ai []
-  (ai mm/next-move))
-
-(defn medium-ai []
-  (ai #(medium-difficulty mm/next-move %)))
+(defn medium-ai [board]
+  (ai board #(medium-difficulty mm/next-move %)))
 
 
 (defn comp-move-statement [x-turn? grid move]
@@ -56,8 +56,8 @@
     (do statement
         (ui/place-xo grid move letter))))
 
-(defn comp-vs-comp [difficulty-1 difficulty-2]
-  (loop [grid [1 2 3 4 5 6 7 8 9]
+(defn comp-vs-comp [board difficulty-1 difficulty-2]
+  (loop [grid board
          x-turn? true]
     (let [move (if x-turn?
                  (difficulty-1 grid)
@@ -75,9 +75,9 @@
       :medium #(medium-difficulty next-move %)
       :hard next-move)))
 
-(defn ai-vs-ai []
+(defn ai-vs-ai [board]
   (let [diff-1 (do (ui/welcome-c-vs-c)
                    (get-difficulty mm/next-move))
         diff-2 (do (ui/second-difficulty-message)
                    (get-difficulty mm/next-move-2))]
-    (comp-vs-comp diff-1 diff-2)))
+    (comp-vs-comp board diff-1 diff-2)))

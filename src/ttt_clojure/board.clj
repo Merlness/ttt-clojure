@@ -1,45 +1,57 @@
 (ns ttt-clojure.board
   (:require [clojure.string :as str]))
 
+(defn size [grid]
+  (int (Math/sqrt (count grid))))
+
+(defn rows [grid]
+  (partition (size grid) grid))
+
+(defn column [index rows]
+  (map #(nth % index) rows))
+
+(defn rows->columns [rows]
+  (let [indices (range (count rows))]
+    (map #(column % rows) indices)))
+
+(defn columns [grid]
+  (rows->columns (rows grid)))
+
+(defn back-diagonal [grid]
+  (let [size (size grid)
+        indices (range size)]
+    (vec (map #(nth grid (* % (inc size))) indices))))
+
+(defn front-diagonal [grid]
+  (let [size (size grid)
+        indices (map inc (range size))]
+    (vec (map #(nth grid (* % (- size 1))) indices))))
+
+(defn diagonals [grid]
+  (conj [(back-diagonal grid)]
+        (front-diagonal grid)))
+
 (defn separate [row]
   (str/join " | " row))
 
 (defn display [grid]
-  (let [columns (int (Math/sqrt (count grid)))]
-    (->> grid
-         (partition columns)
-         (map separate)
-         (str/join "\n"))))
+  (->> grid
+       rows
+       (map separate)
+       (str/join "\n")))
 
 (defn winning-combo? [grid combo letter]
   (every? #(= (nth grid %) letter) combo))
 
-(def winning-combos
-  [[0 1 2]
-   [3 4 5]
-   [6 7 8]
-   [0 3 6]
-   [1 4 7]
-   [2 5 8]
-   [0 4 8]
-   [2 4 6]])
 
-(def winning-combos-4-4
-  [[0 1 2 3]
-   [4 5 6 7]
-   [8 9 10 11]
-   [12 13 14 15]
-   [0 4 8 12]
-   [1 5 9 13]
-   [2 6 10 14]
-   [3 7 11 15]
-   [0 5 10 15]
-   [3 6 9 12]])
+(defn winning-lines? [letter lines]
+  (some #(every? #{letter} %) lines))
 
 (defn winner? [grid letter]
-  (if (= 9 (count grid))
-   (some #(winning-combo? grid % letter) winning-combos)
-  (some #(winning-combo? grid % letter) winning-combos-4-4)))
+  (or (winning-lines? letter (rows grid))
+    (winning-lines? letter (diagonals grid))
+    (winning-lines? letter (columns grid))))
+
 
 (defn x-wins [grid] (winner? grid "X"))
 (defn o-wins [grid] (winner? grid "O"))

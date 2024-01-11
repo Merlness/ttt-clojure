@@ -67,10 +67,10 @@
                                       [0 1 2 3] "X")))
 
     (it "checks x-wins top row"
-      (should (sut/x-wins ["X" "X" "X" "X" 5 6 7 8 9 10 11 12 13 14 15])))
+      (should (sut/x-wins ["X" "X" "X" "X" 5 6 7 8 9 10 11 12 13 14 15 16])))
 
     (it "checks x-wins second to top row"
-      (should (sut/x-wins [1 2 3 4 "X" "X" "X" "X" 9 10 11 12 13 14 15])))
+      (should (sut/x-wins [1 2 3 4 "X" "X" "X" "X" 9 10 11 12 13 14 15 16])))
 
     (it "checks x-wins right column"
       (should (sut/x-wins [1 2 3 "X" 5 6 7 "X" 9 10 11 "X" 13 14 15 "X"])))
@@ -108,5 +108,7 @@
       (should-not (sut/x-wins ["X" "O" "X" "O" "O" "O" "X" "X" "X" "X" "O" "O" "O" "X" "O" "X"])))
 
     (it "checks not a tie"
-      (should-not (sut/tie ["X" 2 "X" "O" "O" "O" "X" "X" "X" "X" "O" "O" "O" "X" "O" "X"]))))
+      (should-not (sut/tie ["X" 2 "X" "O" "O" "O" "X" "X" "X" "X" "O" "O" "O" "X" "O" "X"])))
+
+    )
   )
