@@ -60,14 +60,4 @@
 
   (it "chooses a random move after 7 moves"
     (should= 4 (sut/place-easy-move [4])))
-
-  ;(it "generates a random number from nothing"
-  ;  (should= nil  (sut/find-rand-int '())))
-
-  #_(it "finds less available actions"
-    (let [board ["X" "O" "X"
-                 4 5 6
-                 7 8 9]]
-      (should-contain (sut/find-actions board)
-                      (4 5 6 7 8 9))))
   )

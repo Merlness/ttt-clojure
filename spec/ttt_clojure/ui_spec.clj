@@ -49,6 +49,18 @@
                                   "O" "X" "X"
                                   "O" "X" "O"])))
 
+  (it "checks my turn statement"
+    (let [output (with-out-str (sut/my-turn-statement))]
+      (should= "My turn...\n" output)))
+
+  (it "checks comp 1 statement"
+    (let [output (with-out-str (sut/comp-statement 1))]
+      (should= "Computer 1's turn\n" output)))
+
+  (it "checks comp 2 statement"
+    (let [output (with-out-str (sut/comp-statement 2))]
+      (should= "Computer 2's turn\n" output)))
+
   (it "knows game is still going"
     (should= nil
              (sut/endgame-result [1 2 3 4 5 6 7 8 9])))
@@ -72,12 +84,34 @@
              2 for Two Player Tic Tac Toe
              3 for Computer vs Computer Tic Tac Toe\n" output))))
 
-  (it "gets user input difficulty"
-    (with-in-str "1\n"
-      (let [output (with-out-str (sut/get-user-input-difficulty))]
-        (should= "Please press 1 for an easy AI
+  (context "getting difficulty"
+    (it "easy"
+      (with-out-str
+        (with-in-str "1\n"
+          (should= :easy (sut/get-user-input-difficulty)))))
+
+    (it "medium"
+      (with-out-str
+        (with-in-str "2\n"
+          (should= :medium (sut/get-user-input-difficulty)))))
+
+    (it "hard"
+      (with-out-str
+        (with-in-str "3\n"
+          (should= :hard (sut/get-user-input-difficulty)))))
+
+    (it "invalid"
+      (with-out-str
+        (with-in-str "a\n1\n"
+          (should= :easy (sut/get-user-input-difficulty)))))
+
+    (it "displays a message"
+      (with-in-str "1\n"
+        (let [output (with-out-str (sut/get-user-input-difficulty))]
+          (should= "Please press 1 for an easy AI
              2 for a medium AI
              3 for a an impossible AI\n" output))))
+    )
 
   (it "checks welcome computer vs computer message"
     (let [output (with-out-str (sut/welcome-c-vs-c))]

@@ -60,32 +60,33 @@
 (defn start-first-question [] (println "Would you like to go first or second?"))
 (defn luck-greeting [] (println "Ok, best of luck ... you're gonna need it"))
 (defn my-turn-statement [] (println "My turn..."))
-(defn comp-1-statement [] (println "Computer 1's turn"))
-(defn comp-2-statement [] (println "Computer 2's turn"))
-
+(defn comp-statement [num] (println (str "Computer " num "'s turn")))
 
 (defn start-first? []
   (start-first-question)
   (let [user-input (read-line)]
-    (cond
-      (= "1" user-input) (do (luck-greeting)
-                             (print-board [1 2 3 4 5 6 7 8 9]) false)
-      (= "2" user-input) true
-      :else (recur)
-      )))
+    (case user-input
+      "1" (do (luck-greeting)
+              (print-board [1 2 3 4 5 6 7 8 9])
+              false)
+      "2" true
+      (recur))))
 
 (defn get-user-input-main []
-  (do (println "Please press 1 for Tic Tac Toe vs AI
+  (println "Please press 1 for Tic Tac Toe vs AI
              2 for Two Player Tic Tac Toe
-             3 for Computer vs Computer Tic Tac Toe"
-               )
-      (read-line)))
+             3 for Computer vs Computer Tic Tac Toe")
+  (read-line))
 
 (defn get-user-input-difficulty []
-  (do (println "Please press 1 for an easy AI
+  (println "Please press 1 for an easy AI
              2 for a medium AI
              3 for a an impossible AI")
-      (read-line)))
+  (case (read-line)
+    "1" :easy
+    "2" :medium
+    "3" :hard
+    (recur)))
 
 (defn welcome-c-vs-c []
   (println "Welcome to Computer vs Computer
@@ -93,11 +94,3 @@
 
 (defn second-difficulty-message []
   (println "For the second computer, choose your difficulty"))
-
-;(defn comp-difficulty []
-;  (let [user-input (get-user-input-difficulty)]
-;    (cond
-;      (= user-input "1") (ai/easy-ai)
-;      (= user-input "2") (ai/medium-ai)
-;      (= user-input "3") (ai/hard-ai)
-;      :else (recur))))

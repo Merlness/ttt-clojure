@@ -3,21 +3,11 @@
   (:require [ttt-clojure.minimax :as mm])
   (:require [ttt-clojure.easy-comp :as ec]))
 
-;multimethods
-;single play game function
-
 (defn grid-after-comp [x-turn? grid move]
   (if x-turn?
     (do (ui/my-turn-statement)
         (ui/place-xo grid move "X"))
     (ui/update-board grid false)))
-
-;(defn medium-difficulty [grid]
-;  (let [move-count (count (remove number? grid))
-;        hard-ai? (or (< move-count 5) (zero? (rand-int 2)))]
-;    (if hard-ai?
-;      (mm/next-move grid)
-;      (ec/place-easy-move grid))))
 
 (defn medium-difficulty [next-move grid]
   (let [move-count (count (remove number? grid))
@@ -26,6 +16,8 @@
       (next-move grid)
       (ec/place-easy-move grid))))
 
+;multimethods
+;single play game function
 ;(let [game {:board [1 2 3 4 5 6 7 8 9]
 ;            :mode :pvp ; :pvc :cvc
 ;            :x    :human
@@ -47,9 +39,6 @@
         (recur new-grid (not x-turn?))
         (ui/print-end-computer new-grid)))))
 
-; map, reduce, filter, ...
-;(count (filter (complement number?) [0 1 2 3 4 5 6 7 8 9]))
-
 (defn easy-ai []
   (ai ec/place-easy-move))
 
@@ -62,9 +51,9 @@
 
 (defn comp-move-statement [x-turn? grid move]
   (let [[letter statement] (if x-turn?
-                       ["X" ui/comp-1-statement]
-                       ["O" ui/comp-2-statement])]
-    (do (statement)
+                             ["X" (ui/comp-statement 1)]
+                             ["O" (ui/comp-statement 2)])]
+    (do statement
         (ui/place-xo grid move letter))))
 
 (defn comp-vs-comp [difficulty-1 difficulty-2]
@@ -81,44 +70,14 @@
 
 (defn get-difficulty [next-move]
   (let [user-input (ui/get-user-input-difficulty)]
-    (cond
-      (= user-input "1") ec/place-easy-move
-      (= user-input "2") #(medium-difficulty next-move %) ; medium-difficulty-2
-      (= user-input "3") next-move
-      :else (recur next-move))))
+    (case user-input
+      :easy ec/place-easy-move
+      :medium #(medium-difficulty next-move %)
+      :hard next-move)))
 
 (defn ai-vs-ai []
-    (let [diff-1 (do (ui/welcome-c-vs-c)
-                     (get-difficulty mm/next-move))
-          diff-2 (do (ui/second-difficulty-message)
-                     (get-difficulty mm/next-move-2))]
-      (comp-vs-comp diff-1 diff-2)))
-
-
-
-;(defn comp-helper [x-turn? grid move]
-;  (if x-turn?
-;    (do (ui/comp-1-statement)
-;        (ui/place-xo grid move "X"))
-;    (do (ui/comp-2-statement)
-;;        (ui/place-xo grid move "O"))))
-
-
-
-
-#_(defn ai-vs-ai []
-    (let [diff-1 (do (ui/welcome-c-vs-c)
-                     (let [user-input (ui/get-user-input-difficulty)]
-                       (cond
-                         (= user-input "1") ec/place-easy-move
-                         (= user-input "2") medium-difficulty
-                         (= user-input "3") mm/next-move
-                         :else (recur))))
-          diff-2 (do (ui/second-difficulty-message)
-                     (let [user-input (ui/get-user-input-difficulty)]
-                       (cond
-                         (= user-input "1") ec/place-easy-move
-                         (= user-input "2") medium-difficulty
-                         (= user-input "3") mm/next-move
-                         :else (recur))))]
-      (comp-vs-comp diff-1 diff-2)))
+  (let [diff-1 (do (ui/welcome-c-vs-c)
+                   (get-difficulty mm/next-move))
+        diff-2 (do (ui/second-difficulty-message)
+                   (get-difficulty mm/next-move-2))]
+    (comp-vs-comp diff-1 diff-2)))
