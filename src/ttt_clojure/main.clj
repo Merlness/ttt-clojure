@@ -19,7 +19,7 @@
    (case (ui/get-user-input-main)
     ;"1" (dif/difficulty)
     "2" (tp/two-player board)
-    ;"3" (comp/ai-vs-ai)
+    "3" (comp/ai-vs-ai board)
     (recur))))
 
 (defn -main []

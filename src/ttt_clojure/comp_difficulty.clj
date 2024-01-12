@@ -1,6 +1,6 @@
 (ns ttt-clojure.comp-difficulty
-      (:require [ttt-clojure.computer :as ai]
-                [ttt-clojure.ui :as ui]))
+  (:require [ttt-clojure.computer :as ai]
+            [ttt-clojure.ui :as ui]))
 
 
 ;(defn difficulty [board]
@@ -11,8 +11,8 @@
 ;      (recur (ui/get-user-input-difficulty))))
 
 (defn difficulty [board]
-  (loop [user-input (ui/get-user-input-difficulty)]
-    (= user-input "1") (ai/easy-ai board)
-    (= user-input "2") (ai/medium-ai board)
-    (= user-input "3") (ai/hard-ai board)
-    :else (recur (ui/get-user-input-difficulty))))
+    (case (ui/get-user-input-difficulty)
+      :easy (ai/easy-ai board)
+      :medium (ai/medium-ai board)
+      :hard (ai/hard-ai board)
+      :else (recur (ui/get-user-input-difficulty))))
