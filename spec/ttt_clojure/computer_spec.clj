@@ -23,8 +23,6 @@
         result (game-result board)]
     (if result
       (do
-        ;(println)
-        ;(ui/print-board board)
         (conj results result))
       (concat results (play-game-computer-second board)))))
 
@@ -33,8 +31,6 @@
         result (game-result board)]
     (if result
       (do
-        ;(println)
-        ;(ui/print-board board)
         (conj results result))
       (collect-ai-results results board))))
 
@@ -50,14 +46,14 @@
   #_(context "minimax"
       (it "tests minimax going first"
         (let [results (play-game-computer-first [1 2 3 4 5 6 7 8 9])]
-          (println "results " (count results))
+          ;(println "results " (count results))
           ;(println "results " (count results) results)
           (should-not-contain :loss results)))
 
 
       (it "tests minimax going second"
         (let [results (play-game-computer-second [1 2 3 4 5 6 7 8 9])]
-          (println "results " (count results))
+          ;(println "results " (count results))
           ;(println "results " (count results) results)
           (should (not-any? #(= % :loss) results))))
 
@@ -92,9 +88,7 @@
                     ec/place-easy-move (stub :place-easy-move {:return 9})
                     mm/next-move (stub :next-move)]
         (should= 9 (sut/medium-difficulty mm/next-move ["O" "O" "X" 4 "X" 6 "O" 8 9]))
-        (should-have-invoked :place-easy-move {:with [["O" "O" "X" 4 "X" 6 "O" 8 9]]})
-        ;(should-not-have-invoked :next-move)
-        ))
+        (should-have-invoked :place-easy-move {:with [["O" "O" "X" 4 "X" 6 "O" 8 9]]})))
 
     (it "fifth move-hard move"
       (with-redefs [rand-int (fn [_] 0)
@@ -109,9 +103,7 @@
                     ec/place-easy-move (stub :place-easy-move {:return 8})
                     mm/next-move (stub :next-move)]
         (should= 8 (sut/medium-difficulty mm/next-move ["O" "O" "X" 4 "X" "X" 7 8 "O"]))
-        (should-have-invoked :place-easy-move {:with [["O" "O" "X" 4 "X" "X" 7 8 "O"]]})
-        ;(should-not-have-invoked :next-move)
-        ))
+        (should-have-invoked :place-easy-move {:with [["O" "O" "X" 4 "X" "X" 7 8 "O"]]})))
 
     (it "seventh move-hard move"
       (with-redefs [rand-int (fn [_] 0)
@@ -121,18 +113,18 @@
         (should-have-invoked :next-move {:with [["O" "O" "X" 4 "X" "X" "O" 8 9]]})
         (should-not-have-invoked :place-easy-move)))
 
-    #_(it "medium-ai"
+    (it "medium-ai"
         (with-redefs [ui/start-first? (constantly true)
                       ui/print-board (stub :print-board)
                       ui/print-end-computer (stub :print-end-computer)
                       ui/my-turn-statement (stub :my-turn-statement)
                       ui/update-board (stub :update-board)
-                      ;mm/next-move (stub :next-move {:return 1})
+                      mm/next-move (stub :next-move {:return 1})
                       ]
           (with-in-str "2\n5\n"
-            (let [output (with-out-str (sut/medium-ai))]
+            (let [output (with-out-str (sut/medium-ai [1 2 3 4 5 6 7 8 9]) )]
               (should= "" output)
-              ;(should-have-invoked :next-move {:with [[1 2 3 4 5 6 7 8 9]]})
+              (should-have-invoked :next-move {:with [[1 2 3 4 5 6 7 8 9]]})
               (should-have-invoked :print-board {:with [["X" 2 3 4 5 6 7 8 9]]})
               (should-not-have-invoked :print-end-computer {:with [[1 2 3 4 5 6 7 8 9]]})
               ))))
@@ -164,18 +156,18 @@
     ;      ))
     ;  )
 
-    #_(it "hard-ai"
+    (it "hard-ai"
         (with-redefs [ui/start-first? (constantly true)
                       ui/print-board (stub :print-board)
                       ui/print-end-computer (stub :print-end-computer)
                       ui/my-turn-statement (stub :my-turn-statement)
                       ui/update-board (stub :update-board)
-                      ;mm/next-move (stub :next-move {:return 1})
+                      mm/next-move (stub :next-move {:return 1})
                       ]
           (with-in-str "2\n5\n"
-            (let [output (with-out-str (sut/hard-ai))]
+            (let [output (with-out-str (sut/hard-ai [1 2 3 4 5 6 7 8 9]))]
               (should= "" output)
-              ;(should-have-invoked :next-move {:with [[1 2 3 4 5 6 7 8 9]]})
+              (should-have-invoked :next-move {:with [[1 2 3 4 5 6 7 8 9]]})
               (should-have-invoked :print-board {:with [["X" 2 3 4 5 6 7 8 9]]})
               (should-not-have-invoked :print-end-computer {:with [[1 2 3 4 5 6 7 8 9]]})
               )))))
@@ -212,7 +204,7 @@
                  (sut/comp-move-statement false [1 2 3 4 5 6 7 8 9] 9)))))
 
   (context "comp vs comp"
-    (it "comp-vs-comp"
+    #_(it "comp-vs-comp"
       (with-redefs [ui/start-first? (constantly true)
                     ui/print-board (stub :print-board)
                     ui/print-end-computer (stub :print-end-computer)
@@ -220,8 +212,8 @@
                     ;mm/next-move-2 (stub :next-move-2 {:return 2})
                     ]
 
-        #_(let [output (with-out-str (sut/comp-vs-comp mm/next-move mm/next-move-2))]
-          (should= ["X" "O" 3 4 5 6 7 8 9] output)
+        (let [output (with-out-str (sut/comp-vs-comp [1 2 3 4 5 6 7 8 9] mm/next-move mm/next-move-2))]
+          ;(should= ["X" "O" 3 4 5 6 7 8 9] output)
           (should-have-invoked :next-move {:with [[1 2 3 4 5 6 7 8 9]]})
           (should-have-invoked :next-move-2 {:with [["X" 2 3 4 5 6 7 8 9]]})
           (should-have-invoked :print-board {:with [["X" "O" 3 4 5 6 7 8 9]]})
@@ -229,12 +221,6 @@
           )))
 
     (context "get difficulty"
-      ;doesnt work
-      ;(it "gets the difficulty medium"
-      ;  (with-in-str "2\n"
-      ;    (with-out-str
-      ;      (should= #(sut/medium-difficulty mm/next-move %)
-      ;               (sut/get-difficulty mm/next-move )))))
 
       (it "easy"
         (with-redefs [ui/get-user-input-difficulty (constantly :easy)]
@@ -242,7 +228,7 @@
 
       #_(it "medium"
           (with-redefs [ui/get-user-input-difficulty (constantly :medium)]
-            (should= (medium-difficulty mm/next-move) (sut/get-difficulty mm/next-move))))
+            (should= "bar" (sut/get-difficulty "bar"))))
 
       (it "hard"
         (with-redefs [ui/get-user-input-difficulty (constantly :hard)]
@@ -256,7 +242,7 @@
                       ui/get-user-input-difficulty (constantly "1")
                       sut/comp-vs-comp (stub :comp-vs-comp {:return
                                                             (ec/place-easy-move ec/place-easy-move)})]
-          (let [output (with-out-str (sut/ai-vs-ai))]
+          (let [output (with-out-str (sut/ai-vs-ai [1 2 3 4 5 6 7 8 9] ))]
             (should-have-invoked :comp-vs-comp {:with (ec/place-easy-move ec/place-easy-move)})))))
 
   )

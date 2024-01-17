@@ -83,25 +83,25 @@
                       [6 7 10 11]))
 
     (it "checks block"
-      (should= 1 (sut/block-opponent [1 2 "X" "X"
+      (should= 1 (sut/win-or-block [1 2 "X" "X"
                                       "O" "X" "O" "X"
                                       "O" 10 "O" 12
                                       "O" "O" 15 16] "O")))
 
     (it "can't block"
-      (should= nil (sut/block-opponent [1 2 "X" "X"
+      (should= nil (sut/win-or-block [1 2 "X" "X"
                                         5 "X" "O" "X"
                                         "O" 10 "O" 12
                                         "O" "O" 15 16] "O")))
 
     (it "can win for X"
-      (should= 16 (sut/block-opponent [1 2 3 "X"
+      (should= 16 (sut/win-or-block [1 2 3 "X"
                                        5 6 7 "X"
                                        "O" 10 11 "X"
                                        "O" 14 15 16] "X")))
 
     (it "can win for O"
-      (should= 1 (sut/block-opponent [1 2 3 "X"
+      (should= 1 (sut/win-or-block [1 2 3 "X"
                                       "O" 6 7 "X"
                                       "O" 10 11 12
                                       "O" 14 15 16] "O")))

@@ -40,7 +40,7 @@
       (if (not (ui/endgame-result new-grid))
         (recur new-grid (not x-turn?))
         (ui/print-end-computer new-grid)))))
-;added board for all AI
+
 (defn easy-ai [board]
   (ai board ec/place-easy-move))
 
@@ -55,8 +55,8 @@
   (let [[letter statement] (if x-turn?
                              ["X" (ui/comp-statement 1)]
                              ["O" (ui/comp-statement 2)])]
-    (do statement
-        (ui/place-xo grid move letter))))
+    statement
+    (ui/place-xo grid move letter)))
 
 (defn comp-vs-comp [board difficulty-1 difficulty-2]
   (loop [grid board
