@@ -18,10 +18,10 @@
              (sut/display ["X" "X" "X" "O" "O" "O" "X" "O" "X"])))
 
   (it "checks winning combo"
-    (should (sut/winning-combo? ["X" "X" "X" 4 5 6 7 8 9] [0 1 2] "X")))
+    (should (sut/winner? ["X" "X" "X" 4 5 6 7 8 9] "X")))
 
   (it "checks for false winning combos"
-    (should-not (sut/winning-combo? ["X" "X" 3 4 5 6 7 8 9] [0 1 2] "X")))
+    (should-not (sut/winner? ["X" "X" 3 4 5 6 7 8 9] "X")))
 
   (it "checks X-wins top row"
     (should (sut/x-wins ["X" "X" "X" 4 5 6 7 8 9])))
@@ -59,12 +59,10 @@
                (sut/display ["X" "O" "X" "O" "O" "X" "O" "X" "X" "O" "X" "O" "O" "X" "O" "X"])))
 
     (it "checks winning combo "
-      (should (sut/winning-combo? ["X" "X" "X" "X" 5 6 7 8 9 10 11 12 13 14 15]
-                                  [0 1 2 3] "X")))
+      (should (sut/winner? ["X" "X" "X" "X" 5 6 7 8 9 10 11 12 13 14 15 16] "X")))
 
     (it "checks a non winning combo"
-      (should-not (sut/winning-combo? ["X" "X" "X" "O" 5 6 7 8 9 10 11 12 13 14 15]
-                                      [0 1 2 3] "X")))
+      (should-not (sut/winner? ["X" "X" 3 "O" 5 6 7 8 9 10 11 12 13 14 15 16] "X")))
 
     (it "checks x-wins top row"
       (should (sut/x-wins ["X" "X" "X" "X" 5 6 7 8 9 10 11 12 13 14 15 16])))
@@ -109,6 +107,5 @@
 
     (it "checks not a tie"
       (should-not (sut/tie ["X" 2 "X" "O" "O" "O" "X" "X" "X" "X" "O" "O" "O" "X" "O" "X"])))
-
     )
   )

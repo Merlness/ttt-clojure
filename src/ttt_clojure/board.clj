@@ -49,8 +49,8 @@
 
 (defn winner? [grid letter]
   (or (winning-lines? letter (rows grid))
-    (winning-lines? letter (diagonals grid))
-    (winning-lines? letter (columns grid))))
+      (winning-lines? letter (diagonals grid))
+      (winning-lines? letter (columns grid))))
 
 
 (defn x-wins [grid] (winner? grid "X"))

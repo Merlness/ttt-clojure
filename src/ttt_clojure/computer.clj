@@ -16,6 +16,8 @@
       (next-move grid)
       (ec/place-easy-move grid))))
 
+;4x4 medium difficulty
+
 ;multimethods
 ;single play game function
 ;(let [game {:board [1 2 3 4 5 6 7 8 9]
@@ -31,7 +33,7 @@
 
 (defn ai [board difficulty]
   (loop [grid board
-         x-turn? (ui/start-first?)]
+         x-turn? (ui/start-first? board)]
     (let [move (difficulty grid)
           new-grid (grid-after-comp x-turn? grid move)]
       (ui/print-board new-grid)

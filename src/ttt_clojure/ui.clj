@@ -63,15 +63,15 @@
 (defn my-turn-statement [] (println "My turn..."))
 (defn comp-statement [num] (println (str "Computer " num "'s turn")))
 
-(defn start-first? []
+(defn start-first? [board]
   (start-first-question)
   (let [user-input (read-line)]
     (case user-input
       "1" (do (luck-greeting)
-              (print-board [1 2 3 4 5 6 7 8 9])
+              (print-board board)
               false)
       "2" true
-      (recur))))
+      (recur board))))
 
 (defn get-user-input-main []
   (println "Please press 1 for Tic Tac Toe vs AI

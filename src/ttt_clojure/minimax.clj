@@ -42,5 +42,49 @@
 (defn minimize [board depth]
   (min-or-max board depth false))
 
-(defn next-move [board] (second (maximize board 1)))
-(defn next-move-2 [board] (second (minimize board 1)))
+(defn select-move [board valid-moves-set]
+  (let [available-moves (filter number? board)
+        valid-moves (filter valid-moves-set available-moves)]
+    (if (not-empty valid-moves)
+      (rand-nth valid-moves)
+      nil)))
+
+(defn corners [board]
+  (select-move board #{1 4 13 16}))
+
+(defn center [board]
+  (select-move board #{6 7 10 11}))
+
+
+(defn checks-end-move [board available-moves token]
+  (first (filter #(board/winner?
+                    (ui/place-xo board % token) token)
+                 available-moves)))
+
+(defn block-opponent [board opponent-token]
+  (let [available-moves (filter number? board)
+        my-token (if (= opponent-token "X") "O" "X")
+        winning-move (checks-end-move board available-moves my-token)
+        blocking-move (checks-end-move board available-moves opponent-token)]
+    (or winning-move blocking-move)))
+
+(defn hard-16-helper [board opponent-token]
+  (let [move-count (count (remove number? board))
+        evaluate (if (= opponent-token "O") maximize minimize)]
+    (if (< move-count 7) (or (block-opponent board opponent-token) (corners board)
+                             (center board)) (second (evaluate board 1)))))
+(defn hard-9-helper [board evaluate]
+  (if (= (count (filter number? board)) 9) 1 (second (evaluate board 1))))
+
+(defn find-next-move [board maximize?]
+  (let [[evaluate opponent-token] (if (= maximize? maximize) [maximize "O"]
+                                                             [minimize "X"])]
+    (if (= 16 (count board))
+      (hard-16-helper board opponent-token)
+      (hard-9-helper board evaluate))))
+
+(defn next-move [board]
+  (find-next-move board maximize))
+
+(defn next-move-2 [board]
+  (find-next-move board minimize))

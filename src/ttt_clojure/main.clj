@@ -8,7 +8,6 @@
 (defn boardgame-3x3 []
   (let [board [1 2 3 4 5 6 7 8 9]]
         (case (ui/get-user-input-main)
-          ;added board here v
     "1" (dif/difficulty board)
     "2" (tp/two-player board)
     "3" (comp/ai-vs-ai board)
@@ -17,7 +16,7 @@
 (defn boardgame-4x4 []
   (let [board [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16]]
    (case (ui/get-user-input-main)
-    ;"1" (dif/difficulty)
+    "1" (dif/difficulty board) ;fix print to be 4x4
     "2" (tp/two-player board)
     "3" (comp/ai-vs-ai board)
     (recur))))
@@ -28,7 +27,7 @@
     "4" (boardgame-4x4)
     (recur)))
 
-(comment
+#_(comment
   (defmulti some-fn :game-type)
 
   (defmethod some-fn :ai-vs-ai [game-board-map]
