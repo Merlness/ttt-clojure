@@ -34,6 +34,11 @@
 (defn separate [row]
   (str/join " | " row))
 
+(defn separate-3-3 [grid]
+  (if (= grid 27)
+    (partition 9 grid)
+    grid))
+
 (defn display [grid]
   (->> grid
        rows
@@ -43,7 +48,6 @@
 (defn winning-combo? [grid combo letter]
   (every? #(= (nth grid %) letter) combo))
 
-
 (defn winning-lines? [letter lines]
   (some #(every? #{letter} %) lines))
 
@@ -51,7 +55,6 @@
   (or (winning-lines? letter (rows grid))
       (winning-lines? letter (diagonals grid))
       (winning-lines? letter (columns grid))))
-
 
 (defn x-wins [grid] (winner? grid "X"))
 (defn o-wins [grid] (winner? grid "O"))

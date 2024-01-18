@@ -3,12 +3,6 @@
   (:require [ttt-clojure.minimax :as mm])
   (:require [ttt-clojure.easy-comp :as ec]))
 
-(defn grid-after-comp [x-turn? grid move]
-  (if x-turn?
-    (do (ui/my-turn-statement)
-        (ui/place-xo grid move "X"))
-    (ui/update-board grid false)))
-
 (defn medium-difficulty [next-move grid]
   (let [move-count (count (remove number? grid))
         hard-ai? (or (< move-count 5) (zero? (rand-int 2)))]
@@ -16,15 +10,48 @@
       (next-move grid)
       (ec/place-easy-move grid))))
 
+;(defn grid-after-comp [comp-turn? grid move]
+;  (if comp-turn?
+;    (do (ui/my-turn-statement)
+;        (ui/place-xo grid move "X"))
+;    (ui/update-board grid false)))
+
+(defn grid-after-comp [comp-turn? grid move x-o]
+  (let [[comp-token user-token] (if (= "O" x-o)
+                                ["X" false] ["O" true])]
+        (if comp-turn?
+          (do (ui/my-turn-statement)
+              (ui/place-xo grid move comp-token))
+          (ui/update-board grid user-token))))
+
+;(defn ai [board difficulty]
+;  (loop [grid board
+;         comp-turn? (ui/start-first? board)]
+;    (let [move (difficulty grid)
+;          new-grid (grid-after-comp comp-turn? grid move)]
+;      (ui/print-board new-grid)
+;      (if (not (ui/endgame-result new-grid))
+;        (recur new-grid (not comp-turn?))
+;        (ui/print-end-computer new-grid)))))
+
+(defn hard-ai-x-o [difficulty user-token]
+  (if (and (= mm/next-move difficulty)
+           (= "X" user-token))
+    mm/next-move-2
+    difficulty))
+
 (defn ai [board difficulty]
-  (loop [grid board
-         x-turn? (ui/start-first? board)]
-    (let [move (difficulty grid)
-          new-grid (grid-after-comp x-turn? grid move)]
-      (ui/print-board new-grid)
-      (if (not (ui/endgame-result new-grid))
-        (recur new-grid (not x-turn?))
-        (ui/print-end-computer new-grid)))))
+  (let [user-token (ui/get-user-vs-ai-x-o)
+        difficulty (hard-ai-x-o difficulty user-token)]
+    (loop [grid board
+           comp-turn? (ui/start-first? board)]
+      (let [move (difficulty grid)
+            new-grid (grid-after-comp comp-turn? grid move user-token)]
+        (ui/print-board new-grid)
+        (if (not (ui/endgame-result new-grid))
+          (recur new-grid (not comp-turn?))
+          (ui/print-end-computer new-grid))))))
+
 
 (defn easy-ai [board]
   (ai board ec/place-easy-move))

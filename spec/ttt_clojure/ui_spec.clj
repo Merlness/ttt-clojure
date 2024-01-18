@@ -135,4 +135,24 @@ or anything else if Player 1 wants to be O and Player 2 wants to be X\n"
 or anything else if Player 1 wants to be O and Player 2 wants to be X\n"
                  output))))
 
+  (it "checks get-user vs ai xo"
+    (with-in-str "1\n"
+      (let [output (with-out-str (sut/get-user-vs-ai-x-o))]
+        (should=  "Please press 1 you want to be X or
+  anything else if you want to be O\n"
+                 output))))
+
+  (it "checks get-user vs ai xo return"
+    (with-in-str "\n"
+      (let [output (with-out-str (sut/get-user-vs-ai-x-o))]
+        (should=  "Please press 1 you want to be X or
+  anything else if you want to be O\n"
+                  output))))
+
+  (it "should choose O"
+    (with-out-str
+      (with-in-str "3\n"
+        (should= "O" (sut/get-user-vs-ai-x-o)))))
+
+
   )

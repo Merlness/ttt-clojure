@@ -109,3 +109,10 @@ or anything else if Player 1 wants to be O and Player 2 wants to be X")
   (if (= "1" (read-line))
     true
     false))
+
+(defn get-user-vs-ai-x-o []
+  (println "Please press 1 you want to be X or
+  anything else if you want to be O")
+  (if (= "1" (read-line))
+    "X"
+    "O"))
