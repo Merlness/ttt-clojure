@@ -16,21 +16,6 @@
       (next-move grid)
       (ec/place-easy-move grid))))
 
-;4x4 medium difficulty
-
-;multimethods
-;single play game function
-;(let [game {:board [1 2 3 4 5 6 7 8 9]
-;            :mode :pvp ; :pvc :cvc
-;            :x    :human
-;            :o    :hard
-;            :turn :x ; :o
-;            }])
-;
-;(defmulti next-move [] )
-;(defmethod next-move :human [{:keys [board x o]}]
-;  4)
-
 (defn ai [board difficulty]
   (loop [grid board
          x-turn? (ui/start-first? board)]
@@ -83,3 +68,19 @@
         diff-2 (do (ui/second-difficulty-message)
                    (get-difficulty mm/next-move-2))]
     (comp-vs-comp board diff-1 diff-2)))
+
+
+;4x4 medium difficulty
+
+;multimethods
+;single play game function
+;(let [game {:board [1 2 3 4 5 6 7 8 9]
+;            :mode :pvp ; :pvc :cvc
+;            :x    :human
+;            :o    :hard
+;            :turn :x ; :o
+;            }])
+;
+;(defmulti next-move [] )
+;(defmethod next-move :human [{:keys [board x o]}]
+;  4)

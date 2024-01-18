@@ -120,4 +120,19 @@
   (it "checks second difficulty message"
     (let [output (with-out-str (sut/second-difficulty-message))]
       (should= "For the second computer, choose your difficulty\n" output)))
+
+  (it "checks get-user xo 1"
+    (with-in-str "1\n"
+     (let [output (with-out-str (sut/get-user-x-o))]
+      (should= "Please press 1 if Player 1 wants to be X and Player 2 wants to be O,
+or anything else if Player 1 wants to be O and Player 2 wants to be X\n"
+               output))))
+
+  (it "checks get-user xo return"
+    (with-in-str "\n"
+      (let [output (with-out-str (sut/get-user-x-o))]
+        (should= "Please press 1 if Player 1 wants to be X and Player 2 wants to be O,
+or anything else if Player 1 wants to be O and Player 2 wants to be X\n"
+                 output))))
+
   )

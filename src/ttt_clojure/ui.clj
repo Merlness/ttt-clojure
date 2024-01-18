@@ -35,7 +35,7 @@
   (println "Choose your position")
   (loop []
     (let [user-input (read-line)]
-      (if (valid-input? user-input )
+      (if (valid-input? user-input)
         (Integer/parseInt user-input)
         (do
           (println "Invalid input. Please enter a number between 1 and 9.")
@@ -43,7 +43,7 @@
 
 (defn update-board [grid xo]
   (loop []
-    (let [move (get-move )]
+    (let [move (get-move)]
       (if (invalid-move? move grid)
         (do (invalid-message) (recur))
         (place-xo grid move (X? xo))))))
@@ -102,3 +102,10 @@
 
 (defn second-difficulty-message []
   (println "For the second computer, choose your difficulty"))
+
+(defn get-user-x-o []
+  (println "Please press 1 if Player 1 wants to be X and Player 2 wants to be O,
+or anything else if Player 1 wants to be O and Player 2 wants to be X")
+  (if (= "1" (read-line))
+    true
+    false))
