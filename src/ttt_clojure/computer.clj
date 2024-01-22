@@ -10,12 +10,6 @@
       (next-move grid)
       (ec/place-easy-move grid))))
 
-;(defn grid-after-comp [comp-turn? grid move]
-;  (if comp-turn?
-;    (do (ui/my-turn-statement)
-;        (ui/place-xo grid move "X"))
-;    (ui/update-board grid false)))
-
 (defn grid-after-comp [comp-turn? grid move x-o]
   (let [[comp-token user-token] (if (= "O" x-o)
                                 ["X" false] ["O" true])]
@@ -23,16 +17,6 @@
           (do (ui/my-turn-statement)
               (ui/place-xo grid move comp-token))
           (ui/update-board grid user-token))))
-
-;(defn ai [board difficulty]
-;  (loop [grid board
-;         comp-turn? (ui/start-first? board)]
-;    (let [move (difficulty grid)
-;          new-grid (grid-after-comp comp-turn? grid move)]
-;      (ui/print-board new-grid)
-;      (if (not (ui/endgame-result new-grid))
-;        (recur new-grid (not comp-turn?))
-;        (ui/print-end-computer new-grid)))))
 
 (defn hard-ai-x-o [difficulty user-token]
   (if (and (= mm/next-move difficulty)

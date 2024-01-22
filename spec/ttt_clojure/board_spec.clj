@@ -108,4 +108,113 @@
     (it "checks not a tie"
       (should-not (sut/tie ["X" 2 "X" "O" "O" "O" "X" "X" "X" "X" "O" "O" "O" "X" "O" "X"])))
     )
+  (context "3x3x3"
+    (it "checks if separate 3-3 works"
+      (should= [[1 2 3 4 5 6 7 8 9] [10 11 12 13 14 15 16 17 18]
+                [19 20 21 22 23 24 25 26 27]]
+               (sut/separate-3-3 [1 2 3 4 5 6 7 8 9 10 11 12 13 14
+                                  15 16 17 18 19 20 21 22 23 24 25 26 27])))
+
+    (it "checks the 3x3x3 display"
+      (should= "1 | 2 | 3\n4 | 5 | 6\n7 | 8 | 9\n\n10 | 11 | 12
+13 | 14 | 15\n16 | 17 | 18
+\n19 | 20 | 21\n22 | 23 | 24\n25 | 26 | 27"
+               (sut/display-3-3 [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+                                 19 20 21 22 23 24 25 26 27])))
+
+    (it "checks  size 3d 3x3"
+      (should= 3 (sut/size-3d [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+                               19 20 21 22 23 24 25 26 27])))
+
+    (it "checks  size 3d 4x4"
+      (should= 4 (sut/size-3d [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+                               19 20 21 22 23 24 25 26 27 28 29 30 31 32 33
+                               34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49
+                               50 51 52 53 54 55 56 57 58 59 60 61 62 63 64])))
+
+    (it "checks back diagonal through"
+      (should= [[3 11 19] [6 14 22] [9 17 25]]
+               (sut/back-diagonal-through
+                 [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+                  19 20 21 22 23 24 25 26 27])))
+
+    (it "checks front diagonal through"
+      (should= [[1 11 21] [4 14 24] [7 17 27]]
+               (sut/front-diagonal-through [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+                                            19 20 21 22 23 24 25 26 27])))
+
+    (it "checks same space all faces"
+      (should= [[1 10 19] [2 11 20] [3 12 21] [4 13 22] [5 14 23]
+                [6 15 24] [7 16 25] [8 17 26] [9 18 27]]
+               (sut/same-space-all-faces [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+                                          19 20 21 22 23 24 25 26 27])))
+    (it "checks front diagonal across"
+      (should= [[1 13 25] [2 14 26] [3 15 27]]
+               (sut/front-diagonal-across [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+                                           19 20 21 22 23 24 25 26 27])))
+    (it "checks back diagonal across"
+      (should= [[7 13 19] [8 14 20] [9 15 21]]
+               (sut/back-diagonal-across [1 2 3 4 5 6 7 8 9
+                                          10 11 12 13 14 15 16 17 18
+                                          19 20 21 22 23 24 25 26 27])))
+
+    (it "checks back diagonal across X wins"
+      (should (sut/winner?-3d [1 2 3 4 5 6 7 "X" 9
+                               10 11 12 13 "X" 15 16 17 18
+                               19 "X" 21 22 23 24 25 26 27]
+                              "X")))
+
+    (it "checks front diagonal across X wins"
+      (should (sut/winner?-3d [1 2 "X" 4 5 6 7 8 9
+                               10 11 12 13 14 "X" 16 17 18
+                               19 20 21 22 23 24 25 26 "X"]
+                              "X")))
+
+    (it "checks basic row for x wins"
+      (should (sut/winner?-3d ["X" "X" "X" 4 5 6 7 8 9
+                               10 11 12 13 14 15 16 17 18
+                               19 20 21 22 23 24 25 26 27] "X")))
+
+    (it "checks basic column for O wins"
+      (should (sut/winner?-3d [1 2 3 4 5 6 7 8 9
+                               10 11 "O" 13 14 "O" 16 17 "O"
+                               19 20 21 22 23 24 25 26 27] "O")))
+
+    (it "checks same space O wins"
+      (should (sut/winner?-3d [1 2 3 4 "O"  6 7 8 9
+                               10 11 12 13 "O" 15 16 17 18
+                               19 20 21 22 "O"  24 25 26 27] "O")))
+
+    (it "checks basic column for O wins"
+      (should (sut/winner?-3d [1 2 3 4 5 6 7 8 9
+                               10 11 "O" 13 14 "O" 16 17 "O"
+                               19 20 21 22 23 24 25 26 27] "O")))
+
+    (it "checks edge case O wins"
+      (should (sut/winner?-3d ["O" 2 3 4 5 6 7 8 9
+                         10 11 12 13 "O" 15 16 17 18
+                         19 20 21 22 23 24 25 26 "O"] "O")))
+
+    (it "checks false edge case"
+      (should-not (sut/winner?-3d [1 "O" 3 4 5 6 7 8 9
+                         10 11 12 13 "O" 15 16 17 18
+                         19 20 21 22 23 24 25 26 "O"] "O")))
+
+    )
   )
+
+
+#_( 1 | 2 | 3     10 | 11 | 12    19 | 20 | 21
+    4 | 5 | 6     13 | 14 | 15    22 | 23 | 24
+    7 | 8 | 9     16 | 17 | 18    25 | 26 | 27)
+
+;rows x and z columns -9
+;going through -4
+;diagnols 2 per face, 3 faces per d, 3 d, -18
+;missing traditional 1 5 9 3 5 7
+
+#_( 1  | 2 | 3 | 4      17 |18| 19 | 20    33 |34| 35 | 36    49 |50| 51 | 52
+    5  | 6 | 7 | 8      21 |22| 23 | 24    37 |38| 39 | 40    53 |54| 55 | 56
+    9  |10 |11 |12      25 |26| 27 | 28    41 |42| 43 | 44    57 |58| 59 | 60
+    13 |14 |15 |16      29 |30| 31 | 32    45 |46| 47 | 48    61 |62| 63 | 64
+    )
