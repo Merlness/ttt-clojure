@@ -8,18 +8,23 @@
 (defn boardgame-3x3 []
   (let [board [1 2 3 4 5 6 7 8 9]]
     (case (ui/get-user-input-main)
-      "1" (dif/difficulty board)
-      "2" (tp/two-player board)
-      "3" (comp/ai-vs-ai board)
+      :playerVSai (dif/difficulty board)
+      :playerVSplayer (tp/two-player board)
+      :aiVSai (comp/ai-vs-ai board)
       (recur))))
 
 (defn boardgame-4x4 []
   (let [board [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16]]
     (case (ui/get-user-input-main)
-      "1" (dif/difficulty board)
-      "2" (tp/two-player board)
-      "3" (comp/ai-vs-ai board)
+      :playerVSai (dif/difficulty board)
+      :playerVSplayer (tp/two-player board)
+      :aiVSai (comp/ai-vs-ai board)
       (recur))))
+
+(defn boardgame-3D []
+  (let [board [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+               17 18 19 20 21 22 23 24 25 26 27]]
+    (tp/two-player board)))
 
 #_(defn play-game [{:keys [board player-1 player-2] :as game}]
   (if (and (ai? player-1) (ai? player-2))
@@ -34,8 +39,9 @@
       (play-game game))
 
   (case (ui/get-user-input-3-4)
-    "3" (boardgame-3x3)
-    "4" (boardgame-4x4)
+    :3x3 (boardgame-3x3)
+    :4x4 (boardgame-4x4)
+    :3x3x3 (boardgame-3D)
     (recur)))
 
 #_(comment

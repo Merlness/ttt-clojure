@@ -135,8 +135,19 @@
       (winning-lines? letter (front-diagonal-across grid))
       (winning-lines? letter (front-diagonal-through grid)))))
 
-(defn x-wins [grid] (winner? grid "X"))
-(defn o-wins [grid] (winner? grid "O"))
+(defn two-dimensional? [board]
+  (> 17 (count board)))
+
+(defn x-wins [grid]
+  (if (two-dimensional? grid)
+   (winner? grid "X")
+   (winner?-3d grid "X")))
+
+(defn o-wins [grid]
+  (if (two-dimensional? grid)
+   (winner? grid "O")
+   (winner?-3d grid "O")))
+
 (defn tie [grid] (not-any? integer? grid))
 
 ; size= (cuberoot (count grid)) =3

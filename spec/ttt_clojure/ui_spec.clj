@@ -13,7 +13,7 @@
 
   (it "get-move"
     (with-in-str "1\n"
-      (let [output (with-out-str (sut/get-move))]
+      (let [output (with-out-str (sut/get-move [1 2 3 4 5 6 7 8 9]))]
         (should= "Choose your position\n" output))))
 
   (it "updates board for X"

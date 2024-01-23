@@ -1,7 +1,8 @@
 (ns ttt-clojure.computer
   (:require [ttt-clojure.ui :as ui])
   (:require [ttt-clojure.minimax :as mm])
-  (:require [ttt-clojure.easy-comp :as ec]))
+  (:require [ttt-clojure.easy-comp :as ec]
+            [ttt-clojure.board :as board]))
 
 (defn medium-difficulty [next-move grid]
   (let [move-count (count (remove number? grid))
@@ -31,7 +32,7 @@
            comp-turn? (ui/start-first? board)]
       (let [move (difficulty grid)
             new-grid (grid-after-comp comp-turn? grid move user-token)]
-        (ui/print-board new-grid)
+        (ui/print-board new-grid board/display)
         (if (not (ui/endgame-result new-grid))
           (recur new-grid (not comp-turn?))
           (ui/print-end-computer new-grid))))))
@@ -61,7 +62,7 @@
                  (difficulty-1 grid)
                  (difficulty-2 grid))
           new-grid (comp-move-statement x-turn? grid move)]
-      (ui/print-board new-grid)
+      (ui/print-board new-grid board/display)
       (if (not (ui/endgame-result new-grid))
         (recur new-grid (not x-turn?))
         (ui/print-end-computer new-grid)))))
