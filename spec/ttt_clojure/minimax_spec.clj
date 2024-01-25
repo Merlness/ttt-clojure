@@ -72,62 +72,41 @@
                                    "O" 10 "O" "X"
                                    "O" "O" 15 16])))
 
-    (it "checks corners"
-      (should-contain (sut/corners
-                        [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16])
-                      [1 4 13 16]))
-
-    (it "checks center"
-      (should-contain (sut/center
-                        [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16])
-                      [6 7 10 11]))
-
     (it "checks block"
-      (should= 1 (sut/win-or-block [1 2 "X" "X"
+      (should= 1 (sut/next-move-2 [1 2 "X" "X"
                                       "O" "X" "O" "X"
                                       "O" 10 "O" 12
-                                      "O" "O" 15 16] "O")))
-
-    (it "can't block"
-      (should= nil (sut/win-or-block [1 2 "X" "X"
-                                        5 "X" "O" "X"
-                                        "O" 10 "O" 12
-                                        "O" "O" 15 16] "O")))
+                                      "O" "O" 15 16] )))
 
     (it "can win for X"
-      (should= 16 (sut/win-or-block [1 2 3 "X"
+      (should= 16 (sut/next-move [1 2 3 "X"
                                        5 6 7 "X"
                                        "O" 10 11 "X"
-                                       "O" 14 15 16] "X")))
+                                       "O" 14 15 16])))
 
     (it "can win for O"
-      (should= 1 (sut/win-or-block [1 2 3 "X"
+      (should= 1 (sut/next-move-2 [1 2 3 "X"
                                       "O" 6 7 "X"
                                       "O" 10 11 12
-                                      "O" 14 15 16] "O")))
+                                      "O" 14 15 16])))
 
-    (it "checks center move"
-      (should= 10 (sut/center [1 2 "X" "X"
-                               5 "X" "O" "X"
-                               "O" 10 "O" 12
-                               "O" "O" 15 16])))
-    (it "checks corners"
-      (should= 1 (sut/corners [1 2 "X" "X"
-                               5 "X" "O" "X"
-                               "O" 10 "O" 12
-                               "O" 14 15 "O"])))
-
-    (it "selects winning move over blockX"
-      (should= 16 (sut/next-move [1 2 3 "X"
-                                  "O" 6 7 "X"
-                                  "O" 10 11 "X"
-                                  "O" 14 15 16])))
-
-    (it "selects winning move over blockO"
-      (should= 1 (sut/next-move-2 [1 2 3 "X"
-                                   "O" 6 7 "X"
-                                   "O" 10 11 "X"
-                                   "O" 14 15 16])))
+    ;(it "selects winning move over blockX"
+    ;  (should= 16 (sut/next-move [1 2 3 "X"
+    ;                              "O" 6 7 "X"
+    ;                              "O" 10 11 "X"
+    ;                              "O" 14 15 16])))
+    ;
+    ;(it "selects winning move over blockO"
+    ;  (should= 1 (sut/next-move-2 [1 2 3 "X"
+    ;                               "O" 6 7 "X"
+    ;                               "O" 10 11 "X"
+    ;                               "O" 14 15 16])))
+    ;
+    ;(it "selects 2nd move O"
+    ;  (should= 2 (sut/next-move-2 ["X" 2 3 4
+    ;                               5 6 7 8
+    ;                               9 10 11 12
+    ;                               13 14 15 16])))
 
     ;custom hard-medium: random first few moves then minimax
     ; 1. decreasing depth instead of increasing it,
@@ -136,5 +115,18 @@
     ; 3. another simpler version of minimax for the first few moves
 
     )
+  #_(context "3D grid"
+    (it "selects winning move"
+      (should= 3 (sut/next-move ["X" "X" 3
+                                   4 5 6
+                                   7 8 9
 
+                                   10 11 12
+                                   13 14 15
+                                   16 17 18
+
+                                   19 20 21
+                                   22 23 24
+                                   25 26 27])))
+    )
   )

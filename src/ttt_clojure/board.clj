@@ -100,6 +100,7 @@
 
 (defn separate-3-3 [grid]
   (partition 9 grid))
+;change this
 
 (defn display [grid]
   (->> grid
@@ -116,7 +117,9 @@
 (defn winning-lines? [letter lines]
   (some #(every? #{letter} %) lines))
 
-(defn winner? [grid letter]
+(defn winner? [grid letter] ; [game player]
+  ; player {:token "X" :kind :ai :human}
+  ; game {:size 4 :dimensions 2 :board [0 1 2 3]}
   (or (winning-lines? letter (rows grid))
       (winning-lines? letter (diagonals grid))
       (winning-lines? letter (columns grid))))
@@ -138,6 +141,9 @@
 (defn two-dimensional? [board]
   (> 17 (count board)))
 
+(defn- player-wins? [player game]
+  (winner? game player))
+
 (defn x-wins [grid]
   (if (two-dimensional? grid)
    (winner? grid "X")
@@ -147,6 +153,8 @@
   (if (two-dimensional? grid)
    (winner? grid "O")
    (winner?-3d grid "O")))
+;multi methods, deftypes/protocols
+;koans
 
 (defn tie [grid] (not-any? integer? grid))
 

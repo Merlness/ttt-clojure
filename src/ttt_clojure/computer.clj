@@ -36,7 +36,7 @@
         (if (not (ui/endgame-result new-grid))
           (recur new-grid (not comp-turn?))
           (ui/print-end-computer new-grid))))))
-
+;combine with comp vs comp and hvh
 
 (defn easy-ai [board]
   (ai board ec/place-easy-move))
@@ -66,6 +66,7 @@
       (if (not (ui/endgame-result new-grid))
         (recur new-grid (not x-turn?))
         (ui/print-end-computer new-grid)))))
+;should be same as human vs human
 
 (defn get-difficulty [next-move]
   (let [user-input (ui/get-user-input-difficulty)]

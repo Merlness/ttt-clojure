@@ -2,26 +2,49 @@
   (:require [ttt-clojure.ui :as ui])
   (:require [ttt-clojure.board :as board]))
 
+(declare alpha-beta)
 (declare minimize)
 (declare maximize)
 (def value-max -100000)
 (def value-min 100000)
+(def default-depth 4)
 
 (defn value [game-board depth]
   (cond
-    (board/x-wins game-board) (/ 12 depth)
-    (board/o-wins game-board) (/ -12 depth)
-    (board/tie game-board) 0))
+    (board/x-wins game-board) depth
+    (board/o-wins game-board) (- depth)
+    :else 0))
+
 
 (defn best-move [maximizing? game-board depth [best-value best-action] action]
   (let [[compare evaluate token] (if maximizing?
                                    [> minimize "X"]
                                    [< maximize "O"])
         new-game-board (ui/place-xo game-board action token)
-        [value] (evaluate new-game-board (inc depth))]
+        value (if (zero? depth)
+                (value new-game-board depth)
+                (first (evaluate new-game-board (dec depth))))]
     (if (compare value best-value)
       [value action]
       [best-value best-action])))
+
+;(defn best-move [maximizing? game-board depth alpha beta [best-value best-action] action]
+;  (let [[compare evaluate token] (if maximizing?
+;                                   [> alpha-beta "X"]
+;                                   [< alpha-beta "O"])
+;        new-game-board (ui/place-xo game-board action token)
+;        value (if (zero? depth)
+;                (value new-game-board depth)
+;                (first (evaluate new-game-board (dec depth) alpha beta (not maximizing?))))]
+;    ;board depth alpha beta maximizing?
+;    (if (compare value best-value)
+;      (let [new-best-value value
+;            new-alpha (if maximizing? (max alpha new-best-value) alpha)
+;            new-beta (if maximizing? beta (min beta new-best-value))]
+;        (if (> new-beta new-alpha)
+;          [new-best-value action]
+;          [best-value best-action]))
+;      [best-value best-action])))
 
 (defn extremity [actions maximizing? game-board depth]
   (let [default-value (if maximizing? value-max value-min)]
@@ -30,86 +53,102 @@
       [default-value nil]
       actions)))
 
+;(defn extremity [actions maximizing? game-board depth alpha beta]
+  ;  (let [default-value (if maximizing? value-max value-min)]
+  ;    (reduce
+  ;      #(best-move maximizing? game-board depth alpha beta %1 %2)
+  ;      [default-value nil]
+  ;      actions)))
+
+
 (defn min-or-max [board depth maximizing?]
   (let [actions (filter number? board)]
     (if (ui/endgame-result board)
-      [(value board depth) nil]
+      [(value board depth)]
       (extremity actions maximizing? board depth))))
+
+;(defn alpha-beta [board depth alpha beta maximizing?]
+;  (let [actions (filter number? board)]
+;    (if (ui/endgame-result board)
+;      [(value board depth)]
+;      (extremity actions maximizing? board depth alpha beta))))
 
 (defn maximize [board depth]
   (min-or-max board depth true))
 
 (defn minimize [board depth]
   (min-or-max board depth false))
+;(defn maximize [board depth]
+;  (alpha-beta board depth value-min value-max true))
+;
+;(defn minimize [board depth]
+;  (alpha-beta board depth value-max value-min false))
 
-(defn select-move [board valid-moves-set]
-  (let [available-moves (filter number? board)
-        valid-moves (filter valid-moves-set available-moves)]
-    (when (not-empty valid-moves)
-      ;(seq valid-moves)
-      (rand-nth valid-moves))))
-
-(comment
-  (if test nil (code))
-  (if-not test (code) nil)
-  (when-not test (code))
-
-  (if-not test nil (code))
-  (if test (code) nil)
-  (when test (code))
-  )
-
-(defn corners [board]
-  (select-move board #{1 4 13 16}))
-
-(defn center [board]
-  (select-move board #{6 7 10 11}))
-
-;take board winner out into other function
-(defn winning-move [board available-moves token]
-  (first (filter #(board/winner?
-                    (ui/place-xo board % token) token)
-                 available-moves)))
-
-(defn win-or-block [board opponent-token]
-  (let [available-moves (filter number? board)
-        my-token (if (= opponent-token "X") "O" "X")]
-    (or (winning-move board available-moves my-token)
-        (winning-move board available-moves opponent-token))))
-
-(defn hard-16-helper [board opponent-token]
-  (let [move-count (count (remove number? board))
-        evaluate (if (= opponent-token "O") maximize minimize)]
-    (if (< move-count 7)
-      (or (win-or-block board opponent-token)
-          (corners board)
-          (center board))
-      (second (evaluate board 1)))))
-
-(defn hard-9-helper [board evaluate]
+(defn find-next-move [board evaluate]
   (if (every? number? board)
     1
-    (second (evaluate board 1))))
-
-(comment
-  (if condition
-    truthy-case
-    falsy-case)
-
-  (if test 1 6)
-
-  )
-
-(defn find-next-move [board maximize?]
-  (let [[evaluate opponent-token] (if (= maximize? maximize)
-                                    [maximize "O"]
-                                    [minimize "X"])]
-    (if (= 16 (count board))
-      (hard-16-helper board opponent-token)
-      (hard-9-helper board evaluate))))
+    (second (evaluate board default-depth))))
 
 (defn next-move [board]
   (find-next-move board maximize))
 
 (defn next-move-2 [board]
   (find-next-move board minimize))
+
+
+;(defn alpha-beta [game-board depth alpha beta maximizingPlayer]
+;  (if (zero? depth)
+;    (value game-board depth)
+;    (if maximizingPlayer
+;      (let [value value-max]
+;        (for [child (best-move maximizingPlayer game-board depth )]
+;          (let [value (max value (alpha-beta child (dec depth) alpha beta false))]
+;            (if (>= value beta)
+;              value
+;              (let [alpha (max alpha value)]))))
+;        value)
+;      (let [value value-min]
+;        (for [child (children node)]
+;          (let [value (min value (alpha-beta child (dec depth) alpha beta true))]
+;            (if (<= value alpha)
+;               value
+;              (let [beta (min beta value)]))))
+;        value))))
+
+
+;(defn best-move [maximizing? game-board depth alpha beta [best-value best-action] action]
+;  (let [[compare evaluate token] (if maximizing?
+;                                   [> alpha-beta "X"]
+;                                   [< alpha-beta "O"])
+;        new-game-board (ui/place-xo game-board action token)
+;        value (if (zero? depth)
+;                (value new-game-board depth)
+;                (first (evaluate new-game-board (dec depth) alpha beta (not maximizing?))))]
+;    ;board depth alpha beta maximizing?
+;    (if (compare value best-value)
+;      (let [new-best-value value
+;            new-alpha (if maximizing? (max alpha new-best-value) alpha)
+;            new-beta (if maximizing? beta (min beta new-best-value))]
+;        (if (> new-beta new-alpha)
+;          [new-best-value action]
+;          [best-value best-action]))
+;      [best-value best-action])))
+;
+;(defn extremity [actions maximizing? game-board depth alpha beta]
+;  (let [default-value (if maximizing? value-max value-min)]
+;    (reduce
+;      #(best-move maximizing? game-board depth alpha beta %1 %2)
+;      [default-value nil]
+;      actions)))
+;
+;(defn alpha-beta [board depth alpha beta maximizing?]
+;  (let [actions (filter number? board)]
+;    (if (ui/endgame-result board)
+;      [(value board depth)]
+;      (extremity actions maximizing? board depth alpha beta))))
+;
+;(defn maximize [board depth]
+;  (alpha-beta board depth value-min value-max true))
+;
+;(defn minimize [board depth]
+;  (alpha-beta board depth value-max value-min false))

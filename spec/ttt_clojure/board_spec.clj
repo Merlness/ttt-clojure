@@ -208,7 +208,7 @@
     4 | 5 | 6     13 | 14 | 15    22 | 23 | 24
     7 | 8 | 9     16 | 17 | 18    25 | 26 | 27)
 
-;rows x and z columns -9
+;rows x and z columns -9, 27
 ;going through -4
 ;diagnols 2 per face, 3 faces per d, 3 d, -18
 ;missing traditional 1 5 9 3 5 7

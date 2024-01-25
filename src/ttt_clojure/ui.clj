@@ -78,9 +78,9 @@
              2 for Two Player Tic Tac Toe
              3 for Computer vs Computer Tic Tac Toe")
   (case (read-line)
-    "1" :playerVSai
-    "2" :playerVSplayer
-    "3" :aiVSai
+    "1" :player-vs-ai
+    "2" :player-vs-player
+    "3" :ai-vs-ai
     (recur)))
 
 (defn get-user-input-3-4 []
