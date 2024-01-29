@@ -110,7 +110,7 @@
         (let [output (with-out-str (sut/get-user-input-difficulty))]
           (should= "Please press 1 for an easy AI
              2 for a medium AI
-             3 for a an impossible AI\n" output)))))
+             3 for a hard AI\n" output)))))
 
   (it "checks welcome computer vs computer message"
     (let [output (with-out-str (sut/welcome-c-vs-c))]

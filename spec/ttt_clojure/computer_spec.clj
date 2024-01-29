@@ -113,21 +113,6 @@
         (should-have-invoked :next-move {:with [["O" "O" "X" 4 "X" "X" "O" 8 9]]})
         (should-not-have-invoked :place-easy-move)))
 
-    #_(it "medium-ai"
-        (with-redefs [ui/start-first? (constantly true)
-                      ui/print-board (stub :print-board)
-                      ui/print-end-computer (stub :print-end-computer)
-                      ui/my-turn-statement (stub :my-turn-statement)
-                      ui/update-board (stub :update-board)
-                      mm/next-move (stub :next-move {:return 1})
-                      ]
-          (with-in-str "2\n5\n"
-            (let [output (with-out-str (sut/medium-ai [1 2 3 4 5 6 7 8 9]) )]
-              (should= "" output)
-              (should-have-invoked :next-move {:with [[1 2 3 4 5 6 7 8 9]]})
-              (should-have-invoked :print-board {:with [["X" 2 3 4 5 6 7 8 9]]})
-              (should-not-have-invoked :print-end-computer {:with [[1 2 3 4 5 6 7 8 9]]})
-              ))))
     )
 
   (context "easy AI"
@@ -144,33 +129,7 @@
       (with-redefs [mm/next-move (stub :next-move {:return 1})]
         (should= 1 (mm/next-move [1 2 3 4 5 6 7 8 9]))
         (should-have-invoked :next-move {:with [[1 2 3 4 5 6 7 8 9]]})))
-
-    ;(it "hard-ai"
-    ;  (with-redefs [ui/start-first? (constantly true)
-    ;                ui/print-board (stub :print-board)
-    ;                ui/print-end-computer (stub :print-end-computer)]
-    ;    (with-in-str "1\n2\n3\n4\n5\n"
-    ;      (let [output (with-out-str (sut/hard-ai))]
-    ;        (should= "blah" output)
-    ;        )
-    ;      ))
-    ;  )
-
-    #_(it "hard-ai"
-        (with-redefs [ui/start-first? (constantly true)
-                      ui/print-board (stub :print-board)
-                      ui/print-end-computer (stub :print-end-computer)
-                      ui/my-turn-statement (stub :my-turn-statement)
-                      ui/update-board (stub :update-board)
-                      mm/next-move (stub :next-move {:return 1})
-                      ]
-          (with-in-str "2\n5\n"
-            (let [output (with-out-str (sut/hard-ai [1 2 3 4 5 6 7 8 9]))]
-              (should= "" output)
-              (should-have-invoked :next-move {:with [[1 2 3 4 5 6 7 8 9]]})
-              (should-have-invoked :print-board {:with [["X" 2 3 4 5 6 7 8 9]]})
-              (should-not-have-invoked :print-end-computer {:with [[1 2 3 4 5 6 7 8 9]]})
-              )))))
+           )
 
 
 

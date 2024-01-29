@@ -109,17 +109,11 @@
       (should-not (sut/tie ["X" 2 "X" "O" "O" "O" "X" "X" "X" "X" "O" "O" "O" "X" "O" "X"])))
     )
   (context "3x3x3"
-    (it "checks if separate 3-3 works"
-      (should= [[1 2 3 4 5 6 7 8 9] [10 11 12 13 14 15 16 17 18]
-                [19 20 21 22 23 24 25 26 27]]
-               (sut/separate-3-3 [1 2 3 4 5 6 7 8 9 10 11 12 13 14
-                                  15 16 17 18 19 20 21 22 23 24 25 26 27])))
-
     (it "checks the 3x3x3 display"
       (should= "1 | 2 | 3\n4 | 5 | 6\n7 | 8 | 9\n\n10 | 11 | 12
 13 | 14 | 15\n16 | 17 | 18
 \n19 | 20 | 21\n22 | 23 | 24\n25 | 26 | 27"
-               (sut/display-3-3 [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+               (sut/display [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
                                  19 20 21 22 23 24 25 26 27])))
 
     (it "checks  size 3d 3x3"
@@ -159,44 +153,44 @@
                                           19 20 21 22 23 24 25 26 27])))
 
     (it "checks back diagonal across X wins"
-      (should (sut/winner?-3d [1 2 3 4 5 6 7 "X" 9
+      (should (sut/winner? [1 2 3 4 5 6 7 "X" 9
                                10 11 12 13 "X" 15 16 17 18
                                19 "X" 21 22 23 24 25 26 27]
-                              "X")))
+                           "X")))
 
     (it "checks front diagonal across X wins"
-      (should (sut/winner?-3d [1 2 "X" 4 5 6 7 8 9
+      (should (sut/winner? [1 2 "X" 4 5 6 7 8 9
                                10 11 12 13 14 "X" 16 17 18
                                19 20 21 22 23 24 25 26 "X"]
-                              "X")))
+                           "X")))
 
     (it "checks basic row for x wins"
-      (should (sut/winner?-3d ["X" "X" "X" 4 5 6 7 8 9
+      (should (sut/winner? ["X" "X" "X" 4 5 6 7 8 9
                                10 11 12 13 14 15 16 17 18
                                19 20 21 22 23 24 25 26 27] "X")))
 
     (it "checks basic column for O wins"
-      (should (sut/winner?-3d [1 2 3 4 5 6 7 8 9
+      (should (sut/winner? [1 2 3 4 5 6 7 8 9
                                10 11 "O" 13 14 "O" 16 17 "O"
                                19 20 21 22 23 24 25 26 27] "O")))
 
     (it "checks same space O wins"
-      (should (sut/winner?-3d [1 2 3 4 "O"  6 7 8 9
+      (should (sut/winner? [1 2 3 4 "O"  6 7 8 9
                                10 11 12 13 "O" 15 16 17 18
                                19 20 21 22 "O"  24 25 26 27] "O")))
 
     (it "checks basic column for O wins"
-      (should (sut/winner?-3d [1 2 3 4 5 6 7 8 9
+      (should (sut/winner? [1 2 3 4 5 6 7 8 9
                                10 11 "O" 13 14 "O" 16 17 "O"
                                19 20 21 22 23 24 25 26 27] "O")))
 
     (it "checks edge case O wins"
-      (should (sut/winner?-3d ["O" 2 3 4 5 6 7 8 9
+      (should (sut/winner? ["O" 2 3 4 5 6 7 8 9
                          10 11 12 13 "O" 15 16 17 18
                          19 20 21 22 23 24 25 26 "O"] "O")))
 
     (it "checks false edge case"
-      (should-not (sut/winner?-3d [1 "O" 3 4 5 6 7 8 9
+      (should-not (sut/winner? [1 "O" 3 4 5 6 7 8 9
                          10 11 12 13 "O" 15 16 17 18
                          19 20 21 22 23 24 25 26 "O"] "O")))
 

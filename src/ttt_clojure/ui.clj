@@ -58,6 +58,7 @@
 (defn print-end [grid display] (println (display grid)) (println (endgame-result grid)))
 (defn print-end-computer [grid] (println (endgame-result grid)))
 
+
 (defn start-first-question [] (println "Would you like to go first or second?"))
 (defn luck-greeting [] (println "Ok, best of luck ... you're gonna need it"))
 (defn my-turn-statement [] (println "My turn..."))
@@ -97,7 +98,7 @@
 (defn get-user-input-difficulty []
   (println "Please press 1 for an easy AI
              2 for a medium AI
-             3 for a an impossible AI")
+             3 for a hard AI")
   (case (read-line)
     "1" :easy
     "2" :medium

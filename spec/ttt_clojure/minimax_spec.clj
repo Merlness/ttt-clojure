@@ -74,50 +74,69 @@
 
     (it "checks block"
       (should= 1 (sut/next-move-2 [1 2 "X" "X"
-                                      "O" "X" "O" "X"
-                                      "O" 10 "O" 12
-                                      "O" "O" 15 16] )))
+                                   "O" "X" "O" "X"
+                                   "O" 10 "O" 12
+                                   "O" "O" 15 16])))
 
     (it "can win for X"
       (should= 16 (sut/next-move [1 2 3 "X"
-                                       5 6 7 "X"
-                                       "O" 10 11 "X"
-                                       "O" 14 15 16])))
+                                  5 6 7 "X"
+                                  "O" 10 11 "X"
+                                  "O" 14 15 16])))
 
     (it "can win for O"
       (should= 1 (sut/next-move-2 [1 2 3 "X"
-                                      "O" 6 7 "X"
-                                      "O" 10 11 12
-                                      "O" 14 15 16])))
+                                   "O" 6 7 "X"
+                                   "O" 10 11 12
+                                   "O" 14 15 16])))
 
-    ;(it "selects winning move over blockX"
-    ;  (should= 16 (sut/next-move [1 2 3 "X"
-    ;                              "O" 6 7 "X"
-    ;                              "O" 10 11 "X"
-    ;                              "O" 14 15 16])))
-    ;
-    ;(it "selects winning move over blockO"
-    ;  (should= 1 (sut/next-move-2 [1 2 3 "X"
-    ;                               "O" 6 7 "X"
-    ;                               "O" 10 11 "X"
-    ;                               "O" 14 15 16])))
-    ;
-    ;(it "selects 2nd move O"
-    ;  (should= 2 (sut/next-move-2 ["X" 2 3 4
-    ;                               5 6 7 8
-    ;                               9 10 11 12
-    ;                               13 14 15 16])))
+    (it "selects winning move over blockX"
+      (should= 16 (sut/next-move [1 2 3 "X"
+                                  "O" 6 7 "X"
+                                  "O" 10 11 "X"
+                                  "O" 14 15 16])))
 
-    ;custom hard-medium: random first few moves then minimax
-    ; 1. decreasing depth instead of increasing it,
-    ; putting a cap on depth
-    ; 2. alpha beta pruning
-    ; 3. another simpler version of minimax for the first few moves
+    (it "selects winning move over blockO"
+      (should= 1 (sut/next-move-2 [1 2 3 "X"
+                                   "O" 6 7 "X"
+                                   "O" 10 11 "X"
+                                   "O" 14 15 16])))
 
+    (it "selects 2nd move O"
+      (should= 2 (sut/next-move-2 ["X" 2 3 4
+                                   5 6 7 8
+                                   9 10 11 12
+                                   13 14 15 16])))
     )
+
   #_(context "3D grid"
-    (it "selects winning move"
-      (should= 3 (sut/next-move ["X" "X" 3
+      (it "selects winning move"
+        (should= 3 (sut/next-move ["X" "X" 3
+                                   "O" "O" 6
+                                   7 8 9
+
+                                   10 11 12
+                                   13 14 15
+                                   16 17 18
+
+                                   19 20 21
+                                   22 23 24
+                                   25 26 27])))
+      (it "selects winning move"
+        (should= 2 (sut/next-move-2 ["X" 2 3
+                                     4 5 6
+                                     7 8 9
+
+                                     10 11 12
+                                     13 14 15
+                                     16 17 18
+
+                                     19 20 21
+                                     22 23 24
+                                     25 26 27])))
+
+      (it "selects winning move"
+        (should= 3 (sut/next-move ["X" "O" 3
                                    4 5 6
                                    7 8 9
 
@@ -128,5 +147,18 @@
                                    19 20 21
                                    22 23 24
                                    25 26 27])))
-    )
+
+      (it "selects winning move"
+        (should= 20 (second (sut/maximize ["O" "X" 3
+                                           4 5 6
+                                           7 8 9
+
+                                           10 "X" 12
+                                           13 15 15
+                                           16 17 18
+
+                                           19 20 21
+                                           22 23 24
+                                           25 "O" 27] 3))))
+      )
   )

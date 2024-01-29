@@ -98,36 +98,40 @@
 (defn separate [row]
   (str/join " | " row))
 
-(defn separate-3-3 [grid]
-  (partition 9 grid))
-;change this
+(defn two-dimensional? [board]
+  (> 17 (count board)))
 
-(defn display [grid]
-  (->> grid
+(defn board-type [board]
+  (if (two-dimensional? board) :2d :3d))
+
+(defmulti display board-type)
+
+(defmethod display :2d [board]
+  (->> board
        rows
        (map separate)
        (str/join "\n")))
 
-(defn display-3-3 [grid]
-  (->> grid
-       separate-3-3
+(defmethod display :3d [board]
+  (->> board
+       (partition 9)
        (map display)
        (str/join "\n\n")))
 
 (defn winning-lines? [letter lines]
   (some #(every? #{letter} %) lines))
 
-(defn winner? [grid letter] ; [game player]
-  ; player {:token "X" :kind :ai :human}
-  ; game {:size 4 :dimensions 2 :board [0 1 2 3]}
+(defn winning-combo? [grid combo letter]
+  (every? #(= (nth grid %) letter) combo))
+
+(defmulti winner? (fn [board _letter] (board-type board)))
+
+(defmethod winner? :2d [grid letter]
   (or (winning-lines? letter (rows grid))
       (winning-lines? letter (diagonals grid))
       (winning-lines? letter (columns grid))))
 
-(defn winning-combo? [grid combo letter]
-  (every? #(= (nth grid %) letter) combo))
-
-(defn winner?-3d [grid letter]
+(defmethod winner? :3d [grid letter]
   (let [faces (partition 9 grid)]
     (or
       (some #(winner? % letter) faces)
@@ -137,89 +141,13 @@
       (winning-lines? letter (back-diagonal-across grid))
       (winning-lines? letter (front-diagonal-across grid))
       (winning-lines? letter (front-diagonal-through grid)))))
+; [game player]
+;  ; player {:token "X" :kind :ai :human}
+;  ; game {:size 4 :dimensions 2 :board [0 1 2 3]}
 
-(defn two-dimensional? [board]
-  (> 17 (count board)))
-
-(defn- player-wins? [player game]
-  (winner? game player))
-
-(defn x-wins [grid]
-  (if (two-dimensional? grid)
-   (winner? grid "X")
-   (winner?-3d grid "X")))
-
-(defn o-wins [grid]
-  (if (two-dimensional? grid)
-   (winner? grid "O")
-   (winner?-3d grid "O")))
-;multi methods, deftypes/protocols
+(defn x-wins [grid] (winner? grid "X"))
+(defn o-wins [grid] (winner? grid "O"))
+;multi methods, def-types/protocols
 ;koans
 
 (defn tie [grid] (not-any? integer? grid))
-
-; size= (cuberoot (count grid)) =3
-;same space all faces
-; 0<=i<=(size^2-1)
-;index i + (size^2)*0, i + (size^2)*1, i + (size^2)*2
-
-;(comment
-;  diagonally across all faces-ordered
-;places [1 11 21] index [0 10 20] 0 + 10*0, 0 + 10*1, 0 + 10*2
-;index 4x4 ^ [0 17 34 51]
-;places [4 14 24] index [3 13 23] 3 + 10*0, 3 + 10*1, 3 + 10*2
-;places [7 17 27] index [6 16 26] 6 + 10*0, 6 + 10*1, 6 + 10*2
-;
-; size= (cuberoot (count grid)) =3
-;
-;[(size*0 + (size^2+1)*0) (size*0 + (size^2+1)*1) (size*0 + (size^2+1)*2)]
-;[(size*1 + (size^2+1)*0) (size*1 + (size^2+1)*1) (size*1 + (size^2+1)*2)]
-;[(size*2 + (size^2+1)*0) (size*2 + (size^2+1)*1) (size*2 + (size^2+1)*2)])
-;;
-;
-;(comment
-;places [3 11 19] index [2 10 18] 2 + 8*0, 2 + 8*1, 2 + 8*2
-;index 4x4 ^ [3 18 33 48]
-;places [6 14 22] index [5 13 21] 5 + 8*0, 5 + 8*1, 5 + 8*2
-;places [9 17 25] index [8 16 24] 8 + 8*0, 8 + 8*1, 8 + 8*2
-;[(size*1-1 + (size^2-1)*0) ((size*1)-1 + (size^2-1)*1) ((size*1)-1 + (size^2-1)*2)]
-;[(size*2-1 + (size^2-1)*0) ((size*2)-1 + (size^2-1)*1) ((size*2)-1 + (size^2-1)*2)]
-;[(size*3-1 + (size^2-1)*0) ((size*3)-1 + (size^2-1)*1) ((size*3)-1 + (size^2-1)*2)])
-
-
-;diagonally across front-side faces
-;places [1 13 25] index [0 12 24] 3*0, 3*4, 3*8
-;index 4x4 ^ [0 20 40 60]
-;places [2 14 26] index [1 13 25]
-;places [3 15 27] index [2 14 26] 2 + 3*0, 2 + 3*4, 2 + 3*8
-
-; [(0 + (size * (size+1) * 0))   (0 + (size * (size+1) * 1))   (0 + (size * (size+1) * 2))]
-; [(1 + (size * (size+1) * 0))   (1 + (size * (size+1) * 1))   (1 + (size * (size+1) * 2))]
-; [(2 + (size * (size+1) * 0))   (2 + (size * (size+1) * 1))   (2 + (size * (size+1) * 2))]
-
-
-;diagonally across back-side faces
-
-;places [7 13 19] index [6 12 18] 0 + 3*2* 1, 0+ 3*2* 2, 0 + 3*2* 3
-;index 4x4 ^ [12 24 36 48] 0 + size(size-1)*1
-;places [8 14 20] index [7 13 19] 1 + 3*2* 1, 1+ 3*2* 2, 1 + 3*2* 3
-;places [9 15 21] index [8 14 20] 2 + 3*2* 1, 2+ 3*2* 2, 2 + 3*2* 3
-
-;[(0 + size(size-1)*1) (0 + size(size-1)*2) (0 + size(size-1)*3)]
-;[(1 + size(size-1)*1) (1 + size(size-1)*2) (1 + size(size-1)*3)]
-;[(2 + size(size-1)*1) (2 + size(size-1)*2) (2 + size(size-1)*3)]
-
-;diagonally through the middle
-;places [1 14 27] index [0 13 26] 0 + 13*0, 0 + 13*1, 0 + 13*2
-;                      [0 21 42 63] 0 + size^3/(size-1)*0,
-;places [3 14 25] index [2 13 24] 2 + 11*0, 2 + 11*1, 2 + 11*2
-
-;places [7 14 21] index [6 13 20] 6 + 7*0, 6 + 7*1, 6 + 7*2
-;                     [12 25 38 51]
-;places [9 14 19] index [8 13 18] 8 + 5*0, 8 + 5*1, 8 + 5*2
-
-;[((size-size) + 0*((size^2)+(size +1))    ((size-size) + 1*((size^2)+(size +1))     ((size-size) + 2*((size^2)+(size +1))]
-;[((size-1) + 0*((size^2)+(size -1))       ((size-1)+ 1*((size^2)+(size -1))         ((size-1) + 2*((size^2)+(size -1))]
-
-;[((size^2-size) + 0*((size^2)-(size -1))  ((size^2-size) + 1*((size^2)-(size -1))  ((size^2-size) + 2*((size^2)-(size -1))]
-;[((size^2-1) + 0*((size^2)-(size +1))     ((size^2-1) + 1*((size^2)-(size +1))      ((size^2-1) + 2*((size^2)-(size +1))]
