@@ -18,6 +18,7 @@
     8 4
     7))
 
+;here
 (defn value [game-board depth]
   (cond
     (board/x-wins game-board) depth
@@ -25,9 +26,6 @@
     :else 0))
 
 (defn best-move [maximizing? game-board depth [best-value best-action] action]
-  ;get rid of x or o
-  ;add  parameters to minimizing and maximizing token
-  ;maximizing-token minimizing-token
   (let [[compare evaluate token] (if maximizing?
                                    [> minimize "X"]
                                    [< maximize "O"])
@@ -68,6 +66,7 @@
 
 (defn next-move-2 [board]
   (find-next-move board minimize))
+;to here
 
 (defn value-2 [game-board depth maximizing-token minimizing-token]
   (cond
@@ -120,7 +119,3 @@
 
 (defn next-move-real [board maximizing-token minimizing-token]
   (find-next-move-2 board maximize-2 maximizing-token minimizing-token))
-
-;asking player
-;need a map to pass around the rest of the app
-; easy to pass and retrieve

@@ -1,13 +1,14 @@
 (ns ttt-clojure.ui
   (:require [ttt-clojure.board :as board]))
 
+;here
 (declare start-first-question)
 (declare luck-greeting)
-
 (defn X? [bool]
   (if bool
     "X"
     "O"))
+;to here
 
 (defn place-xo [grid old-num xo]
   (map
@@ -19,6 +20,7 @@
 (defn invalid-move? [num grid]
   (not-any? #{num} grid))
 
+;here
 (defn invalid-message []
   (println "The value you entered is not possible silly. Please try again."))
 
@@ -40,7 +42,28 @@
         (do
           (println "Invalid input. Please enter a number between 1 and 9.")
           (recur))))))
+;to here
 
+(defn valid-input?-2 [input grid]
+  (let [move (try
+               input
+               (catch NumberFormatException e
+                 nil))
+        size (count grid)]
+    (and move (<= 1 move size))))
+
+
+(defn get-move-2 [grid]
+  (println "Choose your position")
+  (loop []
+    (let [user-input (Integer/parseInt (read-line))]
+      (if (and (not (invalid-move? user-input grid)) (valid-input?-2 user-input grid))
+        user-input
+        (do
+          (println "Invalid input. Please place a number that is available.")
+          (recur))))))
+
+;here
 (defn update-board [grid xo]
   (loop []
     (let [move (get-move grid)]
@@ -48,18 +71,12 @@
         (do (invalid-message) (recur))
         (place-xo grid move (X? xo))))))
 
-(defn update-board-2 [grid xo]
-  (loop []
-    (let [move (get-move grid)]
-      (if (invalid-move? move grid)
-        (do (invalid-message) (recur))
-        (place-xo grid move xo)))))
-
 (defn endgame-result [grid]
   (cond
     (board/x-wins grid) "X is the winner!"
     (board/o-wins grid) "O is the winner!"
     (board/tie grid) "Womp, its a tie"))
+;to here
 
 (defn endgame-result-2 [grid token-1 token-2]
   (cond
@@ -69,16 +86,18 @@
 
 
 (defn print-board [grid display] (println (display grid)))
+;here
 (defn print-end [grid display] (println (display grid)) (println (endgame-result grid)))
 (defn print-end-computer [grid] (println (endgame-result grid)))
+;to here
 (defn print-end-2 [grid token-1 token-2] (println (endgame-result-2 grid token-1 token-2)))
+(defn player-statement [num] (println (str "Player " num "'s turn")))
 
-
+;here
 (defn start-first-question [] (println "Would you like to go first or second?"))
 (defn luck-greeting [] (println "Ok, best of luck ... you're gonna need it"))
 (defn my-turn-statement [] (println "My turn..."))
 (defn comp-statement [num] (println (str "Computer " num "'s turn")))
-(defn player-statement [num] (println (str "Player " num "'s turn")))
 
 (defn start-first? [board]
   (start-first-question)
@@ -141,6 +160,7 @@ or anything else if Player 1 wants to be O and Player 2 wants to be X")
   (if (= "1" (read-line))
     "X"
     "O"))
+;to here
 
 (defn get-player [player-number]
   (println (str "If you would like Player " player-number
@@ -150,13 +170,6 @@ or anything else if Player 1 wants to be O and Player 2 wants to be X")
     "2" :ai
     (recur player-number)))
 
-;(defn get-tokens [player-1-token]
-;  (println "Please press 1 if you want Player 1 to be X and Player 2 to be O,
-;or anything else for Player 1 to be O and Player 2 to be X")
-;  (cond
-;    (= player-1-token :X) :O
-;    (= player-1-token :O) :X
-;    :else (get-player-1-token)))
 
 (defn get-player-1-token []
   (println "Please press 1 if you want Player 1 to be X and Player 2 to be O,
@@ -165,7 +178,7 @@ or anything else for Player 1 to be O and Player 2 to be X")
 
 (defn get-player-2-token [player-1-token]
   (if (= player-1-token :X) :O :X))
-
-(defn old-new-way []
-  (println "would you like to try the new way or old way? 1 for new 2 for old")
-  (if (= "1" (read-line)) :new :old))
+;
+;(defn old-new-way []
+;  (println "would you like to try the new way or old way? 1 for new 2 for old")
+;  (if (= "1" (read-line)) :new :old))

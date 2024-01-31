@@ -30,20 +30,6 @@
            #(nth grid (* % (- size 1)))
            indices))))
 
-;(defn diagonal [grid step-fn]
-;  (let [size (count grid)
-;        indices (if (= step-fn inc)
-;                  (range size)
-;                  (map inc (range size)))]
-;    (vec (map
-;           #(nth grid (* % (step-fn size))) indices))))
-;
-;(defn back-diagonal [grid]
-;  (diagonal grid inc))
-;
-;(defn front-diagonal [grid]
-;  (diagonal grid dec))
-
 (defn diagonals [grid]
   (conj [(back-diagonal grid)]
         (front-diagonal grid)))
@@ -138,12 +124,12 @@
       (winning-lines? letter (back-diagonal-across grid))
       (winning-lines? letter (front-diagonal-across grid))
       (winning-lines? letter (front-diagonal-through grid)))))
-; [game player]
-;  ; player {:token "X" :kind :ai :human}
-;  ; game {:size 4 :dimensions 2 :board [0 1 2 3]}
 
+;get rid of these 2
 (defn x-wins [grid] (winner? grid "X"))
 (defn o-wins [grid] (winner? grid "O"))
+
+
 (defn tie [grid] (not-any? integer? grid))
 
 (defn token-wins [grid token] (winner? grid token))
