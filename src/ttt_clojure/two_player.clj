@@ -5,13 +5,7 @@
 
 (defn two-humans [board]
   (let [x-o (ui/get-user-x-o)
-        display board/display
-
-        #_(if (board/two-dimensional? board)
-                  board/display
-                  board/display-3-3)
-
-        ]
+        display board/display]
 
     (loop [grid board
            X? x-o]

@@ -2,19 +2,21 @@
   (:require [ttt-clojure.ui :as ui])
   (:require [ttt-clojure.board :as board]))
 
-(declare alpha-beta)
 (declare minimize)
 (declare maximize)
+(declare minimize-2)
+(declare maximize-2)
 (def value-max -100000)
 (def value-min 100000)
 
-(defn set-depth [board]
-  (cond
-    (> (count (filter number? board)) 20) 2
-    (> (count (filter number? board)) 11) 3
-    (> (count (filter number? board)) 8) 4
-    :else 7))
+(defn remaining-moves [board] (count (filter number? board)))
 
+(defn set-depth [board]
+  (condp < (remaining-moves board)
+    20 2
+    11 3
+    8 4
+    7))
 
 (defn value [game-board depth]
   (cond
@@ -22,8 +24,10 @@
     (board/o-wins game-board) (- depth)
     :else 0))
 
-
 (defn best-move [maximizing? game-board depth [best-value best-action] action]
+  ;get rid of x or o
+  ;add  parameters to minimizing and maximizing token
+  ;maximizing-token minimizing-token
   (let [[compare evaluate token] (if maximizing?
                                    [> minimize "X"]
                                    [< maximize "O"])
@@ -35,40 +39,12 @@
       [value action]
       [best-value best-action])))
 
-;(defn best-move [maximizing? game-board depth alpha beta [best-value best-action] action]
-;  (let [[evaluate token] (if maximizing?
-;                                   [alpha-beta "X"]
-;                                   [alpha-beta "O"])
-;        new-game-board (ui/place-xo game-board action token)
-;        value (if (zero? depth)
-;                (value new-game-board depth)
-;                (first (evaluate new-game-board (dec depth) alpha beta (not maximizing?))))]
-;      (let [new-best-value value
-;            ;max/minEval?
-;            new-alpha (if maximizing? (max alpha new-best-value) alpha)
-;            new-beta (if maximizing? beta (min beta new-best-value))]
-;        (if (> new-beta new-alpha)
-;          [new-best-value action]
-;          [best-value best-action]))
-;      [best-value best-action]))
-
 (defn extremity [actions maximizing? game-board depth]
   (let [default-value (if maximizing? value-max value-min)]
     (reduce
       #(best-move maximizing? game-board depth %1 %2)
       [default-value nil]
       actions)))
-;
-;(defn extremity [actions maximizing? game-board depth alpha beta]
-;    (let [default-value (if maximizing? value-max value-min)]
-;      (reduce
-;        #(let [alpha (max %1 alpha)]
-;           (if (<= beta alpha)
-;             [%1 %2]
-;             (best-move ...)))
-;        [default-value nil]
-;        actions)))
-
 
 (defn min-or-max [board depth maximizing?]
   (let [actions (filter number? board)]
@@ -76,31 +52,16 @@
       [(value board depth)]
       (extremity actions maximizing? board depth))))
 
-;(defn alpha-beta [board depth alpha beta maximizing?]
-;  (let [actions (filter number? board)]
-;    (if (ui/endgame-result board)
-;      [(value board depth)]
-;      (extremity actions maximizing? board depth alpha beta))))
-
 (defn maximize [board depth]
   (min-or-max board depth true))
 
 (defn minimize [board depth]
   (min-or-max board depth false))
 
-;(defn maximize [board depth]
-;  (alpha-beta board depth value-min value-max true))
-;
-;(defn minimize [board depth]
-;  (alpha-beta board depth value-max value-min false))
-
 (defn find-next-move [board evaluate]
   (if (every? number? board)
     1
-    (second (evaluate board
-                      (set-depth board)
-                      ;default-depth
-                      ))))
+    (second (evaluate board (set-depth board)))))
 
 (defn next-move [board]
   (find-next-move board maximize))
@@ -108,61 +69,58 @@
 (defn next-move-2 [board]
   (find-next-move board minimize))
 
+(defn value-2 [game-board depth maximizing-token minimizing-token]
+  (cond
+    (board/token-wins game-board maximizing-token) depth
+    (board/token-wins game-board minimizing-token) (- depth)
+    :else 0))
 
+(defn moves-exhausted? [board depth maximizing-token minimizing-token]
+  (or (zero? depth)
+      (board/game-over? board maximizing-token minimizing-token)))
 
-;(defn best-move [maximizing? game-board depth alpha beta [best-value best-action] action]
-;  (let [[compare evaluate token] (if maximizing?
-;                                   [> alpha-beta "X"]
-;                                   [< alpha-beta "O"])
-;        new-game-board (ui/place-xo game-board action token)
-;        value (if (zero? depth)
-;                (value new-game-board depth)
-;                (first (evaluate new-game-board (dec depth) alpha beta (not maximizing?))))]
-;    ;board depth alpha beta maximizing?
-;    (if (compare value best-value)
-;      (let [new-best-value value
-;            new-alpha (if maximizing? (max alpha new-best-value) alpha)
-;            new-beta (if maximizing? beta (min beta new-best-value))]
-;        (if (> new-beta new-alpha)
-;          [new-best-value action]
-;          [best-value best-action]))
-;      [best-value best-action])))
-;
-;(defn extremity [actions maximizing? game-board depth alpha beta]
-;  (let [default-value (if maximizing? value-max value-min)]
-;    (reduce
-;      #(best-move maximizing? game-board depth alpha beta %1 %2)
-;      [default-value nil]
-;      actions)))
-;
-;(defn alpha-beta [board depth alpha beta maximizing?]
-;  (let [actions (filter number? board)]
-;    (if (ui/endgame-result board)
-;      [(value board depth)]
-;      (extremity actions maximizing? board depth alpha beta))))
-;
-;(defn maximize [board depth]
-;  (alpha-beta board depth value-min value-max true))
-;
-;(defn minimize [board depth]
-;  (alpha-beta board depth value-max value-min false))
+(defn find-value [board evaluate depth maximizing-token minimizing-token]
+  (if (moves-exhausted? board depth maximizing-token minimizing-token)
+    (value-2 board depth maximizing-token minimizing-token)
+    (first (evaluate board (dec depth) maximizing-token minimizing-token))))
 
+(defn best-move-2 [maximizing? game-board depth [best-value best-action] action maximizing-token minimizing-token]
+  (let [[compare evaluate token] (if maximizing?
+                                   [> minimize-2 maximizing-token]
+                                   [< maximize-2 minimizing-token])
+        new-game-board (ui/place-xo game-board action token)
+        value (find-value new-game-board evaluate depth maximizing-token minimizing-token)]
+    (if (compare value best-value)
+      [value action]
+      [best-value best-action])))
 
-;(defn alpha-beta [game-board depth alpha beta maximizingPlayer]
-;  (if (zero? depth)
-;    (value game-board depth)
-;    (if maximizingPlayer
-;      (let [value value-max]
-;        (for [child (best-move maximizingPlayer game-board depth )]
-;          (let [value (max value (alpha-beta child (dec depth) alpha beta false))]
-;            (if (>= value beta)
-;              value
-;              (let [alpha (max alpha value)]))))
-;        value)
-;      (let [value value-min]
-;        (for [child (children node)]
-;          (let [value (min value (alpha-beta child (dec depth) alpha beta true))]
-;            (if (<= value alpha)
-;               value
-;              (let [beta (min beta value)]))))
-;        value))))
+(defn extremity-2 [actions maximizing? game-board depth maximizing-token minimizing-token]
+  (let [default-value (if maximizing? value-max value-min)]
+    (reduce
+      #(best-move-2 maximizing? game-board depth %1 %2 maximizing-token minimizing-token)
+      [default-value nil]
+      actions)))
+
+(defn min-or-max-2 [board depth maximizing? maximizing-token minimizing-token]
+  (let [actions (filter number? board)]
+    (if (board/game-over? board maximizing-token minimizing-token)
+      [(value board depth)]
+      (extremity-2 actions maximizing? board depth maximizing-token minimizing-token))))
+
+(defn maximize-2 [board depth maximizing-token minimizing-token]
+  (min-or-max-2 board depth true maximizing-token minimizing-token))
+
+(defn minimize-2 [board depth maximizing-token minimizing-token]
+  (min-or-max-2 board depth false maximizing-token minimizing-token))
+
+(defn find-next-move-2 [board evaluate maximizing-token minimizing-token]
+  (if (every? number? board)
+    1
+    (second (evaluate board (set-depth board) maximizing-token minimizing-token))))
+
+(defn next-move-real [board maximizing-token minimizing-token]
+  (find-next-move-2 board maximize-2 maximizing-token minimizing-token))
+
+;asking player
+;need a map to pass around the rest of the app
+; easy to pass and retrieve

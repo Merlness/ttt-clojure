@@ -88,26 +88,26 @@
     (it "easy"
       (with-out-str
         (with-in-str "1\n"
-          (should= :easy (sut/get-user-input-difficulty)))))
+          (should= :easy (sut/get-difficulty)))))
 
     (it "medium"
       (with-out-str
         (with-in-str "2\n"
-          (should= :medium (sut/get-user-input-difficulty)))))
+          (should= :medium (sut/get-difficulty)))))
 
     (it "hard"
       (with-out-str
         (with-in-str "3\n"
-          (should= :hard (sut/get-user-input-difficulty)))))
+          (should= :hard (sut/get-difficulty)))))
 
     (it "invalid"
       (with-out-str
         (with-in-str "a\n1\n"
-          (should= :easy (sut/get-user-input-difficulty)))))
+          (should= :easy (sut/get-difficulty)))))
 
     (it "displays a message"
       (with-in-str "1\n"
-        (let [output (with-out-str (sut/get-user-input-difficulty))]
+        (let [output (with-out-str (sut/get-difficulty))]
           (should= "Please press 1 for an easy AI
              2 for a medium AI
              3 for a hard AI\n" output)))))
@@ -154,5 +154,26 @@ or anything else if Player 1 wants to be O and Player 2 wants to be X\n"
       (with-in-str "3\n"
         (should= "O" (sut/get-user-vs-ai-x-o)))))
 
+  (it "should print out x winner"
+    (should= "X is the winner!"
+             (sut/endgame-result-2 [1 2 3 "X" "X" "X" 7 8 9] "X" "O")))
+  (it "knows O winner"
+    (should= "O is the winner!"
+             (sut/endgame-result-2 ["O" "O" "O" 4 5 6 7 8 9] "X" "O")))
+
+  ;(it "gets player-1-token"
+  ;
+  ;    (let [output (with-out-str (with-in-str "1\n"(sut/get-player-1-token )))]
+  ;      (should= :X output))))
+
+  (it "\"gets player-1-token\""
+    (with-out-str
+      (with-in-str "1\n"
+        (should= :X (sut/get-player-1-token)))))
+
+  (it "gets player-2-token"
+    (with-in-str "1\n"
+      (let [output (sut/get-player-2-token :X)]
+        (should= :O output))))
 
   )

@@ -95,14 +95,11 @@
    [6 13 20]
    [8 13 18]])
 
-(defn separate [row]
-  (str/join " | " row))
+(defn separate [row] (str/join " | " row))
 
-(defn two-dimensional? [board]
-  (> 17 (count board)))
+(defn two-dimensional? [board] (> 17 (count board)))
 
-(defn board-type [board]
-  (if (two-dimensional? board) :2d :3d))
+(defn board-type [board] (if (two-dimensional? board) :2d :3d))
 
 (defmulti display board-type)
 
@@ -147,7 +144,12 @@
 
 (defn x-wins [grid] (winner? grid "X"))
 (defn o-wins [grid] (winner? grid "O"))
-;multi methods, def-types/protocols
-;koans
-
 (defn tie [grid] (not-any? integer? grid))
+
+(defn token-wins [grid token] (winner? grid token))
+
+(defn game-over? [grid max-token min-token]
+  (or
+    (token-wins grid max-token)
+    (token-wins grid min-token)
+    (tie grid)))

@@ -48,21 +48,37 @@
         (do (invalid-message) (recur))
         (place-xo grid move (X? xo))))))
 
+(defn update-board-2 [grid xo]
+  (loop []
+    (let [move (get-move grid)]
+      (if (invalid-move? move grid)
+        (do (invalid-message) (recur))
+        (place-xo grid move xo)))))
+
 (defn endgame-result [grid]
   (cond
     (board/x-wins grid) "X is the winner!"
     (board/o-wins grid) "O is the winner!"
     (board/tie grid) "Womp, its a tie"))
 
+(defn endgame-result-2 [grid token-1 token-2]
+  (cond
+    (board/token-wins grid token-1) (str token-1 " is the winner!")
+    (board/token-wins grid token-2) (str token-2 " is the winner!")
+    (board/tie grid) "Womp, its a tie"))
+
+
 (defn print-board [grid display] (println (display grid)))
 (defn print-end [grid display] (println (display grid)) (println (endgame-result grid)))
 (defn print-end-computer [grid] (println (endgame-result grid)))
+(defn print-end-2 [grid token-1 token-2] (println (endgame-result-2 grid token-1 token-2)))
 
 
 (defn start-first-question [] (println "Would you like to go first or second?"))
 (defn luck-greeting [] (println "Ok, best of luck ... you're gonna need it"))
 (defn my-turn-statement [] (println "My turn..."))
 (defn comp-statement [num] (println (str "Computer " num "'s turn")))
+(defn player-statement [num] (println (str "Player " num "'s turn")))
 
 (defn start-first? [board]
   (start-first-question)
@@ -95,7 +111,7 @@
   "9" :3x3x3
   (recur)))
 
-(defn get-user-input-difficulty []
+(defn get-difficulty []
   (println "Please press 1 for an easy AI
              2 for a medium AI
              3 for a hard AI")
@@ -125,3 +141,31 @@ or anything else if Player 1 wants to be O and Player 2 wants to be X")
   (if (= "1" (read-line))
     "X"
     "O"))
+
+(defn get-player [player-number]
+  (println (str "If you would like Player " player-number
+                " to be human press 1, or press 2 for AI?"))
+  (case (read-line)
+    "1" :human
+    "2" :ai
+    (recur player-number)))
+
+;(defn get-tokens [player-1-token]
+;  (println "Please press 1 if you want Player 1 to be X and Player 2 to be O,
+;or anything else for Player 1 to be O and Player 2 to be X")
+;  (cond
+;    (= player-1-token :X) :O
+;    (= player-1-token :O) :X
+;    :else (get-player-1-token)))
+
+(defn get-player-1-token []
+  (println "Please press 1 if you want Player 1 to be X and Player 2 to be O,
+or anything else for Player 1 to be O and Player 2 to be X")
+  (if (= "1" (read-line)) :X :O))
+
+(defn get-player-2-token [player-1-token]
+  (if (= player-1-token :X) :O :X))
+
+(defn old-new-way []
+  (println "would you like to try the new way or old way? 1 for new 2 for old")
+  (if (= "1" (read-line)) :new :old))

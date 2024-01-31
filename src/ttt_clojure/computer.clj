@@ -11,6 +11,13 @@
       (next-move grid)
       (ec/place-easy-move grid))))
 
+(defn medium-difficulty-2 [grid ai-token opp-token]
+  (let [move-count (count (remove number? grid))
+        hard-ai? (or (< move-count 5) (zero? (rand-int 2)))]
+    (if hard-ai?
+      (mm/next-move-real grid ai-token opp-token)
+      (ec/place-easy-move grid))))
+
 (defn grid-after-comp [comp-turn? grid move x-o]
   (let [[comp-token user-token] (if (= "O" x-o)
                                   ["X" false] ["O" true])]
@@ -47,6 +54,20 @@
 (defmethod move :hard [board opponent _difficulty]
   (let [next-move (next-hard-move opponent)]
     (next-move board)))
+
+(defmulti ai-move (fn [_board _ai-token _opponent-token difficulty] difficulty))
+
+(defmethod ai-move :easy [board _ai-token _opponent _difficulty] (ec/place-easy-move board))
+
+(defmethod ai-move :medium [board ai-token opponent-token _difficulty]
+  (let [move-count (count (remove number? board))
+        hard-ai? (or (< move-count 5) (zero? (rand-int 2)))]
+    (if hard-ai?
+      (mm/next-move-real board ai-token opponent-token)
+      (ec/place-easy-move board))))
+
+(defmethod ai-move :hard [board ai-token opponent-token _difficulty]
+  (mm/next-move-real board ai-token opponent-token))
 
 (defn human-vs-ai [board difficulty]
   (let [user-token (ui/get-user-vs-ai-x-o)
@@ -92,7 +113,7 @@
 ;should be same as human vs human
 
 (defn get-difficulty [next-move]
-  (let [user-input (ui/get-user-input-difficulty)]
+  (let [user-input (ui/get-difficulty)]
     (case user-input
       :easy ec/place-easy-move
       :medium #(medium-difficulty next-move %)
@@ -120,6 +141,3 @@
 ;(defmulti next-move [] )
 ;(defmethod next-move :human [{:keys [board x o]}]
 ;  4)
-
-
-

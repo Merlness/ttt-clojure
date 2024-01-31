@@ -182,15 +182,15 @@
     (context "get difficulty"
 
       (it "easy"
-        (with-redefs [ui/get-user-input-difficulty (constantly :easy)]
+        (with-redefs [ui/get-difficulty (constantly :easy)]
           (should= ec/place-easy-move (sut/get-difficulty "foo"))))
 
       #_(it "medium"
-          (with-redefs [ui/get-user-input-difficulty (constantly :medium)]
+          (with-redefs [ui/get-difficulty (constantly :medium)]
             (should= "bar" (sut/get-difficulty "bar"))))
 
       (it "hard"
-        (with-redefs [ui/get-user-input-difficulty (constantly :hard)]
+        (with-redefs [ui/get-difficulty (constantly :hard)]
           (should= "blah" (sut/get-difficulty "blah")))))
 
     )
@@ -198,7 +198,7 @@
       (it "ai-vs-ai"
         (with-redefs [ui/welcome-c-vs-c (stub :welcome)
                       ui/second-difficulty-message (stub :second-message)
-                      ui/get-user-input-difficulty (constantly "1")
+                      ui/get-difficulty (constantly "1")
                       sut/comp-vs-comp (stub :comp-vs-comp {:return
                                                             (ec/place-easy-move ec/place-easy-move)})]
           (let [output (with-out-str (sut/ai-vs-ai [1 2 3 4 5 6 7 8 9] ))]
