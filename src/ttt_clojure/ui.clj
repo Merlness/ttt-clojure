@@ -174,10 +174,10 @@ or anything else if Player 1 wants to be O and Player 2 wants to be X")
 (defn get-player-1-token []
   (println "Please press 1 if you want Player 1 to be X and Player 2 to be O,
 or anything else for Player 1 to be O and Player 2 to be X")
-  (if (= "1" (read-line)) :X :O))
+  (if (= "1" (read-line)) "X" "O"))
 
 (defn get-player-2-token [player-1-token]
-  (if (= player-1-token :X) :O :X))
+  (if (= player-1-token "X") "O" "X"))
 ;
 ;(defn old-new-way []
 ;  (println "would you like to try the new way or old way? 1 for new 2 for old")

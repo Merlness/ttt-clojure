@@ -195,6 +195,7 @@
     (should= 9 (sut/next-move-real ["A" 2 3
                                    "B" "A" 6
                                     "B" 8 9]  "A" "B")))
+  ;pass player instead of tokens and a board instead of an array
 
   (it "tests end move"
     (let [board ["X" "O" "X"
@@ -263,7 +264,7 @@
                                       "O" "O" 15 16] "O" "X")))
 
     (it "sut/minimize check"
-      (should= 1 (sut/find-next-move-2 [ 1   2  "X" "X"
+      (should= 1 (sut/find-next-move-2 [1  2  "X" "X"
                                       "O" "X" "O" "X"
                                       "O"  10 "O" "X"
                                       "O" "O" 15 16] sut/minimize-2 "X" "O")))

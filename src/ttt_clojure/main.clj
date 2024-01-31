@@ -5,15 +5,15 @@
             [ttt-clojure.game-modes :as gm]))
 
 
-(defn boardgame [board]
-  (case (ui/get-user-input-main)
-    :player-vs-ai (comp/human-vs-ai board (ui/get-difficulty))
-    :player-vs-player (tp/two-humans board)
-    :ai-vs-ai (comp/ai-vs-ai board)))
-
-(defn boardgame-3x3 [] (boardgame (range 1 10)))
-(defn boardgame-4x4 [] (boardgame (range 1 17)))
-(defn boardgame-3D [] (boardgame (range 1 28)))
+;(defn boardgame [board]
+;  (case (ui/get-user-input-main)
+;    :player-vs-ai (comp/human-vs-ai board (ui/get-difficulty))
+;    :player-vs-player (tp/two-humans board)
+;    :ai-vs-ai (comp/ai-vs-ai board)))
+;
+;(defn boardgame-3x3 [] (boardgame (range 1 10)))
+;(defn boardgame-4x4 [] (boardgame (range 1 17)))
+;(defn boardgame-3D [] (boardgame (range 1 28)))
 
 ;(defn foo []
 ;  (let [size (ui/get-user-input-3-4)

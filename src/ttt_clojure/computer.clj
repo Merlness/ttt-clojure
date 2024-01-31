@@ -13,13 +13,6 @@
       (next-move grid)
       (ec/place-easy-move grid))))
 
-(defn medium-difficulty-2 [grid ai-token opp-token]
-  (let [move-count (count (remove number? grid))
-        hard-ai? (or (< move-count 5) (zero? (rand-int 2)))]
-    (if hard-ai?
-      (mm/next-move-real grid ai-token opp-token)
-      (ec/place-easy-move grid))))
-
 (defn grid-after-comp [comp-turn? grid move x-o]
   (let [[comp-token user-token] (if (= "O" x-o)
                                   ["X" false] ["O" true])]
@@ -28,19 +21,6 @@
           (ui/place-xo grid move comp-token))
       (ui/update-board grid user-token))))
 
-(defn hard-ai-x-o [difficulty user-token]
-  (if (and (= mm/next-move difficulty)
-           (= "X" user-token))
-    mm/next-move-2
-    difficulty))
-
-;(defmulti display board-type)
-;
-;(defmethod display :2d [board]
-;  (->> board
-;       rows
-;       (map separate)
-;       (str/join "\n")))
 
 (defn next-hard-move [token]
   (if (= token "X") mm/next-move-2 mm/next-move))
@@ -58,6 +38,7 @@
     (next-move board)))
 ;to here
 
+; Use board, player, and opponent params only
 (defmulti ai-move (fn [_board _ai-token _opponent-token difficulty] difficulty))
 
 (defmethod ai-move :easy [board _ai-token _opponent _difficulty] (ec/place-easy-move board))
