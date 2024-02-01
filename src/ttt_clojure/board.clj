@@ -125,13 +125,7 @@
       (winning-lines? letter (front-diagonal-across grid))
       (winning-lines? letter (front-diagonal-through grid)))))
 
-;get rid of these 2
-(defn x-wins [grid] (winner? grid "X"))
-(defn o-wins [grid] (winner? grid "O"))
-
-
 (defn tie [grid] (not-any? integer? grid))
-
 (defn token-wins [grid token] (winner? grid token))
 
 (defn game-over? [grid max-token min-token]

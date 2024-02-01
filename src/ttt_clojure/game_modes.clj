@@ -5,7 +5,7 @@
             [ttt-clojure.computer :as comp]))
 
 (defn board-size []
-  (case (ui/get-user-input-3-4)
+  (case (ui/get-game-board)
     :3x3 (range 1 10)
     :4x4 (range 1 17)
     :3x3x3 (range 1 28)))

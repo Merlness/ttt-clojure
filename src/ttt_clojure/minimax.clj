@@ -65,5 +65,24 @@
     1
     (second (evaluate board (set-depth board) maximizing-token minimizing-token))))
 
-(defn next-move-real [board maximizing-token minimizing-token]
-  (find-next-move-2 board maximize maximizing-token minimizing-token))
+(defn checks-end-move [board available-moves token]
+  (first (filter #(board/winner?
+                    (ui/place-xo board % token) token)
+                 available-moves)))
+
+(defn win-or-block [board maximizing-token minimizing-token]
+  (let [available-moves (filter number? board)
+        winning-move (checks-end-move board available-moves maximizing-token)
+        blocking-move (checks-end-move board available-moves minimizing-token)]
+    (or winning-move blocking-move)))
+
+(defn helper-3d [board]
+  (let [available-moves (filter number? board)
+        number-available (count available-moves)]
+    (when (and (= number-available 26) (some #(= % 14) available-moves)) 14)))
+
+(defn next-move [board maximizing-token minimizing-token]
+  (or
+    (helper-3d board)
+    (win-or-block board maximizing-token minimizing-token)
+    (find-next-move-2 board maximize maximizing-token minimizing-token)))
