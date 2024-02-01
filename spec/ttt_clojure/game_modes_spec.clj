@@ -9,7 +9,7 @@
   (with-stubs)
 
   (it "does it plays a human move"
-    (with-redefs [ui/get-move-2 (stub :next-move {:return 1})]
+    (with-redefs [ui/get-move (stub :next-move {:return 1})]
       (let [player-1 {:kind :human :token "X"}
             player-2 {:kind :ai :token "O" :difficulty :easy}]
         (should= 1 (sut/get-move player-1 player-2 :board))

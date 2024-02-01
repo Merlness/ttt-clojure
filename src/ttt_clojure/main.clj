@@ -1,5 +1,5 @@
 (ns ttt-clojure.main
-  (:require [ttt-clojure.two-player :as tp])
+  ;(:require [ttt-clojure.two-player :as tp])
   (:require [ttt-clojure.ui :as ui]
             [ttt-clojure.computer :as comp]
             [ttt-clojure.game-modes :as gm]))

@@ -2,167 +2,6 @@
   (:require [speclj.core :refer :all]
             [ttt-clojure.minimax :as sut]))
 
-(describe "Minimax tests"
-
-  (it "select the last and only move"
-    (should= 9 (sut/next-move ["X" "O" "X"
-                               "O" "X" "0"
-                               "O" "X" 9])))
-
-  (it "select the second to last move"
-    (should= 2 (sut/next-move [1 2 "X"
-                               "X" "X" "O"
-                               "O" "X" "O"])))
-
-  (it "tests end move"
-    (should= 9 (sut/next-move ["X" 2 3
-                               "O" "X" 6
-                               "O" 8 9])))
-
-  (it "tests end move"
-    (let [board ["X" "O" "X"
-                 "O" "X" 6
-                 7 8 9]]
-      (should-contain (sut/next-move board) [7 9])))
-
-  (it "tests block"
-    (should= 1 (sut/next-move [1 2 3
-                               "O" "X" "X"
-                               "O" 8 9])))
-
-  (it "tests optimal move"
-    (should= 2 (sut/next-move ["X" 2 3
-                               "O" 5 6
-                               7 8 9])))
-
-  (it "tests first move"
-    (let [board [1 2 3
-                 4 5 6
-                 7 8 9]]
-      (should-contain (sut/next-move board) [1 3 7 9])))
-
-  #_(context "4x4"
-      (it "select the last and only move"
-        (should= 16 (sut/next-move ["X" "O" "X" "X"
-                                    "O" "X" "0" "X"
-                                    "O" "X" "O" "X"
-                                    "O" "O" "O" 16])))
-
-      (it "selects the only winning move"
-        (should= 16 (sut/next-move ["X" "O" "X" "X"
-                                    "O" "X" "0" "X"
-                                    "O" "X" "O" "X"
-                                    "O" "O" 15 16])))
-
-      (it "selects the winning move with 3 options"
-        (should= 16 (sut/next-move ["X" "O" "X" "X"
-                                    "O" "X" "0" "X"
-                                    "O" 10 "O" "X"
-                                    "O" "O" 15 16])))
-
-      (it "selects X winning move over block"
-        (should= 16 (sut/next-move [1 2 "X" "X"
-                                    "O" "X" "O" "X"
-                                    "O" 10 "O" "X"
-                                    "O" "O" 15 16])))
-
-      (it "selects O winning move over block"
-        (should= 1 (sut/next-move-2 [1 2 "X" "X"
-                                     "O" "X" "O" "X"
-                                     "O" 10 "O" "X"
-                                     "O" "O" 15 16])))
-
-      (it "checks block"
-        (should= 1 (sut/next-move-2 [1 2 "X" "X"
-                                     "O" "X" "O" "X"
-                                     "O" 10 "O" 12
-                                     "O" "O" 15 16])))
-
-      (it "can win for X"
-        (should= 16 (sut/next-move [1 2 3 "X"
-                                    5 6 7 "X"
-                                    "O" 10 11 "X"
-                                    "O" 14 15 16])))
-
-      (it "can win for O"
-        (should= 1 (sut/next-move-2 [1 2 3 "X"
-                                     "O" 6 7 "X"
-                                     "O" 10 11 12
-                                     "O" 14 15 16])))
-
-      (it "selects winning move over blockX"
-        (should= 16 (sut/next-move [1 2 3 "X"
-                                    "O" 6 7 "X"
-                                    "O" 10 11 "X"
-                                    "O" 14 15 16])))
-
-      (it "selects winning move over blockO"
-        (should= 1 (sut/next-move-2 [1 2 3 "X"
-                                     "O" 6 7 "X"
-                                     "O" 10 11 "X"
-                                     "O" 14 15 16])))
-
-      (it "selects 2nd move O"
-        (should= 2 (sut/next-move-2 ["X" 2 3 4
-                                     5 6 7 8
-                                     9 10 11 12
-                                     13 14 15 16])))
-      )
-
-  #_(context "3D grid"
-    (it "selects winning move"
-      (should= 3 (sut/next-move ["X" "X" 3
-                                 "O" "O" 6
-                                 7 8 9
-
-                                 10 11 12
-                                 13 14 15
-                                 16 17 18
-
-                                 19 20 21
-                                 22 23 24
-                                 25 26 27])))
-    (it "selects next move"
-      (should= 2 (sut/next-move-2 ["X" 2 3
-                                   4 5 6
-                                   7 8 9
-
-                                   10 11 12
-                                   13 14 15
-                                   16 17 18
-
-                                   19 20 21
-                                   22 23 24
-                                   25 26 27])))
-
-    (it "selects 3rd move"
-      (should= 3 (sut/next-move ["X" "O" 3
-                                 4 5 6
-                                 7 8 9
-
-                                 10 11 12
-                                 13 14 15
-                                 16 17 18
-
-                                 19 20 21
-                                 22 23 24
-                                 25 26 27])))
-
-    #_(focus-it "selects blocking move"
-      (should= 7 (sut/next-move-2 ["X" "O" "X"
-                                   "O" "X" 6
-                                   7 8 9
-
-                                   10 11 12
-                                   13 14 15
-                                   16 17 18
-
-                                   19 20 21
-                                   22 23 24
-                                   25 26 27])))
-
-    )
-  )
 
 (describe "Minimax-tokens tests"
 
@@ -173,28 +12,28 @@
 
   (it "select the second to last move"
     (should= 2 (sut/next-move-real [1 2 "X"
-                               "X" "X" "O"
-                               "O" "X" "O"] "X" "O")))
+                                    "X" "X" "O"
+                                    "O" "X" "O"] "X" "O")))
 
   (it "tests end move"
     (should= 9 (sut/next-move-real ["X" 2 3
-                                   "O" "X" 6
+                                    "O" "X" 6
                                     "O" 8 9] "X" "O")))
 
   (it "tests block end move O"
     (should= 9 (sut/next-move-real ["X" 2 3
-                                   "O" "X" 6
+                                    "O" "X" 6
                                     "O" 8 9] "O" "X")))
 
   (it "tests block end move O"
     (should= 9 (sut/next-move-real ["O" 2 3
-                                   "X" "O" 6
-                                    "X" 8 9]  "O" "X")))
+                                    "X" "O" 6
+                                    "X" 8 9] "O" "X")))
 
   (it "tests block end move A"
     (should= 9 (sut/next-move-real ["A" 2 3
-                                   "B" "A" 6
-                                    "B" 8 9]  "A" "B")))
+                                    "B" "A" 6
+                                    "B" 8 9] "A" "B")))
   ;pass player instead of tokens and a board instead of an array
 
   (it "tests end move"
@@ -212,7 +51,7 @@
   (it "tests win O"
     (should= 1 (sut/next-move-real [1 2 3
                                     "O" "X" "X"
-                                    "O" 8 9]  "O" "X")))
+                                    "O" 8 9] "O" "X")))
 
   (it "tests optimal move"
     (should= 2 (sut/next-move-real ["X" 2 3
@@ -233,130 +72,143 @@
       (should-contain (sut/next-move-real board "O" "X") [1 3 7 9])))
 
   (context "4x4"
-      (it "select the last and only move"
-        (should= 16 (sut/next-move-real ["X" "O" "X" "X"
-                                    "O" "X" "0" "X"
-                                    "O" "X" "O" "X"
-                                    "O" "O" "O" 16] "X" "O")))
+    (it "select the last and only move"
+      (should= 16 (sut/next-move-real ["X" "O" "X" "X"
+                                       "O" "X" "0" "X"
+                                       "O" "X" "O" "X"
+                                       "O" "O" "O" 16] "X" "O")))
 
-      (it "selects the only winning move"
-        (should= 16 (sut/next-move-real ["X" "O" "X" "X"
-                                    "O" "X" "0" "X"
-                                    "O" "X" "O" "X"
-                                    "O" "O" 15 16] "X" "O")))
+    (it "selects the only winning move"
+      (should= 16 (sut/next-move-real ["X" "O" "X" "X"
+                                       "O" "X" "0" "X"
+                                       "O" "X" "O" "X"
+                                       "O" "O" 15 16] "X" "O")))
 
-      (it "selects the winning move with 3 options"
-        (should= 16 (sut/next-move-real ["X" "O" "X" "X"
-                                    "O" "X" "0" "X"
-                                    "O" 10 "O" "X"
-                                    "O" "O" 15 16] "X" "O")))
+    (it "selects the winning move with 3 options"
+      (should= 16 (sut/next-move-real ["X" "O" "X" "X"
+                                       "O" "X" "0" "X"
+                                       "O" 10 "O" "X"
+                                       "O" "O" 15 16] "X" "O")))
 
-      (it "selects X winning move over block"
-        (should= 16 (sut/next-move-real [1 2 "X" "X"
-                                    "O" "X" "O" "X"
-                                    "O" 10 "O" "X"
-                                    "O" "O" 15 16] "X" "O")))
+    (it "selects X winning move over block"
+      (should= 16 (sut/next-move-real [1 2 "X" "X"
+                                       "O" "X" "O" "X"
+                                       "O" 10 "O" "X"
+                                       "O" "O" 15 16] "X" "O")))
     ;here v
     (it "selects O winning move over block"
-      (should= 1 (sut/next-move-real [ 1   2  "X" "X"
+      (should= 1 (sut/next-move-real [1 2 "X" "X"
                                       "O" "X" "O" "X"
-                                      "O"  10 "O" "X"
+                                      "O" 10 "O" "X"
                                       "O" "O" 15 16] "O" "X")))
 
     (it "sut/minimize check"
-      (should= 1 (sut/find-next-move-2 [1  2  "X" "X"
+      (should= 1 (sut/find-next-move-2 [1 2 "X" "X"
+                                        "O" "X" "O" "X"
+                                        "O" 10 "O" "X"
+                                        "O" "O" 15 16] sut/minimize "X" "O")))
+    ;here
+    (it "checks block for X"
+      (should= 1 (sut/next-move-real [1 2 "X" "X"
                                       "O" "X" "O" "X"
-                                      "O"  10 "O" "X"
-                                      "O" "O" 15 16] sut/minimize-2 "X" "O")))
-;here
-;      (it "checks block"
-;        (should= 1 (sut/next-move-real [1 2 "X" "X"
-;                                     "O" "X" "O" "X"
-;                                     "O" 10 "O" 12
-;                                     "O" "O" 15 16] "O" "X")))
-;
-;      (it "can win for X"
-;        (should= 16 (sut/next-move-real [1 2 3 "X"
-;                                    5 6 7 "X"
-;                                    "O" 10 11 "X"
-;                                    "O" 14 15 16] "X" "O")))
-;
-;      (it "can win for O"
-;        (should= 1 (sut/next-move-real [1 2 3 "X"
-;                                     "O" 6 7 "X"
-;                                     "O" 10 11 12
-;                                     "O" 14 15 16] "O" "X")))
-;
-;      (it "selects winning move over blockX"
-;        (should= 16 (sut/next-move-real [1 2 3 "X"
-;                                    "O" 6 7 "X"
-;                                    "O" 10 11 "X"
-;                                    "O" 14 15 16] "X" "O")))
-;
-;      (it "selects winning move over blockO"
-;        (should= 1 (sut/next-move-real [1 2 3 "X"
-;                                     "O" 6 7 "X"
-;                                     "O" 10 11 "X"
-;                                     "O" 14 15 16] "O" "X")))
-;
-;      (it "selects 2nd move O"
-;        (should= 2 (sut/next-move-real ["X" 2 3 4
-;                                     5 6 7 8
-;                                     9 10 11 12
-;                                     13 14 15 16] "O" "X")))
-      )
+                                      "O" 10 "O" 12
+                                      "O" "O" 15 16] "X" "O")))
 
-  #_(context "3D grid"
-      (it "selects winning move"
-        (should= 3 (sut/next-move-real ["X" "X" 3
-                                   "O" "O" 6
-                                   7 8 9
+    (it "can win for X"
+      (should= 16 (sut/next-move-real [1 2 3 "X"
+                                       5 6 7 "X"
+                                       "O" 10 11 "X"
+                                       "O" 14 15 16] "X" "O")))
 
-                                   10 11 12
-                                   13 14 15
-                                   16 17 18
+    (it "can win for O"
+      (should= 1 (sut/next-move-real [1 2 3 "X"
+                                      "O" 6 7 "X"
+                                      "O" 10 11 12
+                                      "O" 14 15 16] "O" "X")))
 
-                                   19 20 21
-                                   22 23 24
-                                   25 26 27] "X" "O")))
-      (it "selects next move"
-        (should= 2 (sut/next-move-real ["X" 2 3
-                                     4 5 6
-                                     7 8 9
+    (it "selects winning move over blockX"
+      (should= 16 (sut/next-move-real [1 2 3 "X"
+                                       "O" 6 7 "X"
+                                       "O" 10 11 "X"
+                                       "O" 14 15 16] "X" "O")))
 
-                                     10 11 12
-                                     13 14 15
-                                     16 17 18
+    (it "selects winning move over blockO"
+      (should= 1 (sut/next-move-real [1 2 3 "X"
+                                      "O" 6 7 "X"
+                                      "O" 10 11 "X"
+                                      "O" 14 15 16] "O" "X")))
 
-                                     19 20 21
-                                     22 23 24
-                                     25 26 27] "O" "X")))
+    (it "selects 2nd move O"
+      (should= 2 (sut/next-move-real ["X" 2 3 4
+                                      5 6 7 8
+                                      9 10 11 12
+                                      13 14 15 16] "O" "X")))
+    )
 
-      (it "selects 3rd move"
-        (should= 3 (sut/next-move-real ["X" "O" 3
-                                   4 5 6
-                                   7 8 9
+  (context "3D grid"
+    (it "selects winning move"
+      (should= 3 (sut/next-move-real ["X" "X" 3
+                                      "O" "O" 6
+                                      7 8 9
 
-                                   10 11 12
-                                   13 14 15
-                                   16 17 18
+                                      10 11 12
+                                      13 14 15
+                                      16 17 18
 
-                                   19 20 21
-                                   22 23 24
-                                   25 26 27] "O" "X")))
+                                      19 20 21
+                                      22 23 24
+                                      25 26 27] "X" "O")))
 
-      #_(focus-it "selects blocking move"
-          (should= 7 (sut/next-move-2 ["X" "O" "X"
-                                       "O" "X" 6
-                                       7 8 9
+    (it "selects blocking move"
+      (should= 3 (sut/next-move-real ["X" "X" 3
+                                      "O" 5 6
+                                      7 "O" 9
 
-                                       10 11 12
-                                       13 14 15
-                                       16 17 18
+                                      10 11 12
+                                      13 14 15
+                                      16 17 18
 
-                                       19 20 21
-                                       22 23 24
-                                       25 26 27])))
+                                      19 20 21
+                                      22 23 24
+                                      25 26 27] "O" "X")))
+    (it "selects next move"
+      (should= 2 (sut/next-move-real ["X" 2 3
+                                      4 5 6
+                                      7 8 9
 
-      )
+                                      10 11 12
+                                      13 14 15
+                                      16 17 18
+
+                                      19 20 21
+                                      22 23 24
+                                      25 26 27] "O" "X")))
+
+    (it "selects 3rd move"
+      (should= 3 (sut/next-move-real ["X" "O" 3
+                                      4 5 6
+                                      7 8 9
+
+                                      10 11 12
+                                      13 14 15
+                                      16 17 18
+
+                                      19 20 21
+                                      22 23 24
+                                      25 26 27] "O" "X")))
+
+    ;(focus-it "selects blocking move"
+    ;    (should= 7 (sut/next-move-real ["X" "O" "X"
+    ;                                 "O" "X" 6
+    ;                                 7 8 9
+    ;
+    ;                                 10 11 12
+    ;                                 13 14 15
+    ;                                 16 17 18
+    ;
+    ;                                 19 20 21
+    ;                                 22 23 24
+    ;                                 25 26 27] "O" "X")))
+
+    )
   )

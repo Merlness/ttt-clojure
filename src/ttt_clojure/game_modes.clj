@@ -34,7 +34,7 @@
 (defmulti get-move (fn [player _opponent _grid] (:kind player)))
 
 (defmethod get-move :human [_player _opponent grid]
-  (ui/get-move-2 grid))
+  (ui/get-move grid))
 
 (defmethod get-move :ai [player opponent grid]
   (comp/ai-move grid (:token player) (:token opponent) (:difficulty player)))
@@ -60,7 +60,7 @@
            player-1? true]
       (let [new-grid (play-round player-1? player-1 player-2 grid)]
         (if (board/game-over? new-grid token-1 token-2)
-          (ui/print-end-2 new-grid token-1 token-2)
+          (ui/print-end new-grid token-1 token-2)
           (recur new-grid (not player-1?)))))))
 
 ;notes
