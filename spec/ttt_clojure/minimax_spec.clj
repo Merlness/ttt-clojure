@@ -102,7 +102,7 @@
                                  "O" "O" 15 16] "O" "X")))
 
     (it "sut/minimize check"
-      (should= 1 (sut/find-next-move-2 [1 2 "X" "X"
+      (should= 1 (sut/find-next-move [1 2 "X" "X"
                                         "O" "X" "O" "X"
                                         "O" 10 "O" "X"
                                         "O" "O" 15 16] sut/minimize "X" "O")))
@@ -206,8 +206,8 @@
                                   19 20 21
                                   22 23 24
                                   25 26 27])))
-    (it "helper doesn't work"
-      (should-not (sut/helper-3d [1 2 3
+    (it "helper provides first move"
+      (should= 14 (sut/helper-3d [1 2 3
                                   4 5 6
                                   7 8 9
 

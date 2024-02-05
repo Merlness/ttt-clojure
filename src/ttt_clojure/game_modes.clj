@@ -2,7 +2,32 @@
   (:require [ttt-clojure.ui :as ui]
             [ttt-clojure.board :as board]
             [ttt-clojure.save-game :as save]
-            [ttt-clojure.computer :as comp]))
+            [ttt-clojure.computer :as comp]
+            [clojure.edn :as edn]))
+
+clojure.core/read-string
+clojure.edn/read-string
+
+(defn get-next-game-id []
+  (let [log-data (slurp "log.edn")
+        data (edn/read-string log-data)
+        ;game-ids (find data :game-id)
+        game-ids (map :game-id data)
+
+        max-game-id (if (empty? game-ids) 0 (apply max game-ids))
+        ]
+
+    ;max-game-id
+    (println "game-ids" game-ids)
+    ;(println "log-data" log-data)
+    (inc max-game-id)
+    ;(println log-data)
+    ;(prn data)
+    ;pr-str
+    ))
+
+(def game-id (atom (get-next-game-id)))
+;(def game-id (atom 0))
 
 (defn board-size []
   (case (ui/get-game-board)
@@ -39,29 +64,25 @@
 (defmethod get-move :ai [player opponent grid]
   (comp/ai-move grid (:token player) (:token opponent) (:difficulty player)))
 
+(defn save [player-1 player-2 grid];test
+  ;(save/save-round @game-id player-1 player-2 grid)
+  (save/save-round-2 @game-id player-1 player-2 grid)
+  (save/save-game-id @game-id))
+
 (defn play-round [player-1? player-1 player-2 grid]
   (let [[player opponent] (if player-1? [player-1 player-2] [player-2 player-1])
         move (get-move player opponent grid)
         token-1 (:token player-1)
         token-2 (:token player-2)
         new-grid (grid-after-move player-1? grid move token-1 token-2)]
-    (save/save-round player-1 player-2 new-grid)
+    (save player-1 player-2 new-grid)
     (ui/print-board new-grid board/display)
     new-grid))
 
-(defn player-vs-player []
-  (let [board (board-size)
-        player-1 (create-player 1 nil)
-        player-2 (create-player 2 (:token player-1))
-        token-1 (:token player-1)
-        token-2 (:token player-2)]
-    (ui/print-board board board/display)
-    (loop [grid board
-           player-1? true]
-      (let [new-grid (play-round player-1? player-1 player-2 grid)]
-        (if (board/game-over? new-grid token-1 token-2)
-          (ui/print-end new-grid token-1 token-2)
-          (recur new-grid (not player-1?)))))))
+(defn complete-game [grid token-1 token-2]                  ;test this
+  ;(swap! game-id inc)
+  (ui/print-end grid token-1 token-2))
+
 
 ;notes
 ;stories are taking longer, think about

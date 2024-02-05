@@ -7,10 +7,8 @@
 (def value-max -100000)
 (def value-min 100000)
 
-(defn remaining-moves [board] (count (filter number? board)))
-
 (defn set-depth [board]
-  (condp < (remaining-moves board)
+  (condp < (count (board/find-available-moves board))
     20 2
     11 3
     8 4
@@ -49,10 +47,10 @@
       actions)))
 
 (defn min-or-max [board depth maximizing? maximizing-token minimizing-token]
-  (let [actions (filter number? board)]
+  (let [available-actions (board/find-available-moves board)]
     (if (board/game-over? board maximizing-token minimizing-token)
       [(value board depth maximizing-token minimizing-token)]
-      (extremity actions maximizing? board depth maximizing-token minimizing-token))))
+      (extremity available-actions maximizing? board depth maximizing-token minimizing-token))))
 
 (defn maximize [board depth maximizing-token minimizing-token]
   (min-or-max board depth true maximizing-token minimizing-token))
@@ -60,7 +58,7 @@
 (defn minimize [board depth maximizing-token minimizing-token]
   (min-or-max board depth false maximizing-token minimizing-token))
 
-(defn find-next-move-2 [board evaluate maximizing-token minimizing-token]
+(defn find-next-move [board evaluate maximizing-token minimizing-token]
   (if (every? number? board)
     1
     (second (evaluate board (set-depth board) maximizing-token minimizing-token))))
@@ -71,18 +69,18 @@
                  available-moves)))
 
 (defn win-or-block [board maximizing-token minimizing-token]
-  (let [available-moves (filter number? board)
+  (let [available-moves (board/find-available-moves board)
         winning-move (checks-end-move board available-moves maximizing-token)
         blocking-move (checks-end-move board available-moves minimizing-token)]
     (or winning-move blocking-move)))
 
 (defn helper-3d [board]
-  (let [available-moves (filter number? board)
+  (let [available-moves (board/find-available-moves board)
         number-available (count available-moves)]
-    (when (and (= number-available 26) (some #(= % 14) available-moves)) 14)))
+    (when (> number-available 25) (some #{14} available-moves))))
 
 (defn next-move [board maximizing-token minimizing-token]
   (or
     (helper-3d board)
     (win-or-block board maximizing-token minimizing-token)
-    (find-next-move-2 board maximize maximizing-token minimizing-token)))
+    (find-next-move board maximize maximizing-token minimizing-token)))

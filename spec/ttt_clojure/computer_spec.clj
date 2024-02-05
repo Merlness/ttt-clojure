@@ -28,7 +28,7 @@
     (if result (do (conj results result)) (collect-ai-results results board maximizing-token minimizing-token))))
 
 (defn- play-game-computer-second [board maximizing-token minimizing-token]
-  (reduce #(collect-move-results %1 %2 board maximizing-token minimizing-token) [] (filter number? board)))
+  (reduce #(collect-move-results %1 %2 board maximizing-token minimizing-token) [] (board/find-available-moves board)))
 
 (defn- play-game-computer-first [board maximizing-token minimizing-token]
   (play-game-computer-second (place-ai-move board maximizing-token minimizing-token) maximizing-token minimizing-token))
@@ -67,48 +67,6 @@
 
 
   (context "easy computer"
-    (it "finds available actions"
-      (let [board [1 2 3
-                   4 5 6
-                   7 8 9]]
-        (should= (sut/find-actions board)
-                 '(1 2 3 4 5 6 7 8 9))))
-
-    (it "finds less available actions"
-      (let [board ["X" "O" "X"
-                   4 5 6
-                   7 8 9]]
-        (should= (sut/find-actions board)
-                 '(4 5 6 7 8 9))))
-
-    (it "finds no actions"
-      (let [board ["X" "O" "X"
-                   "X" "X" "X"
-                   "X" "O" "O"]]
-        (should= (sut/find-actions board)
-                 '())))
-
-    (it "generates a random number"
-      (should-contain (sut/find-rand-int [1 2 3 4 5 6 7 8 9])
-                      [1 2 3 4 5 6 7 8 9]))
-
-    (it "generates a random number form all possibilities"
-      (should-contain (sut/find-rand-int '(4 5 6 7 8 9))
-                      [4 5 6 7 8 9]))
-
-    (it "generates a random number from less possibilities"
-      (should-contain (sut/find-rand-int '(4 5 6 7 8 9))
-                      [4 5 6 7 8 9]))
-
-    (it "generates a random number from even less possibilities"
-      (should-contain (sut/find-rand-int '(4 7 9)) [4 7 9]))
-
-    (it "generates a random number from two possibilities"
-      (should-contain (sut/find-rand-int '(4 9)) [4 9]))
-
-    (it "generates a random number from 1 possibility"
-      (should= 9 (sut/find-rand-int '(9))))
-
     (it "chooses a random move from an empty board"
       (should-contain (sut/place-easy-move [1 2 3 4 5 6 7 8 9])
                       [1 2 3 4 5 6 7 8 9]))
@@ -125,12 +83,3 @@
     (it "chooses a random move after 7 moves"
       (should= 4 (sut/place-easy-move [4]))))
   )
-
-
-;(it "seventh move-hard move"
-;  (with-redefs [rand-int (fn [_] 0)
-;                mm/next-move (stub :next-move {:return 4})
-;                ec/place-easy-move (stub :place-easy-move)]
-;    (should= 4 (sut/medium-difficulty mm/next-move ["O" "O" "X" 4 "X" "X" "O" 8 9]))
-;    (should-have-invoked :next-move {:with [["O" "O" "X" 4 "X" "X" "O" 8 9]]})
-;    (should-not-have-invoked :place-easy-move)))

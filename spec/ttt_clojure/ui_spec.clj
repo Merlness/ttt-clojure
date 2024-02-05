@@ -3,9 +3,7 @@
             [ttt-clojure.board :as board]
             [ttt-clojure.ui :as sut]))
 
-
 (describe "Updating board"
-
   (it "is an invalid move"
     (should= true (sut/invalid-move? 1 ["X" 2 3 4 5 6 7 8 9])))
 
@@ -170,5 +168,4 @@ or anything else for Player 1 to be O and Player 2 to be X\n"
   (it "gets player-2-token X"
     (let [output (sut/get-player-2-token "O")]
       (should= "X" output)))
-
   )
