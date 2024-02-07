@@ -61,6 +61,18 @@
   (it "checks O-wins front diagonal"
     (should (sut/token-wins ["O" 2 3 4 "O" 6 7 8 "O"] "O")))
 
+  (context "game-over?"
+    (it "game over with player X"
+      (let [x {:token "X"}
+            o {:token "O"}]
+        (should (sut/game-over? ["X" "X" "X" 4 5 6 7 8 9] x o))))
+
+    (it "game over with player O"
+      (let [x {:token "X"}
+            o {:token "O"}]
+        (should (sut/game-over? ["O" "O" "O" 4 5 6 7 8 9] x o))))
+    )
+
   (context "4x4"
 
     (it "makes an empty grid"
@@ -125,6 +137,7 @@
     (it "checks not a tie"
       (should-not (sut/tie ["X" 2 "X" "O" "O" "O" "X" "X" "X" "X" "O" "O" "O" "X" "O" "X"])))
     )
+
   (context "3x3x3"
     (it "checks the 3x3x3 display"
       (should= "1 | 2 | 3\n4 | 5 | 6\n7 | 8 | 9\n\n10 | 11 | 12
@@ -210,22 +223,5 @@
       (should-not (sut/winner? [1 "O" 3 4 5 6 7 8 9
                                 10 11 12 13 "O" 15 16 17 18
                                 19 20 21 22 23 24 25 26 "O"] "O")))
-
     )
   )
-
-
-#_(1 | 2 | 3 10 | 11 | 12 19 | 20 | 21
-    4 | 5 | 6 13 | 14 | 15 22 | 23 | 24
-    7 | 8 | 9 16 | 17 | 18 25 | 26 | 27)
-
-;rows x and z columns -9, 27
-;going through -4
-;diagnols 2 per face, 3 faces per d, 3 d, -18
-;missing traditional 1 5 9 3 5 7
-
-#_(1 | 2 | 3 | 4 17 |18| 19 | 20 33 |34| 35 | 36 49 |50| 51 | 52
-    5 | 6 | 7 | 8 21 |22| 23 | 24 37 |38| 39 | 40 53 |54| 55 | 56
-    9 |10 |11 |12 25 |26| 27 | 28 41 |42| 43 | 44 57 |58| 59 | 60
-    13 |14 |15 |16 29 |30| 31 | 32 45 |46| 47 | 48 61 |62| 63 | 64
-    )

@@ -41,19 +41,18 @@
   (it "tests print-board on 3x3"
     (should= "1 | 2 | 3\n4 | 5 | 6\n7 | 8 | 9\n"
              (with-out-str
-               (sut/print-board [1 2 3 4 5 6 7 8 9] board/display))))
+               (sut/print-board [1 2 3 4 5 6 7 8 9]))))
 
   (it "tests print-board on 4x4"
     (should= "1 | 2 | 3 | 4\n5 | 6 | 7 | 8\n9 | 10 | 11 | 12\n13 | 14 | 15 | 16\n"
              (with-out-str
-               (sut/print-board [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16] board/display))))
+               (sut/print-board [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16]))))
 
   (it "tests print-board on 3x3x3"
     (should= "1 | 2 | 3\n4 | 5 | 6\n7 | 8 | 9\n\n10 | 11 | 12\n13 | 14 | 15\n16 | 17 | 18\n\n19 | 20 | 21\n22 | 23 | 24\n25 | 26 | 27\n"
              (with-out-str
                (sut/print-board [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-                                 16 17 18 19 20 21 22 23 24 25 26 27]
-                                board/display))))
+                                 16 17 18 19 20 21 22 23 24 25 26 27]))))
 
   (it "tests print end"
     (should= "O is the winner!\n"
@@ -168,4 +167,23 @@ or anything else for Player 1 to be O and Player 2 to be X\n"
   (it "gets player-2-token X"
     (let [output (sut/get-player-2-token "O")]
       (should= "X" output)))
+
+  (it "displays a message for continue last game"
+    (with-in-str "1\n"
+      (let [output (with-out-str (sut/continue-last-game?))]
+        (should= "Would you like to finish your previous game?
+  1 for Yes, anything else for No\n"
+                 output))))
+
+  (it "returns true for last game"
+    (with-out-str
+      (with-in-str "1\n"
+        (let [output (sut/continue-last-game?)]
+          (should output)))))
+
+  (it "returns nil for last game"
+    (with-out-str
+      (with-in-str "\n"
+        (let [output (sut/continue-last-game?)]
+          (should-not output)))))
   )

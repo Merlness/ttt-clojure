@@ -1,11 +1,9 @@
 (ns ttt-clojure.computer
   (:require [ttt-clojure.board :as board]
             [ttt-clojure.minimax :as mm]))
-;put this in board and call it
-;command shift F
+
 (defn place-easy-move [board] (-> board board/find-available-moves rand-nth))
 
-; Use board, player, and opponent params only
 (defmulti ai-move (fn [_board _ai-token _opponent-token difficulty] difficulty))
 
 (defmethod ai-move :easy [board _ai-token _opponent _difficulty] (place-easy-move board))

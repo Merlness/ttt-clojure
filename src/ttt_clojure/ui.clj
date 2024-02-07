@@ -35,8 +35,15 @@
     (board/token-wins grid token-2) (str token-2 " is the winner!")
     (board/tie grid) "Womp, its a tie"))
 
-(defn print-board [grid display] (println (display grid)))
-(defn print-end [grid token-1 token-2] (println (endgame-result grid token-1 token-2)))
+(defn print-board [grid] (println (board/display grid)))
+
+(defn print-end
+  ([{:keys [board player-1 player-2]}] (print-end board player-1 player-2))
+  ([board player-1 player-2]
+   (let [player-1 (board/player-token player-1)
+         player-2 (board/player-token player-2)]
+     (println (endgame-result board player-1 player-2)))))
+
 (defn player-statement [num] (println (str "Player " num "'s turn")))
 
 (defn get-game-board []
@@ -75,3 +82,8 @@ or anything else for Player 1 to be O and Player 2 to be X")
 
 (defn get-player-2-token [player-1-token]
   (if (= player-1-token "X") "O" "X"))
+
+(defn continue-last-game? []
+  (println "Would you like to finish your previous game?
+  1 for Yes, anything else for No")
+  (= "1" (read-line)))

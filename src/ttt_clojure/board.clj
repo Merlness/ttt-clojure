@@ -119,8 +119,14 @@
 (defn tie [grid] (not-any? integer? grid))
 (defn token-wins [grid token] (winner? grid token))
 
-(defn game-over? [grid max-token min-token]
-  (or
-    (token-wins grid max-token)
-    (token-wins grid min-token)
-    (tie grid)))
+(defn player-token [player] (:token player player))
+
+(defn game-over?
+  ([{:keys [board player-1 player-2]}] (game-over? board player-1 player-2))
+  ([grid player-1 player-2]
+   (let [player-1 (player-token player-1)
+         player-2 (player-token player-2)]
+     (or
+       (token-wins grid player-1)
+       (token-wins grid player-2)
+       (tie grid)))))

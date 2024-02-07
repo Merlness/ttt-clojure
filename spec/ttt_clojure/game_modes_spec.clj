@@ -3,12 +3,29 @@
             [speclj.core :refer :all]
             [ttt-clojure.computer :as comp]
             [ttt-clojure.game-modes :as sut]
-            [ttt-clojure.board :as board]
-            [ttt-clojure.save-game :as save]
             [ttt-clojure.ui :as ui]))
 
 (describe "Checking Game"
   (with-stubs)
+
+  (it "gets the next game id"
+    (with-redefs [slurp (stub :slurp {:return "log.edn"})
+                  edn/read-string (stub :read-string {:return [{:game-id 1} {:game-id 2}]})]
+      (let [next-game-id (sut/get-next-game-id)
+            correct-game-id 3]
+        (should= correct-game-id next-game-id)
+        (should-have-invoked :slurp {:with ["log.edn"]})
+        (should-have-invoked :read-string {:with ["log.edn"]}))))
+
+  (it "gets the last game"
+    (with-redefs [slurp (stub :slurp {:return "log.edn"})
+                  edn/read-string (stub :read-string {:return [{:game-id 1} {:game-id 2}]})]
+      (let [last-game (sut/get-last-game)
+            correct-game {:game-id 2}]
+        (should= correct-game last-game)
+        (should-have-invoked :slurp {:with ["log.edn"]})
+        (should-have-invoked :read-string {:with ["log.edn"]}))))
+
 
   (it "checks board 3x3"
     (with-out-str
@@ -29,11 +46,11 @@
                  (sut/board-size)))))
 
   (it "checks grid after player-1 X move"
-    (let [output (sut/grid-after-move true [1 2 3 4 5 6 7 8 9] 1 "X" "O")]
+    (let [output (sut/grid-after-move 1 true [1 2 3 4 5 6 7 8 9] "X" "O")]
       (with-out-str (should= ["X" 2 3 4 5 6 7 8 9] output))))
 
   (it "checks grid after player-2 O move"
-    (let [output (sut/grid-after-move false [1 2 3 4 5 6 7 8 9] 5 "X" "O")]
+    (let [output (sut/grid-after-move 5 false [1 2 3 4 5 6 7 8 9] "X" "O")]
       (with-out-str (should= [1 2 3 4 "O" 6 7 8 9] output))))
 
   (it "returns player-1 token when position is 1"
@@ -92,61 +109,49 @@
     (with-redefs [sut/get-move (stub :next-move {:return 1})
                   ui/print-board (stub :next-print {:return nil})
                   spit (stub :spit)
-                  ui/player-statement (stub :player-statement)]
+                  ui/player-statement (stub :player-statement)
+                  sut/grid-after-move (stub :grid-after-move {:return ["X" 2 3 4 5 6 7 8 9]})
+                  sut/save (stub :save)
+                  ]
       (let [player-1 {:kind :human :token "X"}
             player-2 {:kind :ai :token "O" :difficulty :easy}
             grid [1 2 3 4 5 6 7 8 9]
-            new-grid (sut/play-round true player-1 player-2 grid)]
-        (should= ["X" 2 3 4 5 6 7 8 9] new-grid)
+            game {:game-id 1 :player-1? true :player-1 player-1 :player-2 player-2 :board grid}
+            new-game (sut/play-round game)
+            correct-game {:game-id 1, :player-1? false, :player-1 {:kind :human, :token "X"}, :player-2 {:kind :ai, :token "O", :difficulty :easy}, :board ["X" 2 3 4 5 6 7 8 9]}]
+        (should= correct-game new-game)
         (should-have-invoked :next-move {:with [player-1 player-2 grid]})
-        (should-have-invoked :player-statement {:with [1]})
-        (should-have-invoked :next-print {:with [new-grid board/display]}))))
-
-
-  ;find max game id and inc instead of game-id.edn
+        (should-not-have-invoked :player-statement {:with [1]})
+        (should-have-invoked :next-print {:with [(:board new-game)]}))))
 
   (it "plays a round for player-2"
     (with-redefs [sut/get-move (stub :next-move {:return 2})
                   ui/print-board (stub :next-print)
                   ui/player-statement (stub :player-statement)
                   spit (stub :spit)
+                  sut/grid-after-move (stub :grid-after-move {:return ["X" "O" 3 4 5 6 7 8 9]})
                   ]
       (let [player-1 {:kind :human :token "X"}
             player-2 {:kind :ai :token "O" :difficulty :easy}
             grid ["X" 2 3 4 5 6 7 8 9]
-            new-grid (sut/play-round false player-1 player-2 grid)]
-        (should= ["X" "O" 3 4 5 6 7 8 9] new-grid)
-        (should-have-invoked :next-move {:with [player-2 player-1 grid]})
-        (should-have-invoked :player-statement {:with [2]})
-        (should-have-invoked :next-print {:with [new-grid board/display]}))))
+            game {:game-id 1 :player-1? true :player-1 player-1 :player-2 player-2 :board grid}
+            new-game (sut/play-round game)
+            correct-game  {:game-id 1, :player-1? false, :player-1 {:kind :human, :token "X"}, :player-2 {:kind :ai, :token "O", :difficulty :easy}, :board ["X" "O" 3 4 5 6 7 8 9]}]
+        (should= correct-game new-game)
+        (should-have-invoked :next-move {:with [player-1 player-2 grid]})
+        (should-not-have-invoked :player-statement {:with [2]})
+        (should-have-invoked :next-print {:with [(:board new-game)]})
+        )))
 
-  (focus-it "prints log data"
-    (let [log-edn (pr-str [{:id 0}])                               ;string "[]"
-          log (edn/read-string log-edn)
-          game {:id 1}
-          new-log (conj log game)
-          new-log-edn (pr-str new-log)
-          ]
-      (should= 1 new-log-edn)
+  (it "completes a game"
+    (with-redefs [ui/print-end (stub :print-end)]
+      (let [game {:board ["X" "O" 3 4 5 6 7 8 9]
+                  :player-1 {:kind :human :token "X"}
+                  :player-2 {:kind :ai :token "O" :difficulty :easy}}
+            grid ["X" "O" 3 4 5 6 7 8 9]
+            token-1 "X"
+            token-2 "O"]
+        (sut/complete-game game)
+        (should-have-invoked :print-end {:with [grid token-1 token-2]}))))
 
-      ;edn/read-string
-      ;pr-str
-      ;append
-      ;conj
-      ;spit
-
-      ;if last save= terminal
-      ;start new game
-      ;check last move
-      )
-
-    (should-be-nil (println "println"))
-    (should-be-nil (prn "prn"))
-    (should-be-nil (pr "pr"))
-    "\"quoted string\""
-    (should= "\"pr-str\"" (pr-str "pr-str"))
-    (should= 'pr-str (edn/read-string "pr-str"))
-    (should= "pr-str" (edn/read-string "\"pr-str\""))
-    ;(should= 1 (sut/get-next-game-id))
-    )
   )
