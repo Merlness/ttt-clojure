@@ -1,6 +1,8 @@
 (ns ttt-clojure.ui-spec
-  (:require [speclj.core :refer :all]
+  (:require [clojure.edn :as edn]
+            [speclj.core :refer :all]
             [ttt-clojure.board :as board]
+            [ttt-clojure.data :as data]
             [ttt-clojure.ui :as sut]))
 
 (describe "Updating board"
@@ -186,4 +188,71 @@ or anything else for Player 1 to be O and Player 2 to be X\n"
       (with-in-str "\n"
         (let [output (sut/continue-last-game?)]
           (should-not output)))))
+
+  (it "returns correct strings"
+    (should= "Easy AI" (sut/difficulty-to-string :easy))
+    (should= "Medium AI" (sut/difficulty-to-string :medium))
+    (should= "Hard AI" (sut/difficulty-to-string :hard))
+    (should= "Unknown" (sut/difficulty-to-string :merlo)))
+
+  (it "prints player kind for non-AI player player-2"
+    (let [player {:kind :human}]
+      (should= "Player-2: Human\n"
+               (with-out-str
+                 (sut/print-player-kind "2" player)))))
+
+  (it "prints player kind and difficulty for AI player"
+    (let [player {:kind :ai :difficulty :hard}]
+      (should= "Player-1: Hard AI\n"
+               (with-out-str (sut/print-player-kind "1" player)))))
+
+  (it "prints resumed game with two AI players"
+    (let [player-1 {:kind :ai :token "O" :difficulty :hard}
+          player-2 {:kind :ai :token "X" :difficulty :easy}
+          game {:game-id  1 :player-1? true :player-1 player-1
+                :player-2 player-2 :board [1 2 3 4 5 6 7 8 9]}]
+      (should= "\nResuming game:\nPlayer-1: Hard AI\nPlayer-2: Easy AI\n"
+               (with-out-str (sut/print-resume-game game)))))
+
+  (it "prints resumed game with two AI players"
+    (let [player-1 {:kind :human :token "O"}
+          player-2 {:kind :human :token "X"}
+          game {:game-id  1 :player-1? true :player-1 player-1
+                :player-2 player-2 :board [1 2 3 4 5 6 7 8 9]}]
+      (should= "\nResuming game:\nPlayer-1: Human\nPlayer-2: Human\n"
+               (with-out-str (sut/print-resume-game game)))))
+  (context "new print"
+    (with-stubs)
+    ;(it "returns game id statement"
+    ;  (with-redefs [slurp (stub :slurp {:return "log.edn"})
+    ;                edn/read-string (stub :read-string {:return [{:game-id 1} {:game-id 2}]})]
+    ;    (should= "Game-ID: 3\n" (with-out-str (sut/print-id)))))
+
+    (it "returns game id statement"
+      (should= "Game-ID: 3\n" (with-out-str (sut/print-id 3))))
+
+
+    (it "returns game id and board"
+      (should= "Game-ID: 3\n1 | 2 | 3\n4 | 5 | 6\n7 | 8 | 9\n"
+               (with-out-str (sut/print-id-and-empty-board 3 [1 2 3 4 5 6 7 8 9]))))
+
+    ;(focus-it "prints previous moves"
+    ;  (let [game {:player-1? false, :board ("X" 2 3 4 5 6 7 8 9), :player-1 {:kind :human, :token "X"}, :player-2 {:kind :ai, :token "O", :difficulty :easy}, :game-id 1}]
+    ;    (with-redefs [slurp (stub :slurp {:return "[{:game-id 1, :player-1? true, :player-1 :human, :player-2 :ai, :board (1 2 3 4 5 6 7 8 9)}]"})
+    ;                  ;edn/read-string (stub :read-string {:return (fn [_] [{:game-id 1, :player-1? true, :player-1 :human, :player-2 :ai, :board (1 2 3 4 5 6 7 8 9)}])})
+    ;                  ;edn/read-string (stub :read-string {:return [{:game-id 1, :player-1? true, :player-1 :human, :player-2 :ai, :board (1 2 3 4 5 6 7 8 9)}]})
+    ;                  ;edn/read-string (stub :read-string )
+    ;                  edn/read-string (stub :read-string {:return (fn [_] [game])})
+    ;                  println (stub :println)
+    ;                  data/fetch-all-games (stub :fetch {:return game})
+    ;                  data/max-game-id (stub :max-id {:return 1})
+    ;                  sut/print-board (stub :print-board)]
+    ;      (sut/print-previous-moves)
+    ;      (should-have-invoked :slurp {:with ["log.edn"]})
+    ;      (should-have-invoked :read-string)
+    ;      (should-have-invoked :println {:with ["Player" "2" "made a move:"]})
+    ;      (should-have-invoked :print-board {:with [(1 2 3 4 5 6 7 8 9)]}))))
+
+    )
+
   )

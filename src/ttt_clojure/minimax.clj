@@ -35,6 +35,7 @@
                                    [< maximize minimizing-token])
         new-game-board (ui/place-xo game-board action token)
         value (find-value new-game-board evaluate depth maximizing-token minimizing-token)]
+
     (if (compare value best-value)
       [value action]
       [best-value best-action])))
@@ -57,30 +58,3 @@
 
 (defn minimize [board depth maximizing-token minimizing-token]
   (min-or-max board depth false maximizing-token minimizing-token))
-
-(defn find-next-move [board evaluate maximizing-token minimizing-token]
-  (if (every? number? board)
-    1
-    (second (evaluate board (set-depth board) maximizing-token minimizing-token))))
-
-(defn checks-end-move [board available-moves token]
-  (first (filter #(board/winner?
-                    (ui/place-xo board % token) token)
-                 available-moves)))
-
-(defn win-or-block [board maximizing-token minimizing-token]
-  (let [available-moves (board/find-available-moves board)
-        winning-move (checks-end-move board available-moves maximizing-token)
-        blocking-move (checks-end-move board available-moves minimizing-token)]
-    (or winning-move blocking-move)))
-
-(defn helper-3d [board]
-  (let [available-moves (board/find-available-moves board)
-        number-available (count available-moves)]
-    (when (> number-available 25) (some #{14} available-moves))))
-
-(defn next-move [board maximizing-token minimizing-token]
-  (or
-    (helper-3d board)
-    (win-or-block board maximizing-token minimizing-token)
-    (find-next-move board maximize maximizing-token minimizing-token)))

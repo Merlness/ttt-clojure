@@ -12,4 +12,3 @@ pom.xml
 .lein-plugins
 .lein-repl-history
 log.edn
-game-id.edn

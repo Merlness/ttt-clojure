@@ -1,5 +1,8 @@
 (ns ttt-clojure.board
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+  ;          [ttt-clojure.minimax :as mm]
+   ;         [ttt-clojure.ui :as ui]
+   ))
 
 (defn find-available-moves [board] (filter number? board))
 (defn find-move-count [board] (count (remove number? board)))

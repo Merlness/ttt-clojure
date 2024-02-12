@@ -1,5 +1,6 @@
 (ns ttt-clojure.ui
-  (:require [ttt-clojure.board :as board]))
+  (:require [ttt-clojure.board :as board]
+            [ttt-clojure.data :as data]))
 
 (defn place-xo [grid old-num xo]
   (map
@@ -8,13 +9,12 @@
        %)
     grid))
 
-(defn invalid-move? [num grid]
-  (not-any? #{num} grid))
+(defn invalid-move? [num grid] (not-any? #{num} grid))
 
 (defn valid-input? [input grid]
   (let [move (try
                input
-               (catch NumberFormatException e
+               (catch NumberFormatException _
                  nil))
         size (count grid)]
     (and move (<= 1 move size))))
@@ -87,3 +87,40 @@ or anything else for Player 1 to be O and Player 2 to be X")
   (println "Would you like to finish your previous game?
   1 for Yes, anything else for No")
   (= "1" (read-line)))
+
+(defn difficulty-to-string [difficulty]
+  (case difficulty
+    :easy "Easy AI"
+    :medium "Medium AI"
+    :hard "Hard AI"
+    "Unknown"))
+
+(defn print-player-kind [player-number player]
+  (if (= :ai (:kind player))
+    (println (str "Player-" player-number ": " (difficulty-to-string (:difficulty player))))
+    (println (str "Player-" player-number ": Human"))))
+
+(defn print-resume-game [game]
+  (println "\nResuming game:")
+
+  (print-player-kind "1" (:player-1 game))
+  (print-player-kind "2" (:player-2 game)))
+
+(defn print-previous-moves [input-id] ;test ;[game]
+  (let [;data (data/all-games) ; select game(game-id) in main
+        ;max-game-id (data/max-game-id data)
+        ; data/history
+        ;game-data (filter #(= (:game-id %) max-game-id) data)
+
+        game-data (data/get-game-by-id input-id)
+        ] ;move to own fn
+    (run! (fn [game]
+            (println "Player" (if (:player-1? game) "2" "1") "made a move:")
+            (print-board (:board game)))
+          game-data)))
+
+(defn print-id [id] (println (str "Game-ID: " id)))
+
+(defn print-id-and-empty-board [game-id grid]
+  (print-id game-id)
+  (print-board grid))

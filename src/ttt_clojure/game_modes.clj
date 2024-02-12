@@ -1,22 +1,7 @@
 (ns ttt-clojure.game-modes
   (:require [ttt-clojure.ui :as ui]
-            [ttt-clojure.save-game :as save]
-            [ttt-clojure.computer :as comp]
-            [clojure.edn :as edn]))
-
-(defn get-next-game-id []
-  (let [log-data (slurp "log.edn")
-        data (edn/read-string log-data)
-        game-ids (map :game-id data)
-        max-game-id (if (empty? game-ids) 0 (apply max game-ids))]
-    (inc max-game-id)))
-
-(def game-id (atom (get-next-game-id)))
-
-(defn get-last-game []
-  (let [log-data (slurp "log.edn")
-        data (edn/read-string log-data)]
-    (last data)))
+            [ttt-clojure.data :as save]
+            [ttt-clojure.computer :as comp]))
 
 (defn board-size []
   (case (ui/get-game-board)
@@ -53,19 +38,12 @@
 (defmethod get-move :ai [player opponent grid]
   (comp/ai-move grid (:token player) (:token opponent) (:difficulty player)))
 
-(defn save [game]
-  (let [player-1? (:player-1? game)
-        player-1 (:player-1 game)
-        player-2 (:player-2 game)
-        grid (:board game)]
-    (save/save-round @game-id player-1? player-1 player-2 grid)))
-
 (defn play-round [{:keys [player-1? player-1 player-2 board] :as game}]
   (let [[player opponent] (if player-1? [player-1 player-2] [player-2 player-1])
         move (get-move player opponent board)
         new-grid (grid-after-move move game)
         game (assoc game :board new-grid :player-1? (not (:player-1? game)))]
-    (save game)
+    (save/save game)
     (ui/print-board new-grid)
     game))
 
@@ -79,6 +57,6 @@
 ;notes
 ;stories are taking longer, think about
 ; always reformat code
-; dont comment out tests
+; don't comment out tests
 ; limit commented out code
 ;delete unnecessary code

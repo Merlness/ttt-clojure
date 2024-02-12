@@ -3,29 +3,29 @@
             [speclj.core :refer :all]
             [ttt-clojure.computer :as comp]
             [ttt-clojure.game-modes :as sut]
+            [ttt-clojure.data :as data]
             [ttt-clojure.ui :as ui]))
 
 (describe "Checking Game"
   (with-stubs)
 
-  (it "gets the next game id"
-    (with-redefs [slurp (stub :slurp {:return "log.edn"})
-                  edn/read-string (stub :read-string {:return [{:game-id 1} {:game-id 2}]})]
-      (let [next-game-id (sut/get-next-game-id)
-            correct-game-id 3]
-        (should= correct-game-id next-game-id)
-        (should-have-invoked :slurp {:with ["log.edn"]})
-        (should-have-invoked :read-string {:with ["log.edn"]}))))
-
-  (it "gets the last game"
-    (with-redefs [slurp (stub :slurp {:return "log.edn"})
-                  edn/read-string (stub :read-string {:return [{:game-id 1} {:game-id 2}]})]
-      (let [last-game (sut/get-last-game)
-            correct-game {:game-id 2}]
-        (should= correct-game last-game)
-        (should-have-invoked :slurp {:with ["log.edn"]})
-        (should-have-invoked :read-string {:with ["log.edn"]}))))
-
+  ;(it "gets the next game id"
+  ;  (with-redefs [slurp (stub :slurp {:return "log.edn"})
+  ;                edn/read-string (stub :read-string {:return [{:game-id 1} {:game-id 2}]})]
+  ;    (let [next-game-id (sut/get-next-game-id)
+  ;          correct-game-id 3]
+  ;      (should= correct-game-id next-game-id)
+  ;      (should-have-invoked :slurp {:with ["log.edn"]})
+  ;      (should-have-invoked :read-string {:with ["log.edn"]}))))
+  ;
+  ;(it "gets the last game"
+  ;  (with-redefs [slurp (stub :slurp {:return "log.edn"})
+  ;                edn/read-string (stub :read-string {:return [{:game-id 1} {:game-id 2}]})]
+  ;    (let [last-game (sut/get-last-game)
+  ;          correct-game {:game-id 2}]
+  ;      (should= correct-game last-game)
+  ;      (should-have-invoked :slurp {:with ["log.edn"]})
+  ;      (should-have-invoked :read-string {:with ["log.edn"]}))))
 
   (it "checks board 3x3"
     (with-out-str
@@ -111,7 +111,7 @@
                   spit (stub :spit)
                   ui/player-statement (stub :player-statement)
                   sut/grid-after-move (stub :grid-after-move {:return ["X" 2 3 4 5 6 7 8 9]})
-                  sut/save (stub :save)
+                  data/save (stub :save1)
                   ]
       (let [player-1 {:kind :human :token "X"}
             player-2 {:kind :ai :token "O" :difficulty :easy}
