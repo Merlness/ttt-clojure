@@ -9,7 +9,7 @@
 
 (defn all-games [] @log)
 
-(defn get-game-by-id [game-id]
+(defn game-history-by-id [game-id]
     (filter #(= (:game-id %) game-id) (all-games)))
 
 (defn max-game-id [games]

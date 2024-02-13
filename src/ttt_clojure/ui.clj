@@ -102,22 +102,19 @@ or anything else for Player 1 to be O and Player 2 to be X")
 
 (defn print-resume-game [game]
   (println "\nResuming game:")
-
   (print-player-kind "1" (:player-1 game))
   (print-player-kind "2" (:player-2 game)))
 
-(defn print-previous-moves [input-id] ;test ;[game]
-  (let [;data (data/all-games) ; select game(game-id) in main
-        ;max-game-id (data/max-game-id data)
-        ; data/history
-        ;game-data (filter #(= (:game-id %) max-game-id) data)
-
-        game-data (data/get-game-by-id input-id)
-        ] ;move to own fn
+(defn print-previous-moves [input-id]
+  (let [game-data (data/game-history-by-id input-id)]
     (run! (fn [game]
             (println "Player" (if (:player-1? game) "2" "1") "made a move:")
             (print-board (:board game)))
           game-data)))
+
+(defn print-previous-moves-game [game id]
+  (print-previous-moves id)
+  (print-resume-game game))
 
 (defn print-id [id] (println (str "Game-ID: " id)))
 

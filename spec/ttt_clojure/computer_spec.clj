@@ -1,6 +1,5 @@
 (ns ttt-clojure.computer-spec
   (:require [speclj.core :refer :all]
-            [ttt-clojure.minimax :as mm]
             [ttt-clojure.ui :as ui]
             [ttt-clojure.board :as board]
             [ttt-clojure.computer :as sut]))
@@ -54,17 +53,16 @@
       (should= 1 (sut/ai-move [1 2 3 4 5 6 7 8 9] "O" "X" :easy))
       (should-have-invoked :next-move {:with [[1 2 3 4 5 6 7 8 9]]})))
 
-  ;(it "makes a medium move"
-  ;  (with-redefs [sut/place-easy-move (stub :next-easy-move {:return 1})
-  ;                mm/next-move (stub :next-hard-move {:return 2})]
-  ;    (should= 2 (sut/ai-move [1 2 3 4 5 6 7 8 9] "O" "X" :medium))
-  ;    (should-have-invoked :next-hard-move {:with [[1 2 3 4 5 6 7 8 9] "O" "X"]})))
-  ;
-  ;(it "makes a hard move"
-  ;  (with-redefs [mm/next-move (stub :next-move {:return 1})]
-  ;    (should= 1 (sut/ai-move [1 2 3 4 5 6 7 8 9] "O" "X" :hard))
-  ;    (should-have-invoked :next-move {:with [[1 2 3 4 5 6 7 8 9] "O" "X"]})))
+  (it "makes a medium move"
+    (with-redefs [sut/place-easy-move (stub :next-easy-move {:return 1})
+                  sut/next-move (stub :next-hard-move {:return 2})]
+      (should= 2 (sut/ai-move [1 2 3 4 5 6 7 8 9] "O" "X" :medium))
+      (should-have-invoked :next-hard-move {:with [[1 2 3 4 5 6 7 8 9] "O" "X"]})))
 
+  (it "makes a hard move"
+    (with-redefs [sut/next-move (stub :next-move {:return 1})]
+      (should= 1 (sut/ai-move [1 2 3 4 5 6 7 8 9] "O" "X" :hard))
+      (should-have-invoked :next-move {:with [[1 2 3 4 5 6 7 8 9] "O" "X"]})))
 
   (context "easy computer"
     (it "chooses a random move from an empty board"
@@ -85,7 +83,6 @@
 
 
   (context "logic to help minimax"
-
 
     (it "can't block"
       (should= nil (sut/win-or-block [1 2 "X" "X"
@@ -208,7 +205,6 @@
                                    19 20 21
                                    22 23 24
                                    25 26 27] "O" "X")))
-
       )
     )
 

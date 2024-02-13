@@ -7,13 +7,6 @@
 (def value-max -100000)
 (def value-min 100000)
 
-(defn set-depth [board]
-  (condp < (count (board/find-available-moves board))
-    20 2
-    11 3
-    8 4
-    7))
-
 (defn value [game-board depth maximizing-token minimizing-token]
   (cond
     (board/token-wins game-board maximizing-token) depth
