@@ -5,7 +5,7 @@
 
 (defn set-depth [board]
   (condp < (count (board/find-available-moves board))
-    20 2
+    23 2
     11 3
     8 4
     7))

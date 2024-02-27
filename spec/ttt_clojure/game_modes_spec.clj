@@ -30,12 +30,12 @@
   (it "checks board 3x3"
     (with-out-str
       (with-in-str "3\n"
-        (should= [1 2 3 4 5 6 7 8 9] (sut/board-size)))))
+        (should= [1 2 3 4 5 6 7 8 9] (sut/board-size :3x3) ))))
 
   (it "checks board size 4x4"
     (with-out-str
       (with-in-str "4\n"
-        (should= [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16] (sut/board-size)))))
+        (should= [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16] (sut/board-size :4x4)))))
 
   (it "checks board size 3x3x3"
     (with-out-str
@@ -43,7 +43,7 @@
         (should= [1 2 3 4 5 6 7 8 9
                   10 11 12 13 14 15 16 17 18
                   19 20 21 22 23 24 25 26 27]
-                 (sut/board-size)))))
+                 (sut/board-size :3x3x3)))))
 
   (it "checks grid after player-1 X move"
     (let [output (sut/grid-after-move 1 true [1 2 3 4 5 6 7 8 9] "X" "O")]
@@ -111,14 +111,17 @@
                   spit (stub :spit)
                   ui/player-statement (stub :player-statement)
                   sut/grid-after-move (stub :grid-after-move {:return ["X" 2 3 4 5 6 7 8 9]})
-                  data/save (stub :save1)
+                  data/save-edn (stub :save1)
                   ]
       (let [player-1 {:kind :human :token "X"}
             player-2 {:kind :ai :token "O" :difficulty :easy}
             grid [1 2 3 4 5 6 7 8 9]
             game {:game-id 1 :player-1? true :player-1 player-1 :player-2 player-2 :board grid}
             new-game (sut/play-round game)
-            correct-game {:game-id 1, :player-1? false, :player-1 {:kind :human, :token "X"}, :player-2 {:kind :ai, :token "O", :difficulty :easy}, :board ["X" 2 3 4 5 6 7 8 9]}]
+            correct-game {:game-id 1, :player-1? false, :player-1 {:kind :human, :token "X"},
+             :player-2 {:kind :ai, :token "O", :difficulty :easy},
+             :board ["X" 2 3 4 5 6 7 8 9], :moves [1]}
+            ]
         (should= correct-game new-game)
         (should-have-invoked :next-move {:with [player-1 player-2 grid]})
         (should-not-have-invoked :player-statement {:with [1]})
@@ -136,12 +139,14 @@
             grid ["X" 2 3 4 5 6 7 8 9]
             game {:game-id 1 :player-1? true :player-1 player-1 :player-2 player-2 :board grid}
             new-game (sut/play-round game)
-            correct-game  {:game-id 1, :player-1? false, :player-1 {:kind :human, :token "X"}, :player-2 {:kind :ai, :token "O", :difficulty :easy}, :board ["X" "O" 3 4 5 6 7 8 9]}]
+            correct-game  {:game-id 1, :player-1? false,
+                           :player-1 {:kind :human, :token "X"},
+                           :player-2 {:kind :ai, :token "O", :difficulty :easy},
+                           :board ["X" "O" 3 4 5 6 7 8 9] :moves [2]}]
         (should= correct-game new-game)
         (should-have-invoked :next-move {:with [player-1 player-2 grid]})
         (should-not-have-invoked :player-statement {:with [2]})
-        (should-have-invoked :next-print {:with [(:board new-game)]})
-        )))
+        (should-have-invoked :next-print {:with [(:board new-game)]}))))
 
   (it "completes a game"
     (with-redefs [ui/print-end (stub :print-end)]

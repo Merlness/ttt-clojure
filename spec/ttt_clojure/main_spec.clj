@@ -8,12 +8,13 @@
 
 (describe "Testing Main"
   (with-stubs)
-
+  ;here stub ui/get-board game
   (it "starts a new game correctly"
-    (with-redefs [gm/board-size (stub :board-size {:return [1 2 3 4 5 6 7 8 9]})
+    (with-redefs [ui/get-game-board (constantly :3x3)
+                  gm/board-size (stub :board-size {:return [1 2 3 4 5 6 7 8 9]})
                   gm/create-player (stub :create-player {:return {:kind :human :token "X"}})]
       (let [game (sut/start-new-game 2)]
-        (should= [{:game-id 2 :player-1? true :board [1 2 3 4 5 6 7 8 9] :player-1 {:kind :human :token "X"} :player-2 {:kind :human :token "X"}} 2]
+        (should= [{:game-id 2 :player-1? true :board [1 2 3 4 5 6 7 8 9] :player-1 {:kind :human :token "X"} :player-2 {:kind :human :token "X"}, :size :3x3, :moves []} 2]
                  game))))
 
   (it "continue a previous game"
@@ -96,6 +97,5 @@
   ;begin with an almost complete board
   ; make a complete game see if it invokes complete game
   ; make 1 move available, so it does not have to recur
-
 
   )
