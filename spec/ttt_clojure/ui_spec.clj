@@ -207,7 +207,7 @@ or anything else for Player 1 to be O and Player 2 to be X\n"
   (it "prints resumed game with two AI players"
     (let [player-1 {:kind :ai :token "O" :difficulty :hard}
           player-2 {:kind :ai :token "X" :difficulty :easy}
-          game {:game-id  1 :player-1? true :player-1 player-1
+          game {:game-id  1  :player-1 player-1
                 :player-2 player-2 :board [1 2 3 4 5 6 7 8 9]}]
       (should= "\nResuming game:\nPlayer-1: Hard AI\nPlayer-2: Easy AI\n"
                (with-out-str (sut/print-resume-game game)))))
@@ -215,7 +215,7 @@ or anything else for Player 1 to be O and Player 2 to be X\n"
   (it "prints resumed game with two AI players"
     (let [player-1 {:kind :human :token "O"}
           player-2 {:kind :human :token "X"}
-          game {:game-id  1 :player-1? true :player-1 player-1
+          game {:game-id  1 :player-1 player-1
                 :player-2 player-2 :board [1 2 3 4 5 6 7 8 9]}]
       (should= "\nResuming game:\nPlayer-1: Human\nPlayer-2: Human\n"
                (with-out-str (sut/print-resume-game game)))))
@@ -233,9 +233,9 @@ or anything else for Player 1 to be O and Player 2 to be X\n"
                (with-out-str (sut/print-id-and-empty-board 3 [1 2 3 4 5 6 7 8 9]))))
 
     (it "prints previous moves for a given game id"
-      (let [game-1 {:player-1? true :board [1 2 3 4 5 6 7 8 9]}
-            game-2 {:player-1? false :board ["O" 2 3 4 5 6 7 8 9]}
-            game-3 {:player-1? true :board ["O" "X" 3 4 5 6 7 8 9]}
+      (let [game-1 {:board [1 2 3 4 5 6 7 8 9] :moves []}
+            game-2 {:board ["O" 2 3 4 5 6 7 8 9] :moves [1]}
+            game-3 {:board ["O" "X" 3 4 5 6 7 8 9] :moves [1 2]}
             game-data [game-1 game-2 game-3]
             input-id 1]
         (with-redefs [data/game-history-by-id (stub :game-history-by-id {:return game-data})
@@ -247,13 +247,13 @@ or anything else for Player 1 to be O and Player 2 to be X\n"
 
 
     (it "prints previous moves and resumes game"
-      (let [game {:game-id  1 :player-1? true
+      (let [game {:game-id  1
                   :player-1 {:kind :human :token "O"}
                   :player-2 {:kind :human :token "X"}
                   :board    [1 2 3 4 5 6 7 8 9]}
-            game-1 {:player-1? true :board [1 2 3 4 5 6 7 8 9]}
-            game-2 {:player-1? false :board ["O" 2 3 4 5 6 7 8 9]}
-            game-3 {:player-1? true :board ["O" "X" 3 4 5 6 7 8 9]}
+            game-1 {:board [1 2 3 4 5 6 7 8 9] :moves []}
+            game-2 {:board ["O" 2 3 4 5 6 7 8 9] :moves [1]}
+            game-3 {:board ["O" "X" 3 4 5 6 7 8 9] :moves [1 2]}
             game-data [game-1 game-2 game-3]
             input-id 1]
         (with-redefs [data/game-history-by-id (stub :game-history-by-id {:return game-data})
@@ -268,4 +268,50 @@ or anything else for Player 1 to be O and Player 2 to be X\n"
           (should-have-invoked :print-resume-game))))
     )
 
+  )
+
+
+(def initial-game {1 {:board    :3x3
+                      :player-1 {:kind :ai, :token "X", :difficulty :easy},
+                      :player-2 {:kind :ai, :token "O", :difficulty :easy}
+                      :moves    [7 9 5 6 8 3]}})
+
+(def game-map {1 {:board    :3x3
+                  :player-1 {:kind :ai, :token "X", :difficulty :easy},
+                  :player-2 {:kind :ai, :token "O", :difficulty :easy}
+                  :moves    [7 9 5 6 8 3]}
+               2 {:board    :3x3
+                  :player-1 {:kind :human, :token "X"},
+                  :player-2 {:kind :human, :token "O"}
+                  :moves    [1 2 3 4 5 6]}})
+
+
+
+(def example-map {;add size and moves first, then player-uno? and board, finally game-id
+                  ; Remove
+                  :game-id  1
+                  :uno      true
+                  :board    [1 2 3 4 5 6 7 8 9]
+
+                  ; Keep
+                  :player-1 {:kind :human, :token "X"}
+                  :player-2 {:kind :human, :token "O"}
+
+                  ; Add
+                  :size     :3x3
+                  :moves    [4 2 9 8]})
+
+(defn get-highest-id [game]
+  (->> (keys game)
+       (apply max)))
+
+
+(describe "reads new game map well"
+  (it "gets the initial  game id"
+    (should= 1 (get-highest-id initial-game)))
+
+  (it "gets the highest game id"
+    (should= 2 (get-highest-id game-map)))
+
+  ;(it "prints convert map" (println (convert-map-to-board example-map)))
   )

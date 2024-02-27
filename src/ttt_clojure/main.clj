@@ -9,9 +9,9 @@
         board (gm/board-size size)
         player-1 (gm/create-player 1 nil)
         player-2 (gm/create-player 2 (:token player-1))
-        game {:game-id game-id :player-1? true :board board
+        game {:game-id  game-id :board board
               :player-1 player-1 :player-2 player-2
-              :size size :moves []}]
+              :size     size :moves []}]
     [game game-id]))
 
 (defn continue-previous-game [game input-id]
@@ -47,8 +47,8 @@
 (defn -main [& args]
   (let [[game-id DB] args
         game-id (when game-id (read-string game-id))
-        test (do (prn "game-id:" game-id)
-                 (prn "DB:" DB))
+        ;test (do (prn "game-id:" game-id)
+        ;         (prn "DB:" DB))
         ;DB (if game
         [game id] (continue-game? game-id)
         ;board (

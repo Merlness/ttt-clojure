@@ -1,20 +1,21 @@
 (ns ttt-clojure.game-modes
   (:require [ttt-clojure.ui :as ui]
             [ttt-clojure.data :as save]
+            [ttt-clojure.board :as board]
             [ttt-clojure.computer :as comp]))
 
+
 (defn board-size [size]
-  (let [actual-size (if size size (ui/get-game-board))]
-    (case actual-size
-      :3x3 (range 1 10)
-      :4x4 (range 1 17)
-      :3x3x3 (range 1 28))))
+  (case size
+    :3x3 (range 1 10)
+    :4x4 (range 1 17)
+    :3x3x3 (range 1 28)))
 
 (defn grid-after-move
-  ([move {:keys [player-1? board player-1 player-2]}]
-   (grid-after-move move player-1? board (:token player-1) (:token player-2)))
-  ([move player-1? grid token-1 token-2]
-   (let [[letter player] (if player-1?
+  ([move {:keys [board player-1 player-2 moves]}]
+   (grid-after-move move board (:token player-1) (:token player-2) moves))
+  ([move grid token-1 token-2 moves]
+   (let [[letter player] (if (board/player1? moves)
                            [token-1 1]
                            [token-2 2])]
      (ui/player-statement player)
@@ -39,13 +40,12 @@
 (defmethod get-move :ai [player opponent grid]
   (comp/ai-move grid (:token player) (:token opponent) (:difficulty player)))
 
-(defn play-round [{:keys [player-1? player-1 player-2 board moves] :as game}]
-  (let [[player opponent] (if player-1? [player-1 player-2] [player-2 player-1])
+(defn play-round [{:keys [player-1 player-2 board moves] :as game}]
+  (let [[player opponent] (if (board/player1? moves) [player-1 player-2] [player-2 player-1])
         move (get-move player opponent board)
         new-grid (grid-after-move move game)
         game (assoc game :board new-grid
-                         :player-1? (not (:player-1? game))
-                         :moves (conj moves move))]     ; :moves (conj moves move))
+                         :moves (conj moves move))]         ; :moves (conj moves move))
     (save/save-edn game)
     (ui/print-board new-grid)
     game))

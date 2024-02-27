@@ -108,7 +108,7 @@ or anything else for Player 1 to be O and Player 2 to be X")
 (defn print-previous-moves [input-id]
   (let [game-data (data/game-history-by-id input-id)]
     (run! (fn [game]
-            (println "Player" (if (:player-1? game) "2" "1") "made a move:")
+            (println "Player" (if (board/player1? (:moves game)) "2" "1") "made a move:")
             (print-board (:board game)))
           game-data)))
 
@@ -121,3 +121,19 @@ or anything else for Player 1 to be O and Player 2 to be X")
 (defn print-id-and-empty-board [game-id grid]
   (print-id game-id)
   (print-board grid))
+
+(defn place-token [board [token move]] (place-xo board move token))
+
+(defn place-moves-into-board [player-1-token player-2-token board-size moves]
+  (let [players (cycle [player-1-token player-2-token])
+        _coll (map vector players moves)]
+    (vec (reduce place-token board-size _coll))))
+
+(defn convert-moves-to-board [game-map]
+  (let [player-1-token (:token (:player-1 game-map))
+        player-2-token (:token (:player-2 game-map))
+        board-size [1 2 3 4 5 6 7 8 9]
+        moves (:moves game-map)]
+    (if moves
+      (place-moves-into-board player-1-token player-2-token board-size moves)
+      (cons player-1-token board-size))))

@@ -6,6 +6,7 @@
 
 (defn find-available-moves [board] (filter number? board))
 (defn find-move-count [board] (count (remove number? board)))
+(defn player1? [moves] (even? (count moves)))
 
 (defn size [grid] (int (Math/sqrt (count grid))))
 (defn rows [grid] (partition (size grid) grid))
@@ -125,7 +126,7 @@
 (defn player-token [player] (:token player player))
 
 (defn game-over?
-  ([{:keys [board player-1 player-2]}] (game-over? board player-1 player-2))
+  ([{:keys [board player-1 player-2 size moves]}] (game-over? board player-1 player-2))
   ([grid player-1 player-2]
    (let [player-1 (player-token player-1)
          player-2 (player-token player-2)]

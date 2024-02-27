@@ -46,12 +46,8 @@
                  (sut/board-size :3x3x3)))))
 
   (it "checks grid after player-1 X move"
-    (let [output (sut/grid-after-move 1 true [1 2 3 4 5 6 7 8 9] "X" "O")]
+    (let [output (sut/grid-after-move 1  [1 2 3 4 5 6 7 8 9] "X" "O" [])]
       (with-out-str (should= ["X" 2 3 4 5 6 7 8 9] output))))
-
-  (it "checks grid after player-2 O move"
-    (let [output (sut/grid-after-move 5 false [1 2 3 4 5 6 7 8 9] "X" "O")]
-      (with-out-str (should= [1 2 3 4 "O" 6 7 8 9] output))))
 
   (it "returns player-1 token when position is 1"
     (with-redefs [ui/get-player-1-token (stub :next-token {:return "X"})]
@@ -116,9 +112,9 @@
       (let [player-1 {:kind :human :token "X"}
             player-2 {:kind :ai :token "O" :difficulty :easy}
             grid [1 2 3 4 5 6 7 8 9]
-            game {:game-id 1 :player-1? true :player-1 player-1 :player-2 player-2 :board grid}
+            game {:game-id 1  :player-1 player-1 :player-2 player-2 :board grid :moves []}
             new-game (sut/play-round game)
-            correct-game {:game-id 1, :player-1? false, :player-1 {:kind :human, :token "X"},
+            correct-game {:game-id 1,  :player-1 {:kind :human, :token "X"},
              :player-2 {:kind :ai, :token "O", :difficulty :easy},
              :board ["X" 2 3 4 5 6 7 8 9], :moves [1]}
             ]
@@ -137,14 +133,14 @@
       (let [player-1 {:kind :human :token "X"}
             player-2 {:kind :ai :token "O" :difficulty :easy}
             grid ["X" 2 3 4 5 6 7 8 9]
-            game {:game-id 1 :player-1? true :player-1 player-1 :player-2 player-2 :board grid}
+            game {:game-id 1  :player-1 player-1 :player-2 player-2 :board grid :moves [1]}
             new-game (sut/play-round game)
-            correct-game  {:game-id 1, :player-1? false,
+            correct-game  {:game-id 1,
                            :player-1 {:kind :human, :token "X"},
                            :player-2 {:kind :ai, :token "O", :difficulty :easy},
-                           :board ["X" "O" 3 4 5 6 7 8 9] :moves [2]}]
+                           :board ["X" "O" 3 4 5 6 7 8 9] :moves [1 2]}]
         (should= correct-game new-game)
-        (should-have-invoked :next-move {:with [player-1 player-2 grid]})
+        (should-have-invoked :next-move {:with [player-2 player-1 grid]})
         (should-not-have-invoked :player-statement {:with [2]})
         (should-have-invoked :next-print {:with [(:board new-game)]}))))
 
