@@ -85,11 +85,11 @@
             player-2 {:kind :ai :token "O" :difficulty :easy}
             grid [1 2 3 4 5 6 7 8 9]
             game {:game-id 1 :player-1 player-1 :player-2 player-2
-                  :size :3x3 :moves []}
-            new-game (sut/play-round game)
+                  :size    :3x3 :moves []}
+            new-game (sut/play-round :edn game)
             correct-game {:game-id  1, :player-1 {:kind :human, :token "X"},
                           :player-2 {:kind :ai, :token "O", :difficulty :easy},
-                          :size :3x3, :moves [1]}
+                          :size     :3x3, :moves [1]}
             new-board (game/convert-moves-to-board new-game)]
         (should= correct-game new-game)
         (should-have-invoked :next-move {:with [player-1 player-2 grid]})
@@ -107,7 +107,7 @@
             player-2 {:kind :ai :token "O" :difficulty :easy}
             grid ["X" 2 3 4 5 6 7 8 9]
             game {:game-id 1 :player-1 player-1 :player-2 player-2 :size :3x3 :moves [1]}
-            new-game (sut/play-round game)
+            new-game (sut/play-round :json game)
             correct-game {:game-id  1,
                           :player-1 {:kind :human, :token "X"},
                           :player-2 {:kind :ai, :token "O", :difficulty :easy}, :size :3x3, :moves [1 2]}

@@ -229,7 +229,7 @@ or anything else for Player 1 to be O and Player 2 to be X\n"
 
     (it "returns game id and board"
       (should= "Game-ID: 3\n1 | 2 | 3\n4 | 5 | 6\n7 | 8 | 9\n"
-               (with-out-str (sut/print-id-and-empty-board 3 {:player-1 {:kind :human :token "O"}
+               (with-out-str (sut/print-id-and-board 3 {:player-1       {:kind :human :token "O"}
                                                               :player-2 {:kind :human :token "X"}
                                                               :size     :3x3 :moves []}))))
 

@@ -1,5 +1,4 @@
 (ns ttt-clojure.game
-  ;(:require [ttt-clojure.board :as board])
   )
 
 
@@ -7,7 +6,10 @@
   (case size
     :3x3 (range 1 10)
     :4x4 (range 1 17)
-    :3x3x3 (range 1 28)))
+    :3x3x3 (range 1 28)
+    "3x3" (range 1 10)
+    "4x4" (range 1 17)
+    "3x3x3" (range 1 28)))
 
 (defn place-xo [grid old-num xo]
   (map

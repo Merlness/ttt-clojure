@@ -20,7 +20,8 @@
   [game input-id])
 
 (defn possible-to-continue? [game]
-  (let [new-board (game/convert-moves-to-board game)]
+  (let [;test (prn "game:" game)
+        new-board (game/convert-moves-to-board game)]
     ; TODO: Test me
     (and game (not (board/game-over? new-board game)))
     ;(boolean game) ; this shouldn't pass
@@ -31,11 +32,11 @@
     (possible-to-continue? last-game)
     (ui/continue-last-game?)))
 
-(defn continue-game? [input-id]
-  (let [requested-game (data/get-game-by-id input-id) ;db
-        last-game (data/get-last-game) ;db
-        new-game-id (data/get-next-game-id) ;db
-        last-id (data/last-game-id) ;db
+(defn continue-game? [input-id db-type]
+  (let [requested-game (data/get-game-by-id input-id db-type)
+        last-game (data/get-last-game db-type)
+        new-game-id (data/get-next-game-id db-type)
+        last-id (data/last-game-id db-type)
         ]
     (cond
       (possible-to-continue? requested-game)
@@ -50,15 +51,13 @@
 (defn -main [& args]
   (let [[game-id DB] args
         game-id (when game-id (read-string game-id))
-        ;db-type (if (= "--jsondb" (last args)) :json :edn)
-
-        ;test (do (prn "game-id:" game-id)
-        ;         (prn "DB:" DB))
-        ;DB (if game
-        [game id] (continue-game? game-id)] ;db
-    (ui/print-id-and-empty-board id game)
+        db-type (if (= "--jsondb" (last args)) :json :edn)
+        ;test (do (prn "(last args):" (last args))
+        ;      (prn "db-type:" db-type))
+        [game id] (continue-game? game-id db-type)]
+    (ui/print-id-and-board id game)
     (loop [game game]
-      (let [game (gm/play-round game) ;db
+      (let [game (gm/play-round db-type game)
             new-board (game/convert-moves-to-board game)]
         (if (board/game-over? new-board game)
           (gm/complete-game game)

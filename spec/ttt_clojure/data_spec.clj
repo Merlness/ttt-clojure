@@ -7,16 +7,6 @@
             [ttt-clojure.ui :as ui]
             [clojure.data.json :as json]))
 
-;{1 {:size    :3x3
-;    :player-1 {:kind :ai, :token "X", :difficulty :easy},
-;    :player-2 {:kind :ai, :token "O", :difficulty :easy}
-;    :moves    [7 9 5 6 8 3]}
-; 2 {:size    :3x3
-;    :player-1 {:kind :human, :token "X"},
-;    :player-2 {:kind :human, :token "O"}
-;    :moves    [1 2 3 4 5 6]}}
-
-
 (describe "save round"
   (with-stubs)
   (before (reset! sut/log-edn {}))
@@ -41,17 +31,17 @@
                     :player-2 {:kind :human, :token "O"}
                     :moves    [1 2 3 4 5 6]}}
           expected-id 2
-          actual-id (sut/max-game-id games)]
+          actual-id (sut/max-game-id-edn games)]
       (should= expected-id actual-id)))
 
   (it "gets the next game id"
     (with-redefs [sut/last-game-id (stub :last-id {:return 2})]
-      (should= 3 (sut/get-next-game-id))
+      (should= 3 (sut/get-next-game-id type))
       (should-have-invoked :last-id)))
 
   (it "gets the last game"
     (with-redefs [sut/get-last-game (stub :last-game {:return {:game-id 2}})]
-      (let [last-game (sut/get-last-game)
+      (let [last-game (sut/get-last-game type)
             correct-game {:game-id 2}]
         (should= correct-game last-game)
         (should-have-invoked :last-game))))
@@ -62,7 +52,7 @@
                   sut/get-next-game-id (stub :game-id {:return 1})]
       (let [game {:game-id 1 :player-1 :human :player-2 :ai :size (board/board-size :3x3)}
             expected-shape-of-data {1 game}]
-        (sut/save game)
+        (sut/save game :edn)
         (should-have-invoked :spit {:with ["log.edn" (pr-str expected-shape-of-data)]}))))
 
   (it "saves a second game"
@@ -71,7 +61,7 @@
                   sut/get-next-game-id (stub :game-id {:return 2})]
 
       (let [saved {:game-id 2 :player-1 :ai :player-2 :human :size (board/board-size :3x3)}]
-        (sut/save saved)
+        (sut/save saved :json)
         (should-have-invoked :spit))))
 
 
@@ -81,24 +71,24 @@
         (should= expected-games (sut/fetch-the-games :edn)))))
 
 
-  (focus-it "fetches games from json"
+  (it "fetches games from json"
     (with-redefs [slurp (stub :slurp {:return "{\"2\":{\"size\":\"3x3\",\"player-1\":{\"kind\":\"human\",\"token\":\"X\"},\"player-2\":{\"kind\":\"human\",\"token\":\"O\"},\"moves\":[1,2,3,4,5,6]}}"
                                       })]
-      (let [expected-games {2 {:size "3x3" :player-1 {:kind "human" :token "X"} :player-2 {:kind "human" :token "O"} :moves [1 2 3 4 5 6]}}]
+      (let [expected-games {:2 {:size "3x3" :player-1 {:kind "human" :token "X"} :player-2 {:kind "human" :token "O"} :moves [1 2 3 4 5 6]}}]
         (should= expected-games (sut/fetch-the-games :json)))))
 
   (it "saves games to edn"
     (with-redefs [spit (stub :spit {:return "{:game-id 1, :size :3x3, :player-1 {:kind :ai, :token \"X\", :difficulty :easy}, :player-2 {:kind :ai, :token \"O\", :difficulty :easy}, :moves [7 9 5 6 8 3], :log {:game-id {:game-id 1, :size :3x3, :player-1 {:kind :ai, :token \"X\", :difficulty :easy}, :player-2 {:kind :ai, :token \"O\", :difficulty :easy}, :moves [7 9 5 6 8 3]}}}"})]
       (let [game {:game-id 1 :size :3x3 :player-1 {:kind :ai :token "X" :difficulty :easy} :player-2 {:kind :ai :token "O" :difficulty :easy} :moves [7 9 5 6 8 3]}
             expected-game (pr-str (assoc game :log {:game-id game}))]
-        (should= expected-game (sut/save1 game :edn))
+        (should= expected-game (sut/save game :edn))
         (should-have-invoked :spit))))
 
   (it "saves games to json"
     (with-redefs [spit (stub :spit {:return "{\"game-id\":2,\"size\":\"3x3\",\"player-1\":{\"kind\":\"human\",\"token\":\"X\"},\"player-2\":{\"kind\":\"human\",\"token\":\"O\"},\"moves\":[1,2,3,4,5,6],\"log\":{\"game-id\":{\"game-id\":2,\"size\":\"3x3\",\"player-1\":{\"kind\":\"human\",\"token\":\"X\"},\"player-2\":{\"kind\":\"human\",\"token\":\"O\"},\"moves\":[1,2,3,4,5,6]}}}"})]
       (let [game {:game-id 2 :size :3x3 :player-1 {:kind :human :token "X"} :player-2 {:kind :human :token "O"} :moves [1 2 3 4 5 6]}
             expected-game (json/write-str (assoc game :log {:game-id game}))]
-        (should= expected-game (sut/save1 game :json)))))
+        (should= expected-game (sut/save game :json)))))
 
 
   #_(it "checks json"
@@ -115,8 +105,7 @@
         ))
 
   )
-;
-;
+
 ;[
 ; {:game-id 1, :grid (1 2 3 4 5 6 "X" 8 9), :player-1 {:kind :ai, :token "X", :difficulty :easy}, :player-2 {:kind :ai, :token "O", :difficulty :easy}}
 ; {:game-id 1, :grid (1 2 3 4 5 6 "X" 8 "O"), :player-1 {:kind :ai, :token "X", :difficulty :easy}, :player-2 {:kind :ai, :token "O", :difficulty :easy}}

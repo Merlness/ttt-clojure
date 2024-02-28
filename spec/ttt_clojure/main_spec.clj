@@ -49,7 +49,7 @@
                                                                       :size     :3x3 :moves []} 4]})]
       (let [input-id 2
             expected-game {:game-id 4 :player-1 {:kind :human :token "X"} :player-2 {:kind :human :token "X"} :size :3x3 :moves []}
-            actual-game (sut/continue-game? input-id)]
+            actual-game (sut/continue-game? input-id :edn)]
         (should= expected-game (first actual-game)))))
 
   (it "continues a requested game if possible"
@@ -64,7 +64,7 @@
                            :player-1 {:kind :human :token "X"}
                            :player-2 {:kind :human :token "X"}
                            :size     :3x3 :moves []}
-            actual-game (sut/continue-game? input-id)]
+            actual-game (sut/continue-game? input-id :json)]
         (should= expected-game (first actual-game)))))
 
   (it "continues the last game if possible"
@@ -84,14 +84,14 @@
                            :player-1 {:kind :human :token "X"}
                            :player-2 {:kind :human :token "X"}
                            :size     :3x3 :moves []}
-            actual-game (sut/continue-game? input-id)]
+            actual-game (sut/continue-game? input-id :edn)]
         (should= expected-game (first actual-game)))))
 
   (it "tests the -main function"
     (with-redefs [sut/continue-game? (stub :continue-game? {:return [{:game-id  1 :player-1 {:kind :human :token "X"}
                                                                       :player-2 {:kind :human :token "X"}
                                                                       :size     :3x3 :moves []} 1]})
-                  ui/print-id-and-empty-board (stub :print-id-and-empty-board)
+                  ui/print-id-and-board (stub :print-id-and-empty-board)
                   gm/play-round (stub :play-round {:return {:game-id  1
                                                             :player-1 {:kind :human :token "X"}
                                                             :player-2 {:kind :human :token "X"}

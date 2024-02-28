@@ -107,29 +107,9 @@ or anything else for Player 1 to be O and Player 2 to be X")
   (print-player-kind "1" (:player-1 game))
   (print-player-kind "2" (:player-2 game)))
 
-
-(defn print-previous-moves-game [game id] ;fix this
-  (print-resume-game game))
-
 (defn print-id [id] (println (str "Game-ID: " id)))
 
-(defn print-id-and-empty-board [game-id game]
+(defn print-id-and-board [game-id game]
   (let [board (game/convert-moves-to-board game)]
     (print-id game-id)
     (print-board board)))
-
-;(defn place-token [board [token move]] (place-xo board move token))
-;
-;(defn place-moves-into-board [player-1-token player-2-token board-size moves]
-;  (let [players (cycle [player-1-token player-2-token])
-;        _coll (map vector players moves)]
-;    (vec (reduce place-token board-size _coll))))
-;
-;(defn convert-moves-to-board
-;  ([game-map]
-;   (convert-moves-to-board (:token (:player-1 game-map)) (:token (:player-2 game-map))
-;                           (:size game-map) (:moves game-map)))
-;  ([player-1-token player-2-token size moves]
-;   (if moves
-;     (place-moves-into-board player-1-token player-2-token (board/board-size size) moves)
-;     size)))

@@ -1,9 +1,7 @@
 (ns ttt-clojure.board
   (:require [clojure.string :as str]
-
             [ttt-clojure.game :as game]
-   ;         [ttt-clojure.ui :as ui]
-   ))
+            ))
 
 (defn find-available-moves [board] (filter number? board))
 (defn find-move-count [board] (count (remove number? board)))
@@ -135,9 +133,6 @@
        (token-wins grid player-1)
        (token-wins grid player-2)
        (tie grid)))))
-
-
-
 
 (defn board-size [size]
     (case size
