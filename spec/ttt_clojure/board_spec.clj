@@ -136,6 +136,24 @@
 
     (it "checks not a tie"
       (should-not (sut/tie ["X" 2 "X" "O" "O" "O" "X" "X" "X" "X" "O" "O" "O" "X" "O" "X"])))
+
+    (it "checks board 3x3"
+      (with-out-str
+        (with-in-str "3\n"
+          (should= [1 2 3 4 5 6 7 8 9] (sut/board-size :3x3) ))))
+
+    (it "checks board size 4x4"
+      (with-out-str
+        (with-in-str "4\n"
+          (should= [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16] (sut/board-size :4x4)))))
+
+    (it "checks board size 3x3x3"
+      (with-out-str
+        (with-in-str "9\n"
+          (should= [1 2 3 4 5 6 7 8 9
+                    10 11 12 13 14 15 16 17 18
+                    19 20 21 22 23 24 25 26 27]
+                   (sut/board-size :3x3x3)))))
     )
 
   (context "3x3x3"

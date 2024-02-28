@@ -1,6 +1,7 @@
 (ns ttt-clojure.board
   (:require [clojure.string :as str]
-  ;          [ttt-clojure.minimax :as mm]
+
+            [ttt-clojure.game :as game]
    ;         [ttt-clojure.ui :as ui]
    ))
 
@@ -126,7 +127,7 @@
 (defn player-token [player] (:token player player))
 
 (defn game-over?
-  ([{:keys [board player-1 player-2 size moves]}] (game-over? board player-1 player-2))
+  ([board {:keys [ player-1 player-2 ]}] (game-over? board player-1 player-2))
   ([grid player-1 player-2]
    (let [player-1 (player-token player-1)
          player-2 (player-token player-2)]
@@ -134,3 +135,12 @@
        (token-wins grid player-1)
        (token-wins grid player-2)
        (tie grid)))))
+
+
+
+
+(defn board-size [size]
+    (case size
+      :3x3 (range 1 10)
+      :4x4 (range 1 17)
+      :3x3x3 (range 1 28)))

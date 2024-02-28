@@ -1,6 +1,7 @@
 (ns ttt-clojure.ui-spec
   (:require [speclj.core :refer :all]
             [ttt-clojure.data :as data]
+            [ttt-clojure.game :as game]
             [ttt-clojure.ui :as sut]))
 
 (describe "Updating board"
@@ -195,29 +196,27 @@ or anything else for Player 1 to be O and Player 2 to be X\n"
 
   (it "prints player kind for non-AI player player-2"
     (let [player {:kind :human}]
-      (should= "Player-2: Human\n"
+      (should= "Player-2: Human \n"
                (with-out-str
                  (sut/print-player-kind "2" player)))))
 
   (it "prints player kind and difficulty for AI player"
     (let [player {:kind :ai :difficulty :hard}]
-      (should= "Player-1: Hard AI\n"
+      (should= "Player-1: Hard AI \n"
                (with-out-str (sut/print-player-kind "1" player)))))
 
   (it "prints resumed game with two AI players"
     (let [player-1 {:kind :ai :token "O" :difficulty :hard}
           player-2 {:kind :ai :token "X" :difficulty :easy}
-          game {:game-id  1  :player-1 player-1
-                :player-2 player-2 :board [1 2 3 4 5 6 7 8 9]}]
-      (should= "\nResuming game:\nPlayer-1: Hard AI\nPlayer-2: Easy AI\n"
+          game {:game-id 1 :player-1 player-1 :player-2 player-2}]
+      (should= "\nResuming game:\nPlayer-1: Hard AI O\nPlayer-2: Easy AI X\n"
                (with-out-str (sut/print-resume-game game)))))
 
   (it "prints resumed game with two AI players"
     (let [player-1 {:kind :human :token "O"}
           player-2 {:kind :human :token "X"}
-          game {:game-id  1 :player-1 player-1
-                :player-2 player-2 :board [1 2 3 4 5 6 7 8 9]}]
-      (should= "\nResuming game:\nPlayer-1: Human\nPlayer-2: Human\n"
+          game {:game-id 1 :player-1 player-1 :player-2 player-2}]
+      (should= "\nResuming game:\nPlayer-1: Human O\nPlayer-2: Human X\n"
                (with-out-str (sut/print-resume-game game)))))
 
   (context "new print"
@@ -230,88 +229,12 @@ or anything else for Player 1 to be O and Player 2 to be X\n"
 
     (it "returns game id and board"
       (should= "Game-ID: 3\n1 | 2 | 3\n4 | 5 | 6\n7 | 8 | 9\n"
-               (with-out-str (sut/print-id-and-empty-board 3 [1 2 3 4 5 6 7 8 9]))))
-
-    (it "prints previous moves for a given game id"
-      (let [game-1 {:board [1 2 3 4 5 6 7 8 9] :moves []}
-            game-2 {:board ["O" 2 3 4 5 6 7 8 9] :moves [1]}
-            game-3 {:board ["O" "X" 3 4 5 6 7 8 9] :moves [1 2]}
-            game-data [game-1 game-2 game-3]
-            input-id 1]
-        (with-redefs [data/game-history-by-id (stub :game-history-by-id {:return game-data})
-                      sut/print-board (stub :print-board {:return (:board game-data)})]
-          (should= "Player 2 made a move:\nPlayer 1 made a move:\nPlayer 2 made a move:\n"
-                   (with-out-str (sut/print-previous-moves input-id)))
-          (should-have-invoked :game-history-by-id)
-          (should-have-invoked :print-board))))
+               (with-out-str (sut/print-id-and-empty-board 3 {:player-1 {:kind :human :token "O"}
+                                                              :player-2 {:kind :human :token "X"}
+                                                              :size     :3x3 :moves []}))))
 
 
-    (it "prints previous moves and resumes game"
-      (let [game {:game-id  1
-                  :player-1 {:kind :human :token "O"}
-                  :player-2 {:kind :human :token "X"}
-                  :board    [1 2 3 4 5 6 7 8 9]}
-            game-1 {:board [1 2 3 4 5 6 7 8 9] :moves []}
-            game-2 {:board ["O" 2 3 4 5 6 7 8 9] :moves [1]}
-            game-3 {:board ["O" "X" 3 4 5 6 7 8 9] :moves [1 2]}
-            game-data [game-1 game-2 game-3]
-            input-id 1]
-        (with-redefs [data/game-history-by-id (stub :game-history-by-id {:return game-data})
-                      sut/print-board (stub :print-board {:return (:board game-data)})
-                      sut/print-resume-game (stub :print-resume-game
-                                                  {:return "\nResuming game:\nPlayer-1: Human\nPlayer-2: Human\n"})
-                      ]
-          (should= "Player 2 made a move:\nPlayer 1 made a move:\nPlayer 2 made a move:\n"
-                   (with-out-str (sut/print-previous-moves-game game input-id)))
-          (should-have-invoked :game-history-by-id)
-          (should-have-invoked :print-board)
-          (should-have-invoked :print-resume-game))))
+
     )
 
-  )
-
-
-(def initial-game {1 {:board    :3x3
-                      :player-1 {:kind :ai, :token "X", :difficulty :easy},
-                      :player-2 {:kind :ai, :token "O", :difficulty :easy}
-                      :moves    [7 9 5 6 8 3]}})
-
-(def game-map {1 {:board    :3x3
-                  :player-1 {:kind :ai, :token "X", :difficulty :easy},
-                  :player-2 {:kind :ai, :token "O", :difficulty :easy}
-                  :moves    [7 9 5 6 8 3]}
-               2 {:board    :3x3
-                  :player-1 {:kind :human, :token "X"},
-                  :player-2 {:kind :human, :token "O"}
-                  :moves    [1 2 3 4 5 6]}})
-
-
-
-(def example-map {;add size and moves first, then player-uno? and board, finally game-id
-                  ; Remove
-                  :game-id  1
-                  :uno      true
-                  :board    [1 2 3 4 5 6 7 8 9]
-
-                  ; Keep
-                  :player-1 {:kind :human, :token "X"}
-                  :player-2 {:kind :human, :token "O"}
-
-                  ; Add
-                  :size     :3x3
-                  :moves    [4 2 9 8]})
-
-(defn get-highest-id [game]
-  (->> (keys game)
-       (apply max)))
-
-
-(describe "reads new game map well"
-  (it "gets the initial  game id"
-    (should= 1 (get-highest-id initial-game)))
-
-  (it "gets the highest game id"
-    (should= 2 (get-highest-id game-map)))
-
-  ;(it "prints convert map" (println (convert-map-to-board example-map)))
   )
