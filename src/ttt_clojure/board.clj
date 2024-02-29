@@ -125,7 +125,7 @@
 (defn player-token [player] (:token player player))
 
 (defn game-over?
-  ([board {:keys [ player-1 player-2 ]}] (game-over? board player-1 player-2))
+  ([board {:keys [player-1 player-2]}] (game-over? board player-1 player-2))
   ([grid player-1 player-2]
    (let [player-1 (player-token player-1)
          player-2 (player-token player-2)]

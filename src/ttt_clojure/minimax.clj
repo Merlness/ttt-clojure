@@ -1,6 +1,7 @@
 (ns ttt-clojure.minimax
-  (:require [ttt-clojure.ui :as ui])
-  (:require [ttt-clojure.board :as board]))
+  (:require
+    [ttt-clojure.game :as game]
+    [ttt-clojure.board :as board]))
 
 (declare minimize)
 (declare maximize)
@@ -26,7 +27,7 @@
   (let [[compare evaluate token] (if maximizing?
                                    [> minimize maximizing-token]
                                    [< maximize minimizing-token])
-        new-game-board (ui/place-xo game-board action token)
+        new-game-board (game/place-xo game-board action token)
         value (find-value new-game-board evaluate depth maximizing-token minimizing-token)]
 
     (if (compare value best-value)

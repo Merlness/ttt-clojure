@@ -12,10 +12,9 @@
    (let [[letter player] (if (board/player1? moves)
                            [token-1 1]
                            [token-2 2])
-         new-board (game/convert-moves-to-board token-1 token-2 size moves)
-         ]
+         new-board (game/convert-moves-to-board token-1 token-2 size moves)]
      (ui/player-statement player)
-     (ui/place-xo new-board move letter))))
+     (game/place-xo new-board move letter))))
 
 (defn token-finder [position unavailable-token]
   (if (= position 1)
@@ -45,13 +44,6 @@
     (save/save game db-type)
     (ui/print-board new-grid)
     game))
-
-(defn complete-game
-  ([{:keys [player-1 player-2 size moves]}]
-   (complete-game (:token player-1) (:token player-2) size moves))
-  ([token-1 token-2 size moves]
-   (let [new-board (game/convert-moves-to-board token-1 token-2 size moves)]
-     (ui/print-end new-board token-1 token-2))))
 
 
 ;notes

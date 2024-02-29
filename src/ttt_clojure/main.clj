@@ -31,6 +31,18 @@
     (possible-to-continue? last-game)
     (ui/continue-last-game?)))
 
+(defn replay? [requested-game]
+  (let [
+        ;requested-game (data/get-game-by-id input-id db-type)
+        new-board (game/convert-moves-to-board requested-game)]
+    (and requested-game (board/game-over? new-board requested-game))))
+
+(defn replay [requested-game]
+  (do
+    (ui/print-previous-player-kinds requested-game)
+    (ui/print-previous-moves (game/creates-board-per-move requested-game))
+    (ui/print-end requested-game)))
+
 (defn continue-game? [input-id db-type]
   (let [requested-game (data/get-game-by-id input-id db-type)
         last-game (data/get-last-game db-type)
@@ -47,16 +59,22 @@
       :else
       (start-new-game new-game-id))))
 
-(defn -main [& args]
-  (let [[game-id DB] args
-        game-id (when game-id (read-string game-id))
-        db-type (if (= "--jsondb" (last args)) :json :edn)
-        ; configure db-type here send only to data! keep as atom in data
-        [game id] (continue-game? game-id db-type)]
+(defn game-loop [game-id db-type]
+  (let [[game id] (continue-game? game-id db-type)]
     (ui/print-id-and-board id game)
     (loop [game game]
       (let [game (gm/play-round db-type game)
             new-board (game/convert-moves-to-board game)]
         (if (board/game-over? new-board game)
-          (gm/complete-game game)
+          (ui/print-end game)
           (recur game))))))
+
+(defn -main [& args]
+  (let [[game-id DB] args
+        game-id (when game-id (read-string game-id))
+        db-type (if (= "--jsondb" (last args)) :json :edn)
+        ; configure db-type here send only to data! keep as atom in data
+        requested-game (data/get-game-by-id game-id db-type)]
+    (if (replay? requested-game)
+      (replay requested-game)
+      (game-loop game-id db-type))))

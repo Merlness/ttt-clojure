@@ -1,7 +1,7 @@
 (ns ttt-clojure.computer
   (:require [ttt-clojure.board :as board]
             [ttt-clojure.minimax :as mm]
-            [ttt-clojure.ui :as ui]))
+            [ttt-clojure.game :as game]))
 
 (defn set-depth [board]
   (condp < (count (board/find-available-moves board))
@@ -17,7 +17,7 @@
 
 (defn checks-end-move [board available-moves token]
   (first (filter #(board/winner?
-                    (ui/place-xo board % token) token)
+                    (game/place-xo board % token) token)
                  available-moves)))
 
 (defn win-or-block [board maximizing-token minimizing-token]

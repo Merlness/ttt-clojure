@@ -55,19 +55,39 @@
                (sut/print-board [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
                                  16 17 18 19 20 21 22 23 24 25 26 27]))))
 
-  (it "tests print end"
+  (it "tests print the end of O winning 3x3"
     (should= "O is the winner!\n"
              (with-out-str
-               (sut/print-end ["O" 2 3
-                               "O" "X" "X"
-                               "O" 8 9] "O" "X"))))
+               (sut/print-end "O" "X" :3x3 [1 5 4 6 7]))))
 
-  (it "tests print end"
+  (it "tests print the end of O winning 3x3 while going second"
+    (should= "O is the winner!\n"
+             (with-out-str
+               (sut/print-end "X" "O" :3x3 [4 1 9 2 7 3]))))
+
+  (it "tests print a tie in a 3x3 "
+    (should= "Womp, its a tie\n"
+             (with-out-str
+               (sut/print-end "X" "O" :3x3 [1 2 3 4 5 7 6 9 8]))))
+
+  ;["X" "O" "X"
+  ; "O" "X" "X"
+  ; "O" "X" "O"
+
+  (it "tests print the end of x winning 4x4"
+    (should= "O is the winner!\n"
+             (with-out-str
+               (sut/print-end "O" "X" :4x4 [1 3 5 4 9 6 13]))))
+
+  (it "tests print the end of x winning 3x3x3"
+    (should= "X is the winner!\n"
+             (with-out-str
+               (sut/print-end "X" "O" :3x3x3 [1 3 14 9 27]))))
+
+  (it "tests doesn't print end"
     (should= "nil\n"
              (with-out-str
-               (sut/print-end [1 2 3
-                               "O" "X" "X"
-                               "O" 8 9] "O" "X"))))
+               (sut/print-end "O" "X" :3x3 []))))
 
   (it "tests player 1 statement"
     (should= "Player 1's turn\n"
@@ -212,12 +232,26 @@ or anything else for Player 1 to be O and Player 2 to be X\n"
       (should= "\nResuming game:\nPlayer-1: Hard AI O\nPlayer-2: Easy AI X\n"
                (with-out-str (sut/print-resume-game game)))))
 
-  (it "prints resumed game with two AI players"
+  (it "prints resumed game with two Human players"
     (let [player-1 {:kind :human :token "O"}
           player-2 {:kind :human :token "X"}
           game {:game-id 1 :player-1 player-1 :player-2 player-2}]
       (should= "\nResuming game:\nPlayer-1: Human O\nPlayer-2: Human X\n"
                (with-out-str (sut/print-resume-game game)))))
+
+  (it "prints previous AI players"
+    (let [player-1 {:kind :ai :token "O" :difficulty :hard}
+          player-2 {:kind :ai :token "X" :difficulty :easy}
+          game {:game-id 1 :player-1 player-1 :player-2 player-2}]
+      (should=  "\nPrevious game:\nPlayer-1: Hard AI O\nPlayer-2: Easy AI X\n"
+                (with-out-str (sut/print-previous-player-kinds game)))))
+
+  (it "prints previous Human players"
+    (let [player-1 {:kind :human :token "O"}
+          player-2 {:kind :human :token "X"}
+          game {:game-id 1 :player-1 player-1 :player-2 player-2}]
+      (should= "\nPrevious game:\nPlayer-1: Human O\nPlayer-2: Human X\n"
+               (with-out-str (sut/print-previous-player-kinds game)))))
 
   (context "new print"
     (with-stubs)
@@ -229,11 +263,51 @@ or anything else for Player 1 to be O and Player 2 to be X\n"
 
     (it "returns game id and board"
       (should= "Game-ID: 3\n1 | 2 | 3\n4 | 5 | 6\n7 | 8 | 9\n"
-               (with-out-str (sut/print-id-and-board 3 {:player-1       {:kind :human :token "O"}
-                                                              :player-2 {:kind :human :token "X"}
-                                                              :size     :3x3 :moves []}))))
+               (with-out-str (sut/print-id-and-board 3 {:player-1 {:kind :human :token "O"}
+                                                        :player-2 {:kind :human :token "X"}
+                                                        :size     :3x3 :moves []}))))
+
+    (it "print previous move for 3x3"
+      (should= "Player 1 made a move:\nX | 2 | 3\n4 | 5 | 6\n7 | 8 | 9\n"
+               (with-out-str (sut/print-previous-moves [["X" 2 3 4 5 6 7 8 9]]))))
+
+    (it "print previous 2 moves for 3x3"
+      (should= "Player 1 made a move:\nX | 2 | 3\n4 | 5 | 6\n7 | 8 | 9\nPlayer 2 made a move:\nX | 2 | 3\n4 | 5 | 6\n7 | 8 | O\n"
+               (with-out-str (sut/print-previous-moves
+                               [["X" 2 3 4 5 6 7 8 9]
+                                ["X" 2 3 4 5 6 7 8 "O"]]))))
+
+    (it "print previous 2 moves for 4x4"
+      (should= "Player 1 made a move:\n1 | 2 | 3 | 4\n5 | 6 | 7 | 8\n9 | O | 11 | 12\n13 | 14 | 15 | 16
+Player 2 made a move:\n1 | 2 | 3 | 4\n5 | 6 | 7 | 8\nX | O | 11 | 12\n13 | 14 | 15 | 16\n"
+               (with-out-str (sut/print-previous-moves
+                               [[1 2 3 4 5 6 7 8 9 "O" 11 12 13 14 15 16]
+                                [1 2 3 4 5 6 7 8 "X" "O" 11 12 13 14 15 16]]))))
+
+    (it "print previous 2 moves for 3x3x3"
+      (should= "Player 1 made a move:\n1 | 2 | 3\nO | 5 | 6\n7 | 8 | 9
+\n10 | 11 | 12\n13 | 14 | 15\n16 | 17 | 18\n\n19 | 20 | 21
+22 | 23 | 24\n25 | 26 | 27\nPlayer 2 made a move:\n1 | 2 | 3\nO | 5 | 6
+7 | 8 | 9\n\n10 | 11 | 12\n13 | 14 | 15
+16 | 17 | 18\n\n19 | 20 | 21\n22 | 23 | 24\nX | 26 | 27\n"
+               (with-out-str (sut/print-previous-moves
+                               [[1 2 3 "O" 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+                                [1 2 3 "O" 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 "X" 26 27]]))))
 
 
+
+    (it "print previous 9 moves for 3x3"
+      (should= "Player 1 made a move:\nX | 2 | 3\n4 | 5 | 6\n7 | 8 | 9\nPlayer 2 made a move:\nX | O | 3\n4 | 5 | 6
+7 | 8 | 9\nPlayer 1 made a move:\nX | O | X\n4 | 5 | 6\n7 | 8 | 9\nPlayer 2 made a move:\nX | O | X\nO | 5 | 6\n7 | 8 | 9
+Player 1 made a move:\nX | O | X\nO | X | 6\n7 | 8 | 9\nPlayer 2 made a move:\nX | O | X\nO | X | O\n7 | 8 | 9
+Player 1 made a move:\nX | O | X\nO | X | O\n7 | X | 9\nPlayer 2 made a move:\nX | O | X\nO | X | O\nO | X | 9
+Player 1 made a move:\nX | O | X\nO | X | O\nO | X | X\n"
+               (with-out-str (sut/print-previous-moves
+                               [["X" 2 3 4 5 6 7 8 9]
+                                ["X" "O" 3 4 5 6 7 8 9] ["X" "O" "X" 4 5 6 7 8 9]
+                                ["X" "O" "X" "O" 5 6 7 8 9] ["X" "O" "X" "O" "X" 6 7 8 9]
+                                ["X" "O" "X" "O" "X" "O" 7 8 9] ["X" "O" "X" "O" "X" "O" 7 "X" 9]
+                                ["X" "O" "X" "O" "X" "O" "O" "X" 9] ["X" "O" "X" "O" "X" "O" "O" "X" "X"]]))))
 
     )
 

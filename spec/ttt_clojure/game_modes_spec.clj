@@ -117,15 +117,5 @@
         (should= correct-game new-game)
         (should-have-invoked :next-print {:with [new-board]}))))
 
-  (it "completes a game"
-    (with-redefs [ui/print-end (stub :print-end)]
-      (let [game {:player-1 {:kind :human :token "X"}
-                  :player-2 {:kind :ai :token "O" :difficulty :easy}
-                  :size     :3x3 :moves [1 2]}
-            new-board ["X" "O" 3 4 5 6 7 8 9]
-            token-1 "X"
-            token-2 "O"]
-        (sut/complete-game game)
-        (should-have-invoked :print-end {:with [new-board token-1 token-2]}))))
 
   )

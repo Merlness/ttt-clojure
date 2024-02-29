@@ -1,14 +1,6 @@
 (ns ttt-clojure.ui
   (:require [ttt-clojure.board :as board]
-            [ttt-clojure.data :as data]
             [ttt-clojure.game :as game]))
-
-(defn place-xo [grid old-num xo]
-  (map
-    #(if (= % old-num)
-       xo
-       %)
-    grid))
 
 (defn invalid-move? [num grid] (not-any? #{num} grid))
 
@@ -39,11 +31,12 @@
 (defn print-board [grid] (println (board/display grid)))
 
 (defn print-end
-  ([board {:keys [player-1 player-2]}]
-   (print-end board player-1 player-2))
-  ([board player-1 player-2]
+  ([game]
+   (print-end (:player-1 game) (:player-2 game) (:size game) (:moves game)))
+  ([player-1 player-2 size moves]
    (let [player-1 (board/player-token player-1)
-         player-2 (board/player-token player-2)]
+         player-2 (board/player-token player-2)
+         board (game/convert-moves-to-board player-1 player-2 size moves)]
      (println (endgame-result board player-1 player-2)))))
 
 (defn player-statement [num] (println (str "Player " num "'s turn")))
@@ -102,10 +95,13 @@ or anything else for Player 1 to be O and Player 2 to be X")
     (println (str "Player-" player-number ": " (difficulty-to-string (:difficulty player)) " " (:token player)))
     (println (str "Player-" player-number ": Human " (:token player)))))
 
-(defn print-resume-game [game]
-  (println "\nResuming game:")
+(defn print-player-kinds [game]
   (print-player-kind "1" (:player-1 game))
   (print-player-kind "2" (:player-2 game)))
+
+(defn print-resume-game [game]
+  (println "\nResuming game:")
+  (print-player-kinds game))
 
 (defn print-id [id] (println (str "Game-ID: " id)))
 
@@ -113,3 +109,16 @@ or anything else for Player 1 to be O and Player 2 to be X")
   (let [board (game/convert-moves-to-board game)]
     (print-id game-id)
     (print-board board)))
+
+(defn print-previous-player-kinds [game]
+  (println "\nPrevious game:")
+  (print-player-kinds game))
+
+(defn print-previous-moves [game-data]
+  (run! (fn [game]
+          (println "Player"
+                   (if
+                     (even? (count (filter string? game)))
+                     "2" "1") "made a move:")
+          (print-board game))
+        game-data))

@@ -1,7 +1,7 @@
 (ns ttt-clojure.computer-spec
   (:require [speclj.core :refer :all]
-            [ttt-clojure.ui :as ui]
             [ttt-clojure.board :as board]
+            [ttt-clojure.game :as game]
             [ttt-clojure.computer :as sut]))
 
 (defn game-result [grid maximizing-token minimizing-token]
@@ -12,7 +12,7 @@
 
 (defn place-ai-move [board maximizing-token minimizing-token]
   (let [move (sut/next-move board maximizing-token minimizing-token)]
-    (ui/place-xo board move maximizing-token)))
+    (game/place-xo board move maximizing-token)))
 
 (declare play-game-computer-second)
 
@@ -22,7 +22,7 @@
     (if result (do (conj results result)) (concat results (play-game-computer-second board maximizing-token minimizing-token)))))
 
 (defn collect-move-results [results move board maximizing-token minimizing-token]
-  (let [board (ui/place-xo board move minimizing-token)
+  (let [board (game/place-xo board move minimizing-token)
         result (game-result board maximizing-token minimizing-token)]
     (if result (do (conj results result)) (collect-ai-results results board maximizing-token minimizing-token))))
 
