@@ -1,7 +1,6 @@
 (ns ttt-clojure.game
   )
 
-
 (defn board-size [size]
   (case size
     :3x3 (range 1 10)

@@ -11,15 +11,15 @@
   (with-stubs)
   (before (reset! sut/log-edn {}))
 
-  ;(it "gets game history by id"
-  ;  (reset! sut/log {1 {:game-id  1
-  ;                      :player-1 {:kind :human :token "X"}
-  ;                      :player-2 {:kind :human :token "X"}
-  ;                      :size     :3x3 :moves []}})
-  ;  (let [game-id 1
-  ;        expected-game [{:game-id 1 :player-1 {:kind :human :token "X"} :player-2 {:kind :human :token "X"}}]
-  ;        actual-game (sut/get-game-by-id game-id)]
-  ;    (should= expected-game actual-game)))
+  (it "gets game history by id"
+    (reset! sut/log-edn {1 {:game-id  1
+                        :player-1 {:kind :human :token "X"}
+                        :player-2 {:kind :human :token "X"}
+                        :size     :3x3 :moves []}})
+    (let [game-id 1
+          expected-game {:game-id 1 :player-1 {:kind :human :token "X"} :player-2 {:kind :human :token "X"} :size :3x3 :moves []}
+          actual-game (sut/get-game-by-id game-id :edn)]
+      (should= expected-game actual-game)))
 
   (it "gets max game id"
     (let [games {1 {:size     :3x3

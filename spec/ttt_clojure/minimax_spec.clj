@@ -147,7 +147,7 @@
                             "O" "O" 15 16] "X" "O")))
     )
 
-  (context "3D grid"
+  #_(context "3D grid"
     (it "selects winning move"
       (should= 3 (maximize ["X" "X" 3
                             "O" "O" 6

@@ -2,16 +2,7 @@
   (:require [clojure.edn :as edn]
             [clojure.data.json :as json]))
 
-(defn- fetch-edn-games []
-  (let [log-edn (slurp "log.edn")]
-    (if (empty? log-edn) {} (edn/read-string log-edn))))
 
-;(defn- fetch-json-games []
-;    (let [log-json (slurp "log.json")]
-;      (if (empty? log-json) {}
-;                            (->> (json/read-str log-json :key-fn keyword)
-;                                 (into {} (map (fn [[k v]]
-;                                                 [(Integer/parseInt (name k)) v])))))))
 
 (def string-to-keyword
   {"ai"     :ai
@@ -23,10 +14,10 @@
    "4x4"    :4x4
    "3x3x3"  :3x3x3})
 
-(defn- keywordize-value [v]
-  (if (string? v)
-    (or (string-to-keyword v) v)
-    v))
+(defn- keywordize-value [value]
+  (if (string? value)
+    (or (string-to-keyword value) value)
+    value))
 
 (defn- keywordize [game]
   (into {} (map (fn [[key value]]
@@ -35,10 +26,22 @@
                      (string? value) (keywordize-value value)
                      (map? value) (keywordize value)
                      :else value)])) game))
-;convert keys to strings, remove colon turn to int
+
+(defn- fetch-edn-games []
+  (let [log-edn (slurp "log.edn")]
+    (if (empty? log-edn) {} (edn/read-string log-edn))))
+
 (defn- fetch-json-games []
   (let [log-json (slurp "log.json")]
     (if (empty? log-json) {} (keywordize (json/read-str log-json :key-fn keyword)))))
+
+;(do-something {:1 {:game-id 1 :blah :foo}}) => {1 {:game-id 1 :blah :foo}}
+;(update-keys all data key to number )
+
+(defn int-to-keyword [id]
+  (->> id
+       str
+       keyword))
 
 (defmulti fetch-the-games (fn [db-type] db-type))
 
@@ -53,15 +56,18 @@
 (def log-edn (atom (fetch-edn-games)))
 (def log-json (atom (fetch-json-games)))
 
-(defn all-games [db-type]
-  (cond
-    (= db-type :json) @log-json
-    :else @log-edn))
 
-(defn get-game-by-id [game-id db-type]
-  (if (= db-type :json)
-    (get (all-games db-type) (keyword (str game-id)))
-   (get (all-games db-type) game-id)))
+(defmulti all-games (fn [db-type] db-type))
+(defmethod all-games :json [_db-type] @log-json)
+(defmethod all-games :edn [_db-type] @log-edn)
+
+(defmulti get-game-by-id (fn [_game-id db-type] db-type))
+
+(defmethod get-game-by-id :json [game-id db-type]
+  (get (all-games db-type) (int-to-keyword game-id)))
+
+(defmethod get-game-by-id :edn [game-id db-type]
+  (get (all-games db-type) game-id))
 
 (defn convert-key-to-number [keys]
   (map #(Integer/parseInt (name %)) keys))
@@ -77,15 +83,23 @@
        convert-key-to-number
        (apply max 0)))
 
-(defn last-game-id [db-type]
-  (if (= db-type :json)
-    (max-game-id-json (all-games db-type))
-    (max-game-id-edn (all-games db-type))))
+(defmulti last-game-id (fn [db-type] db-type))
+
+(defmethod last-game-id :json [db-type]
+  (max-game-id-json (all-games db-type)))
+
+(defmethod last-game-id :edn [db-type]
+  (max-game-id-edn (all-games db-type)))
+
 (defn get-next-game-id [db-type] (inc (last-game-id db-type)))
-(defn get-last-game [db-type]
-  (if (= db-type :json)
-   (get (all-games db-type) (keyword (str (last-game-id db-type))))
-   (get (all-games db-type) (last-game-id db-type))))
+
+(defmulti get-last-game (fn [db-type] db-type))
+
+(defmethod get-last-game :json [db-type]
+  (get (all-games db-type) (int-to-keyword (last-game-id db-type))))
+
+(defmethod get-last-game :edn [db-type]
+  (get (all-games db-type) (last-game-id db-type)))
 
 (defmulti save (fn [_game db-type] db-type))
 
@@ -101,6 +115,10 @@
        json/write-str
        (spit "log.json")))
 
+(def foo-impl (atom :bar))
+(defmulti -foo (fn [impl _arg1 _arg2] impl))
+(defmethod -foo :bar [_impl arg1 arg2] [arg1 arg2])
+(defn foo [arg1 arg2] (-foo @foo-impl arg1 arg2))
 
 ;(update {:x 1} :x - 5)
 ;(assoc {:x 1} :x (- 1 5))

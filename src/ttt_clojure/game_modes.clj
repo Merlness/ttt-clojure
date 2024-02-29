@@ -5,7 +5,6 @@
             [ttt-clojure.board :as board]
             [ttt-clojure.computer :as comp]))
 
-
 (defn grid-after-move
   ([move {:keys [player-1 player-2 size moves]}]
    (grid-after-move move (:token player-1) (:token player-2) size moves))
@@ -42,8 +41,8 @@
         new-board (game/convert-moves-to-board game)
         move (get-move player opponent new-board)
         new-grid (grid-after-move move game)
-        game (assoc game :moves (conj moves move))]         ; :moves (conj moves move))
-    (save/save game db-type) ;db
+        game (assoc game :moves (conj moves move))]
+    (save/save game db-type)
     (ui/print-board new-grid)
     game))
 

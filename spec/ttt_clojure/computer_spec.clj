@@ -159,8 +159,7 @@
                                       19 20 21
                                       22 23 24
                                       25 26 27] "O" "X")))
-      ;create helper function to print values and moves
-      ;value to number of losing/winning opps
+
       (it "selects winning move"
         (should= 20 (sut/next-move ["X" "O" "X"
                                     "O" "X" 6

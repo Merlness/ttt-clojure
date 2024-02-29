@@ -73,5 +73,4 @@
               (should= ["O" 2 3 4 5 6 7 8 9 "X" 11 12 13 14 15 16 17 18 19 20 21 22 "O" "X" 25 26 27]
                        (sut/convert-moves-to-board "O" "X" :3x3x3 [1 10 23 24])))
 
-          ;(it "prints convert map" (println (convert-map-to-board example-map)))
           )
