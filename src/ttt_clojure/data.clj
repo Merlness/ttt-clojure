@@ -3,8 +3,6 @@
             [next.jdbc :as j]
             [clojure.data.json :as json]))
 
-
-
 (def string-to-keyword
   {"ai"     :ai
    "human"  :human
@@ -43,10 +41,11 @@
   (let [log-json (slurp "log.json")]
     (if (empty? log-json)
       {}
-      (str-keys-to-int (update-keys
-                         (keywordize (json/read-str log-json :key-fn keyword)) name)))))
-
-
+      (-> log-json
+          (json/read-str :key-fn keyword)
+          keywordize
+          (update-keys name)
+          str-keys-to-int))))
 
 ;load
 ;so def log can be an atom and we can call it and not need to
@@ -60,11 +59,7 @@
 (def log-json (atom (fetch-the-games :json)))
 
 (defn load-db [db-type]
-  (cond
-    (= db-type :edn) (reset! log (fetch-the-games :edn))
-    (= db-type :psql) (reset! log (fetch-the-games :psql))
-    (= db-type :json) (reset! log (fetch-the-games :json))))
-
+  (reset! log (fetch-the-games db-type)))
 
 (defmulti all-games (fn [db-type] db-type))
 (defmethod all-games :json [_db-type] @log-json)
@@ -101,8 +96,7 @@
        json/write-str
        (spit "log.json")))
 
-(def db {:dbtype "postgres" :dbname "tic_tac_toe"           ;:username "merl" :password "clojure"
-         })
+(def db {:dbtype "postgres" :dbname "tic_tac_toe"})         ;:username "merl" :password "clojure"
 (def ds (j/get-datasource db))
 
 (defmethod save :sql [game _db-type]
@@ -116,8 +110,16 @@
                    board-size "', '"
                    moves "', '"
                    player-1 "', '"
-                   player-2 "')")]
+                   player-2 "')"
+                   " ON CONFLICT (game_id) DO UPDATE SET moves = EXCLUDED.moves")]
     (j/execute! ds [query])))
+
+;INSERT INTO inventory (id, name, price, quantity)
+;VALUES (1, 'A', 16.99, 120)
+;ON CONFLICT(id)
+;DO UPDATE SET
+;price = EXCLUDED.price,
+;quantity = EXCLUDED.quantity;
 
 ;(defn update-postsql-moves [game]
 ;  (let [moves (:moves game)
