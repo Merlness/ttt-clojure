@@ -97,7 +97,7 @@
     (should= [["O" 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16]
               ["O" 2 3 4 "X" 6 7 8 9 10 11 12 13 14 15 16]
               ["O" 2 3 4 "X" 6 7 8 9 10 11 12 13 14 15 "O"]]
-             (sut/creates-board-per-move "O" "X" :4x4 [ 1 5 16])))
+             (sut/creates-board-per-move "O" "X" :4x4 [1 5 16])))
 
   (it "makes 2 boards for 2 moves in a 3x3x3"
     (should= [[1 2 3 "O" 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
@@ -111,4 +111,6 @@
               ["X" "O" "X" "O" "X" "O" 7 8 9] ["X" "O" "X" "O" "X" "O" 7 "X" 9]
               ["X" "O" "X" "O" "X" "O" "O" "X" 9] ["X" "O" "X" "O" "X" "O" "O" "X" "X"]]
              (sut/creates-board-per-move "X" "O" :3x3 [1 2 3 4 5 6 8 7 9])))
+
+
   )

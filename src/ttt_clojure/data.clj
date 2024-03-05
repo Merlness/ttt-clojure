@@ -1,5 +1,6 @@
 (ns ttt-clojure.data
   (:require [clojure.edn :as edn]
+            [next.jdbc :as j]
             [clojure.data.json :as json]))
 
 
@@ -27,21 +28,10 @@
                      (map? value) (keywordize value)
                      :else value)])) game))
 
-(defn- fetch-edn-games []
-  (let [log-edn (slurp "log.edn")]
-    (if (empty? log-edn) {} (edn/read-string log-edn))))
-
-(defn- fetch-json-games []
-  (let [log-json (slurp "log.json")]
-    (if (empty? log-json) {} (keywordize (json/read-str log-json :key-fn keyword)))))
-
 ;(do-something {:1 {:game-id 1 :blah :foo}}) => {1 {:game-id 1 :blah :foo}}
 ;(update-keys all data key to number )
-
-(defn int-to-keyword [id]
-  (->> id
-       str
-       keyword))
+(defn str-keys-to-int [m]
+  (into {} (for [[k v] m] [(Integer/parseInt k) v])))
 
 (defmulti fetch-the-games (fn [db-type] db-type))
 
@@ -51,54 +41,50 @@
 
 (defmethod fetch-the-games :json [_db-type]
   (let [log-json (slurp "log.json")]
-    (if (empty? log-json) {} (json/read-str log-json :key-fn keyword))))
+    (if (empty? log-json)
+      {}
+      (str-keys-to-int (update-keys
+                         (keywordize (json/read-str log-json :key-fn keyword)) name)))))
 
-(def log-edn (atom (fetch-edn-games)))
-(def log-json (atom (fetch-json-games)))
+
+
+;load
+;so def log can be an atom and we can call it and not need to
+;pass it as an arguement everywhere
+;reset log to fetch games
+
+
+
+(def log (atom {}))
+(def log-edn (atom (fetch-the-games :edn)))
+(def log-json (atom (fetch-the-games :json)))
+
+(defn load-db [db-type]
+  (cond
+    (= db-type :edn) (reset! log (fetch-the-games :edn))
+    (= db-type :psql) (reset! log (fetch-the-games :psql))
+    (= db-type :json) (reset! log (fetch-the-games :json))))
 
 
 (defmulti all-games (fn [db-type] db-type))
 (defmethod all-games :json [_db-type] @log-json)
 (defmethod all-games :edn [_db-type] @log-edn)
 
-(defmulti get-game-by-id (fn [_game-id db-type] db-type))
-
-(defmethod get-game-by-id :json [game-id db-type]
-  (get (all-games db-type) (int-to-keyword game-id)))
-
-(defmethod get-game-by-id :edn [game-id db-type]
+(defn get-game-by-id [game-id db-type]
   (get (all-games db-type) game-id))
-
-(defn convert-key-to-number [keys]
-  (map #(Integer/parseInt (name %)) keys))
 
 (defn max-game-id-edn [games]
   (->> games
        keys
        (apply max 0)))
 
-(defn max-game-id-json [games]
-  (->> games
-       keys
-       convert-key-to-number
-       (apply max 0)))
-
-(defmulti last-game-id (fn [db-type] db-type))
-
-(defmethod last-game-id :json [db-type]
-  (max-game-id-json (all-games db-type)))
-
-(defmethod last-game-id :edn [db-type]
+(defn last-game-id [db-type]
   (max-game-id-edn (all-games db-type)))
 
 (defn get-next-game-id [db-type] (inc (last-game-id db-type)))
 
-(defmulti get-last-game (fn [db-type] db-type))
 
-(defmethod get-last-game :json [db-type]
-  (get (all-games db-type) (int-to-keyword (last-game-id db-type))))
-
-(defmethod get-last-game :edn [db-type]
+(defn get-last-game [db-type]
   (get (all-games db-type) (last-game-id db-type)))
 
 (defmulti save (fn [_game db-type] db-type))
@@ -111,9 +97,35 @@
 
 (defmethod save :json [game _db-type]
   (->> game
-       (swap! log-edn assoc (:game-id game))
+       (swap! log-json assoc (:game-id game))
        json/write-str
        (spit "log.json")))
+
+(def db {:dbtype "postgres" :dbname "tic_tac_toe"           ;:username "merl" :password "clojure"
+         })
+(def ds (j/get-datasource db))
+
+(defmethod save :sql [game _db-type]
+  (let [game-id (:game-id game)
+        board-size (str (:size game))
+        moves (str (:moves game))
+        player-1 (str (:player-1 game))
+        player-2 (str (:player-2 game))
+        query (str "INSERT INTO game_map (game_id, board_size, moves, player_1, player_2) VALUES ("
+                   game-id ", '"
+                   board-size "', '"
+                   moves "', '"
+                   player-1 "', '"
+                   player-2 "')")]
+    (j/execute! ds [query])))
+
+;(defn update-postsql-moves [game]
+;  (let [moves (:moves game)
+;        id (:game-id game)
+;        query (str "UPDATE game_map SET moves = '"
+;                   moves "' WHERE game_id = "
+;                   id)]
+;    (j/execute! ds [query])))
 
 (def foo-impl (atom :bar))
 (defmulti -foo (fn [impl _arg1 _arg2] impl))

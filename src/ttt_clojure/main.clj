@@ -5,6 +5,13 @@
             [ttt-clojure.data :as data]
             [ttt-clojure.ui :as ui]))
 
+
+(defn select-db [db]
+  (cond
+    (= "--jsondb" db) :json
+    (= "--psldb" db) :psql
+    :else :edn))
+
 (defn start-new-game [game-id]
   (let [size (ui/get-game-board)
         player-1 (gm/create-player 1 nil)
@@ -32,9 +39,7 @@
     (ui/continue-last-game?)))
 
 (defn replay? [requested-game]
-  (let [
-        ;requested-game (data/get-game-by-id input-id db-type)
-        new-board (game/convert-moves-to-board requested-game)]
+  (let [new-board (game/convert-moves-to-board requested-game)]
     (and requested-game (board/game-over? new-board requested-game))))
 
 (defn replay [requested-game]
@@ -47,8 +52,7 @@
   (let [requested-game (data/get-game-by-id input-id db-type)
         last-game (data/get-last-game db-type)
         new-game-id (data/get-next-game-id db-type)
-        last-id (data/last-game-id db-type)
-        ]
+        last-id (data/last-game-id db-type)]
     (cond
       (possible-to-continue? requested-game)
       (continue-previous-game requested-game input-id)
@@ -72,7 +76,8 @@
 (defn -main [& args]
   (let [[game-id DB] args
         game-id (when game-id (read-string game-id))
-        db-type (if (= "--jsondb" (last args)) :json :edn)
+        db-type (select-db (last args))
+        ;_ (data/load-db db-type)
         ; configure db-type here send only to data! keep as atom in data
         requested-game (data/get-game-by-id game-id db-type)]
     (if (replay? requested-game)
