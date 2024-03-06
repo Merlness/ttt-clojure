@@ -50,7 +50,7 @@
                                                                       :size     :3x3 :moves []} 4]})]
       (let [input-id 2
             expected-game {:game-id 4 :player-1 {:kind :human :token "X"} :player-2 {:kind :human :token "O"} :size :3x3 :moves []}
-            actual-game (sut/continue-game? input-id :edn)]
+            actual-game (sut/continue-game? input-id)]
         (should= expected-game (first actual-game)))))
 
   (it "continues a requested game if possible"
@@ -65,7 +65,7 @@
                            :player-1 {:kind :human :token "X"}
                            :player-2 {:kind :human :token "O"}
                            :size     :3x3 :moves []}
-            actual-game (sut/continue-game? input-id :json)]
+            actual-game (sut/continue-game? input-id)]
         (should= expected-game (first actual-game)))))
 
   (it "continues the last game if possible"
@@ -85,7 +85,7 @@
                            :player-1 {:kind :human :token "X"}
                            :player-2 {:kind :human :token "O"}
                            :size     :3x3 :moves []}
-            actual-game (sut/continue-game? input-id :edn)]
+            actual-game (sut/continue-game? input-id)]
         (should= expected-game (first actual-game)))))
 
   (it "tests the -main function"

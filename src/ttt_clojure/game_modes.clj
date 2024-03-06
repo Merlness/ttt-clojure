@@ -39,7 +39,7 @@
   (let [[player opponent] (if (board/player1? moves) [player-1 player-2] [player-2 player-1])
         new-board (game/convert-moves-to-board game)
         move (get-move player opponent new-board)
-        new-grid (grid-after-move move game)
+        new-grid (grid-after-move move game) ;here
         game (assoc game :moves (conj moves move))]
     (save/save game db-type)
     (ui/print-board new-grid)

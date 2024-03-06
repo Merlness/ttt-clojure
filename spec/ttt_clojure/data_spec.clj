@@ -1,12 +1,12 @@
 (ns ttt-clojure.data-spec
   (:require
-            [speclj.core :refer :all]
-            [next.jdbc :as j]
-            [ttt-clojure.data :as sut]
-            [ttt-clojure.board :as board]
-            [next.jdbc.connection :as connection]
-            [ttt-clojure.ui :as ui]
-            [clojure.data.json :as json]))
+    [speclj.core :refer :all]
+    [next.jdbc :as j]
+    [ttt-clojure.data :as sut]
+    [ttt-clojure.board :as board]
+    [next.jdbc.connection :as connection]
+    [ttt-clojure.ui :as ui]
+    [clojure.data.json :as json]))
 
 (def default-map {1 {:size     :3x3
                      :player-1 {:kind :ai, :token "X", :difficulty :easy},
@@ -21,7 +21,7 @@
                      :player-2 {:kind :human :token "O"}
                      :size     :3x3 :moves [1 3 4]}})
 
-(def db {:dbtype "postgres" :dbname "tic_tac_toe" ;:username "merl" :password "clojure"
+(def db {:dbtype "postgres" :dbname "tic_tac_toe"           ;:username "merl" :password "clojure"
          })
 (def ds (j/get-datasource db))
 
@@ -33,9 +33,10 @@
 
 ;(j/execute! ds ["
 ;INSERT INTO game_map (game_id, board_size, moves, player_1, player_2)
-;VALUES (3, ':3x3', '[1 3 4]',
-;'{:kind :ai, :token \"X\", :difficulty :easy}',
-;'{:kind :human, :token \"O\"}')"])
+;VALUES (1, ':4x4', '[10 7]',
+;'{:kind :human, :token \"X\"}',
+;'{:kind :ai, :token \"O\", :difficulty :hard}'
+;)"])
 
 
 ;(j/execute! ds ["
@@ -50,25 +51,24 @@
 
 (defn psql-to-map [data]
   (let [game (into {} data)]
-  {:game-id (:game_map/game_id game)
-   :player-1 (read-string (:game_map/player_1 game))
-   :player-2 (read-string (:game_map/player_2 game))
-   :size (read-string (:game_map/board_size game))
-   :moves (read-string (:game_map/moves game))}))
-
+    {:game-id  (:game_map/game_id game)
+     :player-1 (read-string (:game_map/player_1 game))
+     :player-2 (read-string (:game_map/player_2 game))
+     :size     (read-string (:game_map/board_size game))
+     :moves    (read-string (:game_map/moves game))}))
 
 (describe "save round"
   (with-stubs)
-  (before (reset! sut/log-edn {}))
+  (before (reset! sut/log {}))
 
   (it "gets game history by id"
-    (reset! sut/log-edn {1 {:game-id  1
-                            :player-1 {:kind :human :token "X"}
+    (reset! sut/log {1 {:game-id  1
+                        :player-1 {:kind :human :token "X"}
                         :player-2 {:kind :human :token "X"}
                         :size     :3x3 :moves []}})
     (let [game-id 1
           expected-game {:game-id 1 :player-1 {:kind :human :token "X"} :player-2 {:kind :human :token "X"} :size :3x3 :moves []}
-          actual-game (sut/get-game-by-id game-id :edn)]
+          actual-game (sut/get-game-by-id game-id)]
       (should= expected-game actual-game)))
 
   (it "gets max game id"
@@ -77,20 +77,20 @@
       (should= expected-id actual-id)))
 
   (it "gets the last game id"
-    (with-redefs [sut/all-games (constantly default-map)]
-      (should= 3  (sut/last-game-id :edn))))
+    (reset! sut/log default-map)
+    (should= 3 (sut/last-game-id)))
 
   (it "gets the next game id"
     (with-redefs [sut/last-game-id (stub :last-id {:return 2})]
-      (should= 3 (sut/get-next-game-id type))
+      (should= 3 (sut/get-next-game-id))
       (should-have-invoked :last-id)))
 
   (it "gets the last game"
-    (with-redefs [sut/all-games (constantly default-map)]
-      (let [last-game (sut/get-last-game type)
-            correct-game {:game-id 3, :player-1 {:kind :ai, :difficulty :easy, :token "X"},
-                          :player-2 {:kind :human, :token "O"}, :size :3x3, :moves [1 3 4]}]
-        (should= correct-game last-game))))
+    (reset! sut/log default-map)
+    (let [last-game (sut/get-last-game)
+          correct-game {:game-id  3, :player-1 {:kind :ai, :difficulty :easy, :token "X"},
+                        :player-2 {:kind :human, :token "O"}, :size :3x3, :moves [1 3 4]}]
+      (should= correct-game last-game)))
 
   (it "initial save"
     (with-redefs [ui/get-game-board (constantly :3x3)
@@ -138,58 +138,32 @@
 
 
   (it "checks get game by id "
-    (with-redefs [sut/all-games (constantly default-map)]
+    (reset! sut/log default-map)
     (should= {:game-id  3
               :player-1 {:kind :ai :difficulty :easy :token "X"}
               :player-2 {:kind :human :token "O"}
-              :size     :3x3 :moves [1 3 4]} (sut/get-game-by-id 3 :edn))))
+              :size     :3x3 :moves [1 3 4]} (sut/get-game-by-id 3)))
 
-  ;
+
   ;(it "checks db from sql"
   ;  (should= 1 (j/execute! ds ["select * from game_map"])))
 
-  (it "checks db from sql"
-    (should= 1 (j/execute! ds ["SELECT * FROM game_map WHERE game_id = ?" 3])))
+  ;(it "checks db from sql"
+  ;  (should= 1 (j/execute! ds ["SELECT * FROM game_map WHERE game_id = ?" 3])))
+  ;
+  ;(it "checks transform"
+  ;  (should= 1 (psql-to-map (j/execute! ds ["SELECT * FROM game_map WHERE game_id = ?" 3]))))
+  ;(it "checks fetch the game psql"
+  ;  (should= 1 (sut/fetch-the-games :psql)))
 
-  (it "checks transform"
-    (should= 1 (psql-to-map (j/execute! ds ["SELECT * FROM game_map WHERE game_id = ?" 3]))))
-
-
-
-
-  ;(it "c"
-  ;  (let [game {:game-id 3, :player-1 {:kind :ai, :difficulty :easy, :token "X"},
-  ;              :player-2 {:kind :human, :token "O"}, :size :3x3, :moves [1 3 4]}]
-  ;    (should= ":3x3" (vec (:moves game)))))
 
 
   ;before all create db tranactions
   ;after all delete the db
   ;start on saving first
 
-  ;(focus-it "fetch games"
-  ;  (should= 1 (sut/fetch-the-games :edn)))
-  ;
-  ;(focus-it "tests update key"
-  ;  (should= 1 (sut/all-games :json)))
-
 
   )
-
-;use sratch sql to visually see how to play with the command line
-; find a way to implement sql DB with
-
-;17 {
-; :game-id 17,
-; :player-1 {:kind :ai, :token "O", :difficulty :medium},
-
-; :player-2 {:kind :human, :token "X"},
-; :size :4x4,
-; :moves [1 2 3 4 5 15 6 12 7 8 13 16]}
-
-;game-id   size         moves    kind-1      token-1     kind-2      token-2     difficulty-1  difficulty-2
-;int      varchar(6)             varchar(6)  varchar(3)  varchar(6)  varchar(6)  varchar(7)    varchar(7)
-
 
 ;def connection
 ;:dbtype "sqlite"

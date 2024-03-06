@@ -23,6 +23,9 @@
 
 (defn continue-previous-game [game input-id]
   ; TODO: Test me
+  (->> game
+       game/creates-board-per-move
+       ui/print-previous-moves)
   (ui/print-resume-game game)
   [game input-id])
 
@@ -43,16 +46,17 @@
     (and requested-game (board/game-over? new-board requested-game))))
 
 (defn replay [requested-game]
-  (do
-    (ui/print-previous-player-kinds requested-game)
-    (ui/print-previous-moves (game/creates-board-per-move requested-game))
-    (ui/print-end requested-game)))
+  (ui/print-previous-player-kinds requested-game)
+  (->> requested-game
+       game/creates-board-per-move
+       ui/print-previous-moves)
+  (ui/print-end requested-game))
 
-(defn continue-game? [input-id db-type]
-  (let [requested-game (data/get-game-by-id input-id db-type)
-        last-game (data/get-last-game db-type)
-        new-game-id (data/get-next-game-id db-type)
-        last-id (data/last-game-id db-type)]
+(defn continue-game? [input-id]
+  (let [requested-game (data/get-game-by-id input-id)
+        last-game (data/get-last-game)
+        new-game-id (data/get-next-game-id)
+        last-id (data/last-game-id)]
     (cond
       (possible-to-continue? requested-game)
       (continue-previous-game requested-game input-id)
@@ -64,7 +68,7 @@
       (start-new-game new-game-id))))
 
 (defn game-loop [game-id db-type]
-  (let [[game id] (continue-game? game-id db-type)]
+  (let [[game id] (continue-game? game-id)]
     (ui/print-id-and-board id game)
     (loop [game game]
       (let [game (gm/play-round db-type game)
@@ -77,9 +81,9 @@
   (let [[game-id DB] args
         game-id (when game-id (read-string game-id))
         db-type (select-db (last args))
-        ;_ (data/load-db db-type)
+        _load-db (data/load-db db-type)
         ; configure db-type here send only to data! keep as atom in data
-        requested-game (data/get-game-by-id game-id db-type)]
+        requested-game (data/get-game-by-id game-id)]
     (if (replay? requested-game)
       (replay requested-game)
       (game-loop game-id db-type))))
