@@ -30,7 +30,7 @@
       (assoc base-data :difficulty (ui/get-difficulty))
       base-data)))
 
-(defmulti get-move (fn [player _opponent _grid] (:kind player))) ;use multi for json or dn
+(defmulti get-move (fn [player _opponent _grid] (:kind player)))
 (defmethod get-move :human [_player _opponent grid] (ui/get-move grid))
 (defmethod get-move :ai [player opponent grid]
   (comp/ai-move grid (:token player) (:token opponent) (:difficulty player)))
@@ -39,7 +39,7 @@
   (let [[player opponent] (if (board/player1? moves) [player-1 player-2] [player-2 player-1])
         new-board (game/convert-moves-to-board game)
         move (get-move player opponent new-board)
-        new-grid (grid-after-move move game) ;here
+        new-grid (grid-after-move move game)
         game (assoc game :moves (conj moves move))]
     (save/save game db-type)
     (ui/print-board new-grid)

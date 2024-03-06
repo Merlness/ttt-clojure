@@ -5,7 +5,6 @@
             [ttt-clojure.data :as data]
             [ttt-clojure.ui :as ui]))
 
-
 (defn select-db [db]
   (cond
     (= "--jsondb" db) :json
@@ -82,7 +81,6 @@
         game-id (when game-id (read-string game-id))
         db-type (select-db (last args))
         _load-db (data/load-db db-type)
-        ; configure db-type here send only to data! keep as atom in data
         requested-game (data/get-game-by-id game-id)]
     (if (replay? requested-game)
       (replay requested-game)

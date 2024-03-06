@@ -3,6 +3,9 @@
             [next.jdbc :as j]
             [clojure.data.json :as json]))
 
+(def db {:dbtype "postgres" :dbname "tic_tac_toe"})         ;:username "merl" :password "clojure"
+(def ds (j/get-datasource db))
+
 (def string-to-keyword
   {"ai"     :ai
    "human"  :human
@@ -54,16 +57,9 @@
           str-keys-to-int))))
 
 (defmethod fetch-the-games :psql [_db-type]
-  (let [db {:dbtype "postgres" :dbname "tic_tac_toe"}
-        ds (j/get-datasource db)
-        games-from-db (j/execute! ds ["select * from game_map"])
+  (let [games-from-db (j/execute! ds ["select * from game_map"])
         games (map psql-to-map games-from-db)]
     (into {} (map (fn [game] [(:game-id game) game]) games))))
-
-;(defn test-select []
-;  (let [db {:dbtype "postgres" :dbname "tic_tac_toe"}
-;        ds (j/get-datasource db)]
-;    (j/execute! ds ["select * from game_map"])))
 
 (def log (atom {}))
 (defn load-db [db-type] (reset! log (fetch-the-games db-type)))
@@ -93,13 +89,8 @@
        json/write-str
        (spit "log.json")))
 
-(def db {:dbtype "postgres" :dbname "tic_tac_toe"})         ;:username "merl" :password "clojure"
-(def ds (j/get-datasource db))
-
 (defmethod save :psql [game _db-type]
-  (let [db {:dbtype "postgres" :dbname "tic_tac_toe"}
-        ds (j/get-datasource db)
-        game-id (:game-id game)
+  (let [game-id (:game-id game)
         board-size (str (:size game))
         moves (str (:moves game))
         player-1 (str (:player-1 game))
