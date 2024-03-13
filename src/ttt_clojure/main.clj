@@ -2,8 +2,11 @@
   (:require [ttt-clojure.game :as game]
             [ttt-clojure.game-modes :as gm]
             [ttt-clojure.board :as board]
+            [ttt-clojure.gui :as gui]
             [ttt-clojure.data :as data]
             [ttt-clojure.ui :as ui]))
+
+(declare game-loop)
 
 (defn select-db [db]
   (cond
@@ -11,8 +14,9 @@
     (= "--psldb" db) :psql
     :else :edn))
 
-(defn start-new-game [game-id]
+(defn start-new-game []
   (let [size (ui/get-game-board)
+        game-id (data/get-next-game-id)
         player-1 (gm/create-player 1 nil)
         player-2 (gm/create-player 2 (:token player-1))
         game {:game-id  game-id
@@ -35,6 +39,12 @@
     ;(boolean game) ; this shouldn't pass
     ))
 
+(defn end-game [game db-type]
+  (let [game-id (data/get-next-game-id)]
+    (ui/print-end game)
+    (when (ui/play-again-message)
+      (game-loop game-id db-type))))
+
 (defn continue-last-game? [last-game]
   (and
     (possible-to-continue? last-game)
@@ -54,7 +64,6 @@
 (defn continue-game? [input-id]
   (let [requested-game (data/get-game-by-id input-id)
         last-game (data/get-last-game)
-        new-game-id (data/get-next-game-id)
         last-id (data/last-game-id)]
     (cond
       (possible-to-continue? requested-game)
@@ -64,7 +73,7 @@
       (continue-previous-game last-game last-id)
 
       :else
-      (start-new-game new-game-id))))
+      (start-new-game))))
 
 (defn game-loop [game-id db-type]
   (let [[game id] (continue-game? game-id)]
@@ -73,11 +82,12 @@
       (let [game (gm/play-round db-type game)
             new-board (game/convert-moves-to-board game)]
         (if (board/game-over? new-board game)
-          (ui/print-end game)
+          (end-game game db-type)
           (recur game))))))
 
 (defn -main [& args]
   (let [[game-id DB] args
+        test (if (= args "–gui") gui/gui)
         game-id (when game-id (read-string game-id))
         db-type (select-db (last args))
         _load-db (data/load-db db-type)

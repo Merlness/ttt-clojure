@@ -9,12 +9,9 @@
                  [org.clojure/data.json "2.5.0"]
                  [org.postgresql/postgresql "42.7.2"]
                  [com.github.seancorfield/next.jdbc "1.3.909"]
-
+                 [quil "3.1.0"]
                  ]
   :profiles {:dev {:dependencies [[speclj "3.4.3"]
-                                  ;[org.clojure/data.json "2.5.0"]
-                                  ;[org.postgresql/postgresql "42.7.2"]
-                                  ;[com.github.seancorfield/next.jdbc "1.3.909"]
                                   ]}}
   :plugins [[speclj "3.4.3"]]
   :test-paths ["spec"]

@@ -12,8 +12,9 @@
   (it "starts a new game correctly"
     (with-redefs [ui/get-game-board (constantly :3x3)
                   board/board-size (stub :board-size {:return [1 2 3 4 5 6 7 8 9]})
+                  data/get-next-game-id (constantly 2)
                   gm/create-player (stub :create-player {:return {:kind :human :token "X"}})]
-      (let [game (sut/start-new-game 2)]
+      (let [game (sut/start-new-game)]
         (should= [{:game-id  2
                    :player-1 {:kind :human :token "X"} :player-2 {:kind :human :token "X"}, :size :3x3, :moves []} 2]
                  game))))
@@ -74,6 +75,7 @@
                                                                     :player-2 {:kind :human :token "O"}
                                                                     :size     :3x3 :moves []}})
                   data/last-game-id (stub :last-game-id {:return 3})
+                  ui/play-again-message (stub :play-again {:return false})
                   sut/possible-to-continue? (stub :possible-to-continue? {:return false})
                   sut/continue-last-game? (stub :continue-last-game? {:return true})
                   sut/continue-previous-game (stub :continue-previous-game {:return [{:game-id  3
@@ -86,6 +88,8 @@
                            :player-2 {:kind :human :token "O"}
                            :size     :3x3 :moves []}
             actual-game (sut/continue-game? input-id)]
+
+        ;(with-in-str "/n"
         (should= expected-game (first actual-game)))))
 
   (it "tests the -main function"
@@ -98,9 +102,10 @@
                                                             :player-2 {:kind :human :token "O"}
                                                             :size     :3x3 :moves []}})
                   sut/replay? (constantly false)
+                  ui/play-again-message (constantly false)
                   board/game-over? (stub :game-over? {:return true})
                   ui/print-end (stub :complete-game)]
-      (let [game-id "1"]
+      (let [game-id "1"] ;stub out game by id to satisfy replay and one to not satisfy replay
         (sut/-main game-id)
         (should-have-invoked :continue-game? {:times 1})
         (should-have-invoked :print-id-and-empty-board {:times 1})
@@ -134,8 +139,20 @@
       (should= true (sut/replay? {:player-1 {:kind :human :token "X"}
                                   :player-2 {:kind :human :token "O"}}))))
 
+  (it "checks end game" ;move to game loop with a finished game so it doesn't loop
+    (let [game {:game-id  1
+                :player-1 {:kind :human :token "X"}
+                :player-2 {:kind :human :token "O"}
+                :size     :3x3 :moves [1 2 3 4 5 6 7]}]
+      (with-in-str "blah\n"
+        (should= (str "X is the winner!\n"
+                      "Would you like to play a new game?\n"
+                      "  Please press 1 for a new game or anything else to exit.\n")
+                 (with-out-str (sut/end-game game :json))))))
 
-  ;test starting at the end and work your way backwards
+
+  ;test starting at the end
+  ; and work your way backwards
   ;begin with an almost complete board
   ; make a complete game see if it invokes complete game
   ; make 1 move available, so it does not have to recur

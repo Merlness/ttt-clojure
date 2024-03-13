@@ -122,3 +122,8 @@ or anything else for Player 1 to be O and Player 2 to be X")
                      "2" "1") "made a move:")
           (print-board game))
         game-data))
+
+(defn play-again-message []
+  (println "Would you like to play a new game?
+  Please press 1 for a new game or anything else to exit.")
+  (= "1" (read-line)))

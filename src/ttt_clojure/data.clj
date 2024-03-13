@@ -42,6 +42,7 @@
 
 (defmulti fetch-the-games (fn [db-type] db-type))
 
+(defmethod fetch-the-games :memory [_db-type])
 (defmethod fetch-the-games :edn [_db-type]
   (let [log-edn (slurp "log.edn")]
     (if (empty? log-edn) {} (edn/read-string log-edn))))
@@ -63,7 +64,6 @@
 
 (def log (atom {}))
 (defn load-db [db-type] (reset! log (fetch-the-games db-type)))
-
 
 (defn max-game-id-edn [games]
   (->> games

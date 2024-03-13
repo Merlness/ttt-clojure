@@ -243,8 +243,8 @@ or anything else for Player 1 to be O and Player 2 to be X\n"
     (let [player-1 {:kind :ai :token "O" :difficulty :hard}
           player-2 {:kind :ai :token "X" :difficulty :easy}
           game {:game-id 1 :player-1 player-1 :player-2 player-2}]
-      (should=  "\nPrevious game:\nPlayer-1: Hard AI O\nPlayer-2: Easy AI X\n"
-                (with-out-str (sut/print-previous-player-kinds game)))))
+      (should= "\nPrevious game:\nPlayer-1: Hard AI O\nPlayer-2: Easy AI X\n"
+               (with-out-str (sut/print-previous-player-kinds game)))))
 
   (it "prints previous Human players"
     (let [player-1 {:kind :human :token "O"}
@@ -309,6 +309,22 @@ Player 1 made a move:\nX | O | X\nO | X | O\nO | X | X\n"
                                 ["X" "O" "X" "O" "X" "O" 7 8 9] ["X" "O" "X" "O" "X" "O" 7 "X" 9]
                                 ["X" "O" "X" "O" "X" "O" "O" "X" 9] ["X" "O" "X" "O" "X" "O" "O" "X" "X"]]))))
 
-    )
 
-  )
+    (it "prints end message to to see if the player wants to play again"
+      (with-in-str "1\n"
+        (let [output (with-out-str (sut/play-again-message))]
+          (should= output "Would you like to play a new game?\n  Please press 1 for a new game or anything else to exit.\n"))))
+
+    (it "returns true for play again"
+      (with-out-str
+        (with-in-str "1\n"
+          (let [output (sut/play-again-message)]
+            (should output)))))
+
+    (it "returns false for play again"
+      (with-out-str
+        (with-in-str "2\n"
+          (let [output (sut/play-again-message)]
+            (should-not output)))))
+
+    ))

@@ -21,41 +21,8 @@
                      :player-2 {:kind :human :token "O"}
                      :size     :3x3 :moves [1 3 4]}})
 
-(def db {:dbtype "postgres" :dbname "tic_tac_toe"           ;:username "merl" :password "clojure"
-         })
+(def db {:dbtype "postgres" :dbname "tic_tac_toe"})         ;:username "merl" :password "clojure"
 (def ds (j/get-datasource db))
-
-;(j/execute! ds ["
-;CREATE TABLE game_map
-;(game_id int, board_size VARCHAR(9), moves VARCHAR(100),
-;player_1 VARCHAR(50), player_2 VARCHAR(50))"])
-
-
-;(j/execute! ds ["
-;INSERT INTO game_map (game_id, board_size, moves, player_1, player_2)
-;VALUES (1, ':4x4', '[10 7]',
-;'{:kind :human, :token \"X\"}',
-;'{:kind :ai, :token \"O\", :difficulty :hard}'
-;)"])
-
-
-;(j/execute! ds ["
-; DELETE FROM game_map WHERE game_id='17'
-; " ])
-
-;(j/execute! ds ["
-; UPDATE game_map
-;SET moves = '[1 3 4 9]'
-;WHERE game_id = 3;
-; " ])
-
-(defn psql-to-map [data]
-  (let [game (into {} data)]
-    {:game-id  (:game_map/game_id game)
-     :player-1 (read-string (:game_map/player_1 game))
-     :player-2 (read-string (:game_map/player_2 game))
-     :size     (read-string (:game_map/board_size game))
-     :moves    (read-string (:game_map/moves game))}))
 
 (describe "save round"
   (with-stubs)
@@ -144,27 +111,7 @@
               :player-2 {:kind :human :token "O"}
               :size     :3x3 :moves [1 3 4]} (sut/get-game-by-id 3)))
 
-
   ;(it "checks db from sql"
   ;  (should= 1 (j/execute! ds ["select * from game_map"])))
 
-  ;(it "checks db from sql"
-  ;  (should= 1 (j/execute! ds ["SELECT * FROM game_map WHERE game_id = ?" 3])))
-  ;
-  ;(it "checks transform"
-  ;  (should= 1 (psql-to-map (j/execute! ds ["SELECT * FROM game_map WHERE game_id = ?" 3]))))
-  ;(it "checks fetch the game psql"
-  ;  (should= 1 (sut/fetch-the-games :psql)))
-
-
-
-  ;before all create db tranactions
-  ;after all delete the db
-  ;start on saving first
-
-
   )
-
-;def connection
-;:dbtype "sqlite"
-;   :dbname "file-path"
