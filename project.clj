@@ -4,7 +4,8 @@
 
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :main ttt-clojure.main
+  ;:main ttt-clojure.main
+  :main ttt-clojure.sketch
   :dependencies [[org.clojure/clojure "1.11.1"]
                  [org.clojure/data.json "2.5.0"]
                  [org.postgresql/postgresql "42.7.2"]

@@ -87,7 +87,7 @@
 
 (defn -main [& args]
   (let [[game-id DB] args
-        test (if (= args "–gui") gui/gui)
+        ;test (if (= args "–gui") gui/gui)
         game-id (when game-id (read-string game-id))
         db-type (select-db (last args))
         _load-db (data/load-db db-type)
