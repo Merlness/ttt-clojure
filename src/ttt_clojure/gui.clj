@@ -69,13 +69,13 @@
               [255 255 255]))
     (q/rect (* x w) (* y h) w h)))
 
-{:game   {:game-id  1
-          :player-1 {:kind :human :token "X"}
-          :player-2 {:kind :human :token "O"}
-          :size     :4x4
-          :moves    [1 9 10]}
- :screen :size
- }
+;{:game   {:game-id  1
+;          :player-1 {:kind :human :token "X"}
+;          :player-2 {:kind :human :token "O"}
+;          :size     :4x4
+;          :moves    [1 9 10]}
+; :screen :size
+; }
 
 (defn get-index [size mouse]
   (let [w (/ (q/width) size)
@@ -126,6 +126,16 @@
   (draw-player-screen 2))
 
 (defmethod draw-state :play [state]
+  (q/background 235)
+  (let [size (size (:game state))
+        game (:game state)
+        board (game/convert-moves-to-board game)]           ;[1 "X" 2 3 4 5 6 "O"]
+    (doseq [y (range size)
+            x (range size)]
+      (let [index (+ x (* y size))
+            token (get board index)]
+        (draw-square size token x y)                        ; should be called 9-16 times
+        )))
   state)
 
 
@@ -138,6 +148,7 @@
 (defmulti mouse-clicked (fn [state _mouse] (:screen state))) ;multi
 
 (defn dimensions [] [(q/width) (q/height)])
+
 (defmethod mouse-clicked :size [state mouse]
   (let [x (:x mouse)
         y (:y mouse)
@@ -151,8 +162,7 @@
 (defmethod mouse-clicked :player-1 [state mouse]
   (let [x (:x mouse)
         y (:y mouse)
-        w (q/width)
-        h (q/height)
+        [w h] (dimensions)
         divisor 8]
     (cond                                                   ;test this logic make sure it fails if commented out
       (area-clicked x y (/ w 2) (* h 0.33) (/ w (- divisor 3)) (/ h divisor))
@@ -169,8 +179,7 @@
 (defmethod mouse-clicked :player-2 [state mouse]
   (let [x (:x mouse)
         y (:y mouse)
-        w (q/width)
-        h (q/height)
+        [w h] (dimensions)
         divisor 8]
     (cond
       (area-clicked x y (/ w 2) (* h 0.33) (/ w (- divisor 3)) (/ h divisor))
@@ -204,7 +213,16 @@
       state))
   state)
 
-
+;(q/defsketch ttt_test
+;  :title "Merl's tic Tac Toe"
+;  :size [1000 1000]
+;  :setup setup
+;  :draw draw-state
+;  :mouse-clicked mouse-clicked
+;  :features [:keep-on-top]
+;  :middleware [m/fun-mode])
+;
+;(defn -main [])
 ;get rid of update state done
 ;Any vs Any - Click for every move
 ;AI move "AI is thinking"
@@ -218,20 +236,3 @@
 ; check for wins
 ; allow player to start previous game
 ;ai to make moves
-
-
-;(defn blah [f s t]
-;  (prn f)
-;  (prn s)
-;  (prn t))
-;
-;; when we define an API, we get a map that looks like this:
-;; {:headers [...] :body {...} :something :else}
-;; where that map is passed directly into a funciton
-;; I don't care about :something key, so I do the following
-;(defn my-func [{:keys [body]}]
-;  ;...
-;  )
-;(defn my-func [response]
-;  (let [body (:body response)]
-;    ))

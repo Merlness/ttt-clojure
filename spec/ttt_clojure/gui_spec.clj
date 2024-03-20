@@ -2,6 +2,7 @@
   (:require [quil.core :as q]
             [speclj.core :refer :all]
             [speclj.stub :as stub]
+            [ttt-clojure.game :as game]
             [ttt-clojure.gui :as sut]
             ))
 
@@ -30,14 +31,12 @@
                     q/text (fn [& _])
                     q/text-size (fn [& _])
                     q/text-align (fn [& _])
-                    sut/draw-button (fn [& _])])
+                    ;sut/get-index (fn [& _])
+                    sut/draw-button (fn [& _])
+                    sut/draw-square (fn [& _])])
 
     (it "draws size screen"
       (let [state {:screen :size}]
-        (should= state (sut/draw-state state))))
-
-    (it "draws play screen"
-      (let [state {:screen :play}]
         (should= state (sut/draw-state state))))
 
     (it "draws player-1 screen"
@@ -50,6 +49,42 @@
         (sut/draw-state {:screen :player-2})
         (should-have-invoked :draw-player-screen {:with [2]})))
 
+    (it "draws play screen"
+      (with-redefs [sut/draw-square (stub :draw-square)
+                    game/convert-moves-to-board (fn [_] ["X" 2 3 4 5 6 "O"])]
+        (let [state {:game   {:game-id  1
+                              :player-1 {:kind :human :token "X"}
+                              :player-2 {:kind :human :token "O"}
+                              :size     :4x4
+                              :moves    [1 9 10]}
+                     :screen :play
+                     }]
+          (sut/draw-state state)
+          (should-have-invoked :draw-square))))
+
+    (it "senses that mouse clicked with size is invoked"
+      (let [state {:screen :size}]
+        (should= state (sut/mouse-clicked state {:x 1 :y 1}))))
+
+
+    (it "senses that mouse clicked with player 1 is invoked"
+      (let [state {:screen :player-1}]
+        (should= state (sut/mouse-clicked state {:x 1 :y 1}))))
+
+
+    (it "senses that mouse clicked with player 2 is invoked"
+      (let [state {:screen :player-2}]
+        (should= state (sut/mouse-clicked state {:x 1 :y 1}))))
+
+
+    (it "senses that mouse clicked with play is invoked"
+     (with-redefs [sut/get-index (constantly 2)]
+       (let [state {:screen :play
+                   :game {:size :3x3
+                          :moves [1 9 10]}}]
+
+        (should= state (sut/mouse-clicked state {:x 1 :y 1})))))
+
 
     ;that draw player screen gets invoked, stub everything else out.
     ;that q text is invoked with "player 1 please choose ..."
@@ -61,38 +96,3 @@
 
     )
   )
-
-;
-
-
-
-
-
-;
-;(it "speclj stub examples"
-;  (with-redefs [sut/blah (stub :blah)]
-;    (should-have-invoked :blah {:times 1})
-;    (should-have-invoked :blah {:with [1 2 3]})
-;    (let [[inv1 inv2] (stub/invocations-of :blah)]
-;      (should= [1 2 3] inv1)
-;      (should= [4 5 6] inv2)))
-;  )
-;
-;(it "another stub example"
-;  (with-redefs [q/rect (stub :rect)]
-;    (let [invocations (stub/invocations-of :rect)]
-;      (should= [0 0 10 10] (nth invocations 0))
-;      (should= [0 10 10 10] (nth invocations 1))
-;      (should= [0 20 10 10] (nth invocations 2)))))
-;
-;(it "destructuring example"
-;  (let [vec2 [[1 2 3] [4 5 6] [7 8 9]]
-;        [v1 v2 v3] vec2]
-;    v1 ; => [1 2 3]
-;    v2 ; => [4 5 6]
-;    ))
-;
-;(it "associative destructuring"
-;  (let [my-map {:key1 :val1 :key2 :val2 :key3 :val3}
-;        {:keys [key1 key2]} my-map]
-;    ))
