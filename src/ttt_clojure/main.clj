@@ -34,10 +34,7 @@
 
 (defn possible-to-continue? [game]
   (let [new-board (game/convert-moves-to-board game)]
-    ; TODO: Test me
-    (and game (not (board/game-over? new-board game)))
-    ;(boolean game) ; this shouldn't pass
-    ))
+    (and game (not (board/game-over? new-board game)))))
 
 (defn end-game [game db-type]
   (let [game-id (data/get-next-game-id)]
@@ -75,19 +72,22 @@
       :else
       (start-new-game))))
 
-(defn game-loop [game-id db-type]
+(defn game-loop [game-id db-type] ;gui?
   (let [[game id] (continue-game? game-id)]
     (ui/print-id-and-board id game)
     (loop [game game]
-      (let [game (gm/play-round db-type game)
-            new-board (game/convert-moves-to-board game)]
+      (let [;gui to here
+            game (gm/play-round db-type game) ;gui and cli concrete
+            new-board (game/convert-moves-to-board game)
+            ;here to gui?
+            ]
         (if (board/game-over? new-board game)
           (end-game game db-type)
           (recur game))))))
 
 (defn -main [& args]
   (let [[game-id DB] args
-        ;test (if (= args "–gui") gui/gui)
+        ;gui? (if (= args "–gui") :gui :ui)
         game-id (when game-id (read-string game-id))
         db-type (select-db (last args))
         _load-db (data/load-db db-type)

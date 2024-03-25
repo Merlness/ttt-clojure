@@ -139,7 +139,7 @@
       (should= true (sut/replay? {:player-1 {:kind :human :token "X"}
                                   :player-2 {:kind :human :token "O"}}))))
 
-  (it "checks end game" ;move to game loop with a finished game so it doesn't loop
+  (it "checks end game"
     (let [game {:game-id  1
                 :player-1 {:kind :human :token "X"}
                 :player-2 {:kind :human :token "O"}
@@ -149,6 +149,20 @@
                       "Would you like to play a new game?\n"
                       "  Please press 1 for a new game or anything else to exit.\n")
                  (with-out-str (sut/end-game game :json))))))
+
+  (it "checks if it's not possible to continue"
+    (let [game {:game-id  1
+                :player-1 {:kind :human :token "X"}
+                :player-2 {:kind :human :token "O"}
+                :size     :3x3 :moves [1 2 3 4 5 6 7]}]
+      (should= false (sut/possible-to-continue? game))))
+
+  (it "checks if possible to continue"
+    (let [game {:game-id  1
+                :player-1 {:kind :human :token "X"}
+                :player-2 {:kind :human :token "O"}
+                :size     :3x3 :moves [1 2 3 4 5 6]}]
+      (should= true (sut/possible-to-continue? game))))
 
 
   ;test starting at the end

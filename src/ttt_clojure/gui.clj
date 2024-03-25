@@ -1,6 +1,7 @@
 (ns ttt-clojure.gui
   (:require [quil.core :as q]
             [quil.middleware :as m]
+            [ttt-clojure.board :as board]
             [ttt-clojure.game :as game]))
 
 (defn X [x y w h]
@@ -41,11 +42,16 @@
 ; You win! AI is thinking... Your turn!
 ; |ttt board|
 ;---
-
+(defn dimensions [] [(q/width) (q/height)])
 
 (defn setup []
   (q/color-mode :rgb)
-  {:screen :size})
+  {:screen :continue-game
+   :game   {:game-id  1
+            :player-1 {:kind :human :token "X"}
+            :player-2 {:kind :human :token "O"}
+            :size     :4x4
+            :moves    []}})
 
 (defn size [game]
   (cond
@@ -62,39 +68,49 @@
 
 (defn draw-square [size token x y]
   (let [w (/ (q/width) size)
-        h (/ (q/height) size)]
+        h (/ (- (q/height) 50) size)]
     (q/fill (case token
               "X" (X x y w h)
               "O" (O x y w h)
               [255 255 255]))
     (q/rect (* x w) (* y h) w h)))
 
-;{:game   {:game-id  1
-;          :player-1 {:kind :human :token "X"}
-;          :player-2 {:kind :human :token "O"}
-;          :size     :4x4
-;          :moves    [1 9 10]}
-; :screen :size
-; }
-
 (defn get-index [size mouse]
   (let [w (/ (q/width) size)
-        h (/ (q/height) size)
+        h (/ (- (q/height) 50) size)
         x (int (/ (:x mouse) w))
         y (int (/ (:y mouse) h))]
     (+ x (* y size))))
 
-(defn available-move? [token]
-  (not (or (= token "X") (= token "O"))))
+(defn available-move? [token size index]
+  (and (not
+         (or (= token "X") (= token "O")))
+       (< index (* size size))))
+
+(defn get-winner [game]
+  (let [player-1 (:player-1 game)
+        player-2 (:player-2 game)
+        board (game/convert-moves-to-board game)
+        token-1 (board/player-token player-1)
+        token-2 (board/player-token player-2)]
+    (cond
+      (board/token-wins board token-1) :X
+      (board/token-wins board token-2) :O
+      (board/tie board) :tie)))
 
 (defn header [text x y]
   (q/text-size 38)
   (q/text-align :center :center)
   (q/text text x y))
 
+(defn end-message [string]
+  (let [[w h] (dimensions)]
+    (q/fill 255 255 255)
+    (header (str string) (/ w 2) (/ h 3))
+    (header "Click anywhere to see the final board!" (/ w 2) (/ h 2))))
+
 (defn draw-player-screen [player-number]
-  (let [w (q/width)
-        h (q/height)
+  (let [[w h] (dimensions)
         divisor 8]
     (q/background 255)
     (header (str "Player " player-number ":\n Please choose your player type:") (/ w 2) (/ h 6))
@@ -103,15 +119,61 @@
     (draw-button "Medium AI" (/ w 2) (* h 0.67) (/ w (- divisor 3)) (/ h divisor))
     (draw-button "Hard AI" (/ w 2) (* h 0.84) (/ w (- divisor 3)) (/ h divisor))))
 
+(defn winner-message [game]
+  (let [player-1 (:player-1 game)
+        player-2 (:player-2 game)
+        board (game/convert-moves-to-board game)
+        token-1 (board/player-token player-1)
+        token-2 (board/player-token player-2)
+        [w h] (dimensions)]
+    (cond
+      (board/token-wins board token-1) (do
+                                         (q/text-size 30)
+                                         (q/fill 255 0 0)
+                                         (q/text "Player 1 wins!" (/ w 2) (- h 25)))
+      (board/token-wins board token-2) (do
+                                         (q/text-size 30)
+                                         (q/fill 0 0 255)
+                                         (q/text "Player 2 wins!" (/ w 2) (- h 25)))
+      (board/tie board) (do
+                          (q/text-size 30)
+                          (q/fill 128 0 128)
+                          (q/text "It's a tie!" (/ w 2) (- h 25))))))
+
+(defn play-message [state w h]
+  (let [moves (count (:moves (:game state)))
+        game (:game state)
+        board (game/convert-moves-to-board game)]
+    (q/text-size 20)
+    (q/text-align :center :center)
+    (cond
+
+      (board/game-over? board game) (winner-message game)
+
+      (even? moves) (do
+                      (q/fill 255 0 0)
+                      (q/text "Player 1's turn" (/ w 2) (- h 25)))
+      :else (do
+              (q/fill 0 0 255)
+              (q/text "Player 2's turn" (/ w 2) (- h 25))))))
+
+
 (defmulti draw-state :screen)
 
-(defmethod draw-state :size [state]
-  (let [w (q/width)
-        h (q/height)]
+(defmethod draw-state :continue-game [state]
+  (let [[w h] (dimensions)]
     (q/background 255)
-    (q/text-size 38)
-    (q/text-align :center :center)
-    (q/text (str "Welcome to Merl's Tic Tac Toe game!\n"
+    (header (str "Would you like to continue your old game,\n or start a new one?")
+            (/ w 2)
+            (/ h 5))
+    (draw-button "Continue" (/ w 2) (* h 0.33) (/ w 5) (/ h 10))
+    (draw-button "New Game" (/ w 2) (* h 0.5) (/ w 5) (/ h 10)))
+  state)
+
+(defmethod draw-state :size [state]
+  (let [[w h] (dimensions)]
+    (q/background 255)
+    (header (str "Welcome to Merl's Tic Tac Toe game!\n"
                  " Please choose your board size:")
             (/ w 2)
             (/ h 5))
@@ -129,15 +191,33 @@
   (q/background 235)
   (let [size (size (:game state))
         game (:game state)
-        board (game/convert-moves-to-board game)]           ;[1 "X" 2 3 4 5 6 "O"]
+        board (game/convert-moves-to-board game)
+        [w h] (dimensions)]                                 ;[1 "X" 2 3 4 5 6 "O"]
     (doseq [y (range size)
             x (range size)]
       (let [index (+ x (* y size))
             token (get board index)]
-        (draw-square size token x y)                        ; should be called 9-16 times
-        )))
+        (draw-square size token x y)))                      ; should be called 9-16 times
+    (play-message state w h))
   state)
 
+(defmethod draw-state :game-over [state]
+  (let [winner (:winner state)]
+    (cond
+      (= winner :X) (do (q/background 255 0 0) (end-message "Player 1 Wins!"))
+      (= winner :O) (do (q/background 0 0 255) (end-message "Player 2 Wins!"))
+      :else (do (q/background 128 0 128) (end-message "It's a Tie!")))
+    state))
+
+(defmethod draw-state :again [state]
+  (let [[w h] (dimensions)]
+    (q/background 255)
+    (header (str "Would you like to play again?")
+            (/ w 2)
+            (/ h 5))
+    (draw-button "Play Again" (/ w 2) (* h 0.33) (/ w 5) (/ h 10))
+    (draw-button "No Thanks" (/ w 2) (* h 0.5) (/ w 5) (/ h 10)))
+  state)
 
 (defn area-clicked [x-mouse y-mouse x y width height]
   (and (>= x-mouse (- x (/ width 2)))
@@ -147,34 +227,61 @@
 
 (defmulti mouse-clicked (fn [state _mouse] (:screen state))) ;multi
 
-(defn dimensions [] [(q/width) (q/height)])
+(defmethod mouse-clicked :continue-game [state mouse]
+  (let [x (:x mouse)
+        y (:y mouse)
+        [w h] (dimensions)]
+    (cond
+      (area-clicked x y (/ w 2) (* h 0.33) (/ w 5) (/ h 10))
+      (do
+        (assoc state :screen :size)
+        (assoc state :remove :this))                        ;continue the old game
+
+      (area-clicked x y (/ w 2) (* h 0.5) (/ w 5) (/ h 10))
+      (assoc state :screen :size)
+
+      :else state)))
+
+(defn update-state [state screen player map]
+  (-> state
+      (assoc :screen screen)
+      (assoc-in [:game player] map)))
 
 (defmethod mouse-clicked :size [state mouse]
   (let [x (:x mouse)
         y (:y mouse)
         [w h] (dimensions)]
     (cond
-      (area-clicked x y (/ w 2) (* h 0.33) (/ w 10) (/ h 10)) (do (println "3x3") (assoc state :screen :player-1))
-      (area-clicked x y (/ w 2) (* h 0.5) (/ w 10) (/ h 10)) (do (println "4x4") (assoc state :screen :player-1))))
-  state
-  )
+      (area-clicked x y (/ w 2) (* h 0.33) (/ w 10) (/ h 10))
+      (update-state state :player-1 :size :3x3)
+
+      (area-clicked x y (/ w 2) (* h 0.5) (/ w 10) (/ h 10))
+      (update-state state :player-1 :size :4x4)
+      :else state)))
+
 
 (defmethod mouse-clicked :player-1 [state mouse]
   (let [x (:x mouse)
         y (:y mouse)
         [w h] (dimensions)
         divisor 8]
-    (cond                                                   ;test this logic make sure it fails if commented out
+    (cond
       (area-clicked x y (/ w 2) (* h 0.33) (/ w (- divisor 3)) (/ h divisor))
-      (do (println "Human") (assoc state :screen :player-2))
+      (update-state state :player-2 :player-1
+                    {:kind :human :token "X"})
+
       (area-clicked x y (/ w 2) (* h 0.5) (/ w (- divisor 3)) (/ h divisor))
-      (do (println "AI Easy") (assoc state :screen :player-2))
+      (update-state state :player-2 :player-1
+                    {:kind :ai :token "X" :difficulty :easy})
+
       (area-clicked x y (/ w 2) (* h 0.67) (/ w (- divisor 3)) (/ h divisor))
-      (do (println "AI Medium") (assoc state :screen :player-2))
+      (update-state state :player-2 :player-1
+                    {:kind :ai :token "X" :difficulty :medium})
+
       (area-clicked x y (/ w 2) (* h 0.84) (/ w (- divisor 3)) (/ h divisor))
-      (do (println "AI Hard") (assoc state :screen :player-2))))
-  state
-  )
+      (update-state state :player-2 :player-1
+                    {:kind :ai :token "X" :difficulty :hard})
+      :else state)))
 
 (defmethod mouse-clicked :player-2 [state mouse]
   (let [x (:x mouse)
@@ -183,46 +290,77 @@
         divisor 8]
     (cond
       (area-clicked x y (/ w 2) (* h 0.33) (/ w (- divisor 3)) (/ h divisor))
-      (do
-        (println "Human")
-        (assoc state :screen :play))
+      (update-state state :play :player-2 {:kind :human :token "O"})
+
       (area-clicked x y (/ w 2) (* h 0.5) (/ w (- divisor 3)) (/ h divisor))
-      (do
-        (println "AI Easy")
-        (assoc state :screen :play))
+      (update-state state :play :player-2 {:kind :ai :token "O" :difficulty :easy})
+
       (area-clicked x y (/ w 2) (* h 0.67) (/ w (- divisor 3)) (/ h divisor))
-      (do
-        (println "AI Medium")
-        (assoc state :screen :play))
+      (update-state state :play :player-2 {:kind :ai :token "O" :difficulty :medium})
+
       (area-clicked x y (/ w 2) (* h 0.84) (/ w (- divisor 3)) (/ h divisor))
-      (do
-        (println "AI Hard")
-        (assoc state :screen :play))))
-  state
-  )
+      (update-state state :play :player-2 {:kind :ai :token "O" :difficulty :hard})
+      :else state)))
 
 (defmethod mouse-clicked :play [state mouse]
-  (let [size (size (:game state))
-        index (get-index size mouse)
-        game (:game state)
-        board (game/convert-moves-to-board game)
-        token (get board index)
-        new-moves (conj (:moves game) (inc index))]
-    (if (available-move? token)
-      (assoc state :game (assoc game :moves new-moves))
-      state))
-  state)
+  (if true                                                  ;human-turn?
+    (let [size (size (:game state))
+          index (get-index size mouse)                      ;take this index and return it
+          game (:game state)
+          board (game/convert-moves-to-board game)
+          token (get board index)
+          new-moves (conj (:moves game) (inc index))]
+      (cond
+        (:winner state) (assoc state :screen :again)
+        (board/game-over? board game) (assoc state :screen :game-over :winner (get-winner game))
+        (available-move? token size index) (do
+                                             (prn "game:" game)
+                                             (prn "size:" size)
+                                             (assoc-in state [:game :moves] new-moves))
+        :else state))
+    ;(update-game-with-ai-move)
+    ))
 
-;(q/defsketch ttt_test
-;  :title "Merl's tic Tac Toe"
-;  :size [1000 1000]
-;  :setup setup
-;  :draw draw-state
-;  :mouse-clicked mouse-clicked
-;  :features [:keep-on-top]
-;  :middleware [m/fun-mode])
-;
-;(defn -main [])
+(defmethod mouse-clicked :game-over [state _mouse]
+  (assoc state :screen :play))
+
+(defmethod mouse-clicked :again [state mouse]
+  ;(dissoc state :winner)
+  (let [x (:x mouse)
+        y (:y mouse)
+        [w h] (dimensions)]
+    (cond
+      (area-clicked x y (/ w 2) (* h 0.33) (/ w 5) (/ h 10))
+      (do (dissoc state :winner)
+          (prn "state:" state)
+          (assoc state :screen :size))                      ;continue the old game
+
+      (area-clicked x y (/ w 2) (* h 0.5) (/ w 5) (/ h 10))
+
+      (prn "state:" state)
+      #_(do
+          (assoc state :screen :size)
+          (assoc state :remove :this))
+
+      :else state)))
+
+
+(q/defsketch ttt_test
+  :title "Merl's tic Tac Toe"
+  :size [1000 1000]
+  :setup setup
+  ;connect from play round to here
+  :draw draw-state
+  :mouse-clicked mouse-clicked
+  ;connect from here to play round
+  :features [:keep-on-top]
+  :middleware [m/fun-mode])
+
+(defn -main [& args]
+  ;(let [db nil]
+  ;  (reset! db-impl db))
+  )
+
 ;get rid of update state done
 ;Any vs Any - Click for every move
 ;AI move "AI is thinking"
@@ -236,3 +374,14 @@
 ; check for wins
 ; allow player to start previous game
 ;ai to make moves
+
+
+
+
+;(defn get-selection [board]
+;  (reset! state board)
+;  (reset! selection nil)
+;  (wait-for-selection) ;keep recurring until selection is not nil
+;  @selection) ;
+
+;(Thread/sleep 10 )
