@@ -53,12 +53,12 @@
 
     (it "draws play screen"
       (with-redefs [sut/draw-square (stub :draw-square)
-                    game/convert-moves-to-board (fn [_] ["X" 2 3 4 5 6 "O"])]
+                    game/convert-moves-to-board (fn [_] ["X" 2 3 4 5 6 "O" 8 9])]
         (let [state {:game   {:game-id  1
                               :player-1 {:kind :human :token "X"}
                               :player-2 {:kind :human :token "O"}
-                              :size     :4x4
-                              :moves    [1 9 10]}
+                              :size     :3x3
+                              :moves    [1 7]}
                      :screen :play}]
           (sut/draw-state state)
           (should-have-invoked :draw-square))))
@@ -197,7 +197,6 @@
       (let [state {:screen :player-2}
             new-state {:screen :play :game {:player-2 {:kind :ai :token "O" :difficulty :hard}}}
             [w h] (sut/dimensions)
-
             mouse {:x (/ w 2) :y (* h 0.84)}]
         (should= new-state (sut/mouse-clicked state mouse))))
 
@@ -208,14 +207,15 @@
                               :player-1 {:kind :human :token "X"}
                               :player-2 {:kind :human :token "O"}
                               :moves    [1 2 3 4 5 6 7]}}
-              new-state {:screen :game-over
+              new-state {:screen :again
 
                          :winner :X
                          :game   {:size     :3x3
                                   :player-1 {:kind :human :token "X"}
                                   :player-2 {:kind :human :token "O"}
                                   :moves    [1 2 3 4 5 6 7]}}
-              ]                                             ;[X 2 3 4 5 6 O X 9]
+              ]
+          ;[X 2 3 4 5 6 O X 9]
           (should= new-state (sut/mouse-clicked state {:x 1 :y 1})))))
 
 

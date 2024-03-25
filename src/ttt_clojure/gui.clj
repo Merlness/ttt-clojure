@@ -2,6 +2,7 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]
             [ttt-clojure.board :as board]
+            [ttt-clojure.game-modes :as gm]
             [ttt-clojure.game :as game]))
 
 (defn X [x y w h]
@@ -85,7 +86,7 @@
 (defn available-move? [token size index]
   (and (not
          (or (= token "X") (= token "O")))
-       (< index (* size size))))
+       (<= index (* size size))))
 
 (defn get-winner [game]
   (let [player-1 (:player-1 game)
@@ -201,14 +202,6 @@
     (play-message state w h))
   state)
 
-(defmethod draw-state :game-over [state]
-  (let [winner (:winner state)]
-    (cond
-      (= winner :X) (do (q/background 255 0 0) (end-message "Player 1 Wins!"))
-      (= winner :O) (do (q/background 0 0 255) (end-message "Player 2 Wins!"))
-      :else (do (q/background 128 0 128) (end-message "It's a Tie!")))
-    state))
-
 (defmethod draw-state :again [state]
   (let [[w h] (dimensions)]
     (q/background 255)
@@ -221,7 +214,7 @@
 
 (defn area-clicked [x-mouse y-mouse x y width height]
   (and (>= x-mouse (- x (/ width 2)))
-       (<= x-mouse (+ x width))
+       (<= x-mouse (+ x (/ width 2)))
        (>= y-mouse y)
        (<= y-mouse (+ y height))))
 
@@ -241,6 +234,7 @@
       (assoc state :screen :size)
 
       :else state)))
+
 
 (defn update-state [state screen player map]
   (-> state
@@ -303,46 +297,47 @@
       :else state)))
 
 (defmethod mouse-clicked :play [state mouse]
-  (if true                                                  ;human-turn?
-    (let [size (size (:game state))
-          index (get-index size mouse)                      ;take this index and return it
-          game (:game state)
-          board (game/convert-moves-to-board game)
-          token (get board index)
-          new-moves (conj (:moves game) (inc index))]
-      (cond
-        (:winner state) (assoc state :screen :again)
-        (board/game-over? board game) (assoc state :screen :game-over :winner (get-winner game))
-        (available-move? token size index) (do
-                                             (prn "game:" game)
-                                             (prn "size:" size)
-                                             (assoc-in state [:game :moves] new-moves))
-        :else state))
-    ;(update-game-with-ai-move)
-    ))
+  (let [{:keys [moves player-1 player-2]} (:game state)
+        [player opponent] (if (board/player1? moves) [player-1 player-2] [player-2 player-1])
+        size (size (:game state))
+        index (get-index size mouse)
+        game (:game state)
+        board (game/convert-moves-to-board game)
+        move (if (= :ai (:kind player))
+               (gm/get-move player opponent board)
+               (inc index))
+        token (get board index)
 
-(defmethod mouse-clicked :game-over [state _mouse]
-  (assoc state :screen :play))
+        new-moves (conj (:moves game) move)]
+    (cond
+      ;(:winner state) (assoc state :screen :again)
+      (board/game-over? board game) (assoc state :screen :again :winner (get-winner game))
+      (= :ai (:kind player)) (assoc-in state [:game :moves] new-moves)
+      (available-move? token size move) (do
+                                          ;(prn "game:" game)
+                                          ;(prn "size:" size)
+                                          (assoc-in state [:game :moves] new-moves))
+      :else state))
+  )
 
 (defmethod mouse-clicked :again [state mouse]
-  ;(dissoc state :winner)
   (let [x (:x mouse)
         y (:y mouse)
         [w h] (dimensions)]
     (cond
       (area-clicked x y (/ w 2) (* h 0.33) (/ w 5) (/ h 10))
-      (do (dissoc state :winner)
-          (prn "state:" state)
-          (assoc state :screen :size))                      ;continue the old game
+      (do
+        (println "again")
+        (assoc-in state [:game :moves] [])
+        (prn "state:" state)
+        state)                               ;continue the old game
 
       (area-clicked x y (/ w 2) (* h 0.5) (/ w 5) (/ h 10))
+      (do (println "no")
+          state)
 
-      (prn "state:" state)
-      #_(do
-          (assoc state :screen :size)
-          (assoc state :remove :this))
-
-      :else state)))
+      :else state)
+    ))
 
 
 (q/defsketch ttt_test
