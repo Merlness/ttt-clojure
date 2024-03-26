@@ -72,15 +72,12 @@
       :else
       (start-new-game))))
 
-(defn game-loop [game-id db-type] ;gui?
+(defn game-loop [game-id db-type]
   (let [[game id] (continue-game? game-id)]
     (ui/print-id-and-board id game)
     (loop [game game]
-      (let [;gui to here
-            game (gm/play-round db-type game) ;gui and cli concrete
-            new-board (game/convert-moves-to-board game)
-            ;here to gui?
-            ]
+      (let [game (gm/play-round db-type game)
+            new-board (game/convert-moves-to-board game)]
         (if (board/game-over? new-board game)
           (end-game game db-type)
           (recur game))))))

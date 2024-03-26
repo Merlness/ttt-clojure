@@ -2,6 +2,7 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]
             [ttt-clojure.board :as board]
+            [ttt-clojure.data :as data]
             [ttt-clojure.game-modes :as gm]
             [ttt-clojure.game :as game]))
 
@@ -103,7 +104,9 @@
 (defn play-message [state w h]
   (let [moves (:moves (:game state))
         game (:game state)
-        board (game/convert-moves-to-board game)]
+        board (game/convert-moves-to-board game)
+        game-id (data/get-next-game-id)
+        ]
     (q/text-size 20)
     (q/text-align :center :center)
     (cond
@@ -115,7 +118,11 @@
                                       (/ w 2) (- h 25)))
       :else (do
               (q/fill 0 0 255)
-              (q/text "Player 2's turn" (/ w 2) (- h 25))))))
+              (q/text "Player 2's turn" (/ w 2) (- h 25))))
+    #_((q/fill 0 0 0)
+       (q/text-size 12)
+       (q/text-align :left :center)
+       (q/text (str "Game id:" game-id) 0 (- h 25)))))
 
 
 (defmulti draw-state :screen)
@@ -181,12 +188,14 @@
 (defmethod mouse-clicked :continue-game [state mouse]
   (let [x (:x mouse)
         y (:y mouse)
-        [w h] (dimensions)]
+        [w h] (dimensions)
+        last-game (data/get-last-game)
+        ]
     (cond
       (area-clicked x y (/ w 2) (* h 0.33) (/ w 5) (/ h 10))
       (do
-        (assoc state :screen :size)
-        (assoc state :remove :this))                        ;continue the old game
+        (assoc state :screen :size) ;possible to continue? yes :screen play
+        (assoc state :remove :this))  ;no? screen :size                      ;continue the old game
 
       (area-clicked x y (/ w 2) (* h 0.5) (/ w 5) (/ h 10))
       (assoc state :screen :size)
@@ -254,7 +263,9 @@
 
 (defmethod mouse-clicked :play [state mouse]
   (let [{:keys [moves player-1 player-2]} (:game state)
-        [player opponent] (if (board/player1? moves) [player-1 player-2] [player-2 player-1])
+        [player opponent] (if (board/player1? moves)
+                            [player-1 player-2]
+                            [player-2 player-1])
         size (size (:game state))
         index (get-index size mouse)
         game (:game state)
@@ -263,7 +274,8 @@
                (gm/get-move player opponent board)
                (inc index))
         token (get board index)
-
+        game-id (data/get-next-game-id)
+        _ (assoc-in state [:game :game-id] game-id)
         new-moves (conj (:moves game) move)]
     (cond
       (board/game-over? board game)
@@ -271,9 +283,13 @@
 
       (= :ai (:kind player))
       (assoc-in state [:game :moves] new-moves)
+      ;    (save/save game db-type)
+
 
       (available-move? token size move)
       (assoc-in state [:game :moves] new-moves)
+      ;    (save/save game db-type)
+
 
       :else state)))
 
