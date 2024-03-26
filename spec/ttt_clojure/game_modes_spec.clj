@@ -79,14 +79,14 @@
                   spit (stub :spit)
                   ui/player-statement (stub :player-statement)
                   sut/grid-after-move (stub :grid-after-move {:return ["X" 2 3 4 5 6 7 8 9]})
-                  data/save (stub :save1)
+                  data/save! (stub :save!)
                   ]
       (let [player-1 {:kind :human :token "X"}
             player-2 {:kind :ai :token "O" :difficulty :easy}
             grid [1 2 3 4 5 6 7 8 9]
             game {:game-id 1 :player-1 player-1 :player-2 player-2
                   :size    :3x3 :moves []}
-            new-game (sut/play-round :edn game)
+            new-game (sut/play-round  game)
             correct-game {:game-id  1, :player-1 {:kind :human, :token "X"},
                           :player-2 {:kind :ai, :token "O", :difficulty :easy},
                           :size     :3x3, :moves [1]}
@@ -107,7 +107,7 @@
             player-2 {:kind :ai :token "O" :difficulty :easy}
             grid ["X" 2 3 4 5 6 7 8 9]
             game {:game-id 1 :player-1 player-1 :player-2 player-2 :size :3x3 :moves [1]}
-            new-game (sut/play-round :json game)
+            new-game (sut/play-round  game)
             correct-game {:game-id  1,
                           :player-1 {:kind :human, :token "X"},
                           :player-2 {:kind :ai, :token "O", :difficulty :easy}, :size :3x3, :moves [1 2]}

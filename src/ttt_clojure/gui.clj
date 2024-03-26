@@ -2,6 +2,7 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]
             [ttt-clojure.board :as board]
+            [ttt-clojure.data :as save]
             [ttt-clojure.data :as data]
             [ttt-clojure.game-modes :as gm]
             [ttt-clojure.game :as game]))
@@ -105,7 +106,7 @@
   (let [moves (:moves (:game state))
         game (:game state)
         board (game/convert-moves-to-board game)
-        game-id (data/get-next-game-id)
+        ; game-id (data/get-next-game-id)
         ]
     (q/text-size 20)
     (q/text-align :center :center)
@@ -165,6 +166,7 @@
             token (get board index)]
         (draw-square size token x y)))
     (play-message state w h))
+
   state)
 
 (defmethod draw-state :again [state]
@@ -183,24 +185,40 @@
        (>= y-mouse y)
        (<= y-mouse (+ y height))))
 
+;(defn continue? []
+;  (let [_ (data/load-db :edn)
+;        last-game (data/get-last-game)
+;        new-board (game/convert-moves-to-board last-game)
+;        true? (not (board/game-over? new-board last-game))]
+;    last-game (and last-game true?)))
+
 (defmulti mouse-clicked (fn [state _mouse] (:screen state)))
 
 (defmethod mouse-clicked :continue-game [state mouse]
   (let [x (:x mouse)
         y (:y mouse)
         [w h] (dimensions)
+        _ (data/load-db :edn)
+        game-id (data/get-next-game-id)
+        new-state (assoc-in state [:game :game-id] game-id)
         last-game (data/get-last-game)
+        new-board (game/convert-moves-to-board last-game)
+        true? (not (board/game-over? new-board last-game))
+        continue? (and last-game true?)
         ]
     (cond
-      (area-clicked x y (/ w 2) (* h 0.33) (/ w 5) (/ h 10))
-      (do
-        (assoc state :screen :size) ;possible to continue? yes :screen play
-        (assoc state :remove :this))  ;no? screen :size                      ;continue the old game
-
       (area-clicked x y (/ w 2) (* h 0.5) (/ w 5) (/ h 10))
-      (assoc state :screen :size)
+      (assoc new-state :screen :size)
+
+      (and
+        (area-clicked x y (/ w 2) (* h 0.33) (/ w 5) (/ h 10))
+        continue?)
+      (-> new-state
+          (assoc :game last-game)
+          (assoc :screen :play))                            ;possible to continue? yes :screen play                                                ;no? screen :size                      ;continue the old game
 
       :else state)))
+
 
 (defn update-state [state screen game-key value]
   (-> state
@@ -274,22 +292,20 @@
                (gm/get-move player opponent board)
                (inc index))
         token (get board index)
-        game-id (data/get-next-game-id)
-        _ (assoc-in state [:game :game-id] game-id)
         new-moves (conj (:moves game) move)]
     (cond
       (board/game-over? board game)
       (assoc state :screen :again)
 
       (= :ai (:kind player))
-      (assoc-in state [:game :moves] new-moves)
-      ;    (save/save game db-type)
-
+      (do
+        (save/save! (assoc game :moves new-moves) )
+        (assoc-in state [:game :moves] new-moves))
 
       (available-move? token size move)
-      (assoc-in state [:game :moves] new-moves)
-      ;    (save/save game db-type)
-
+      (do
+        (save/save! (assoc game :moves new-moves) )
+        (assoc-in state [:game :moves] new-moves))
 
       :else state)))
 
@@ -307,18 +323,11 @@
       :else state)))
 
 
-(q/defsketch ttt_test
-  :title "Merl's tic Tac Toe"
-  :size [1000 1000]
-  :setup setup
-  ;connect from play round to here
-  :draw draw-state
-  :mouse-clicked mouse-clicked
-  ;connect from here to play round
-  :features [:keep-on-top]
-  :middleware [m/fun-mode])
-
-(defn -main [& args]
-  ;(let [db nil]
-  ;  (reset! db-impl db))
-  )
+;(q/defsketch ttt_test
+;  :title "Merl's tic Tac Toe"
+;  :size [1000 1000]
+;  :setup setup
+;  :draw draw-state
+;  :mouse-clicked mouse-clicked
+;  :features [:keep-on-top]
+;  :middleware [m/fun-mode])

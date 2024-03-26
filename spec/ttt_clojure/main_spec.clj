@@ -45,6 +45,8 @@
     (with-redefs [data/get-next-game-id (stub :get-next-game-id {:return 4})
                   sut/possible-to-continue? (stub :possible-to-continue? {:return false})
                   sut/continue-last-game? (stub :continue-last-game? {:return false})
+                  data/last-game-id (stub :last-id)
+                  data/get-last-game (stub :last-game)
                   sut/start-new-game (stub :start-new-game {:return [{:game-id  4
                                                                       :player-1 {:kind :human :token "X"}
                                                                       :player-2 {:kind :human :token "O"}
@@ -59,6 +61,8 @@
                                                    :player-1 {:kind :human :token "X"}
                                                    :player-2 {:kind :human :token "O"}
                                                    :size     :3x3 :moves []})
+                  data/last-game-id (stub :last-id)
+                  data/get-last-game (stub :last-game)
                   sut/possible-to-continue? (constantly true)
                   ui/print-resume-game (stub :print-resume-game)]
       (let [input-id 2
@@ -102,10 +106,11 @@
                                                             :player-2 {:kind :human :token "O"}
                                                             :size     :3x3 :moves []}})
                   sut/replay? (constantly false)
+                  data/get-next-game-id (stub :next-id)
                   ui/play-again-message (constantly false)
                   board/game-over? (stub :game-over? {:return true})
                   ui/print-end (stub :complete-game)]
-      (let [game-id "1"] ;stub out game by id to satisfy replay and one to not satisfy replay
+      (let [game-id "1"]                                    ;stub out game by id to satisfy replay and one to not satisfy replay
         (sut/-main game-id)
         (should-have-invoked :continue-game? {:times 1})
         (should-have-invoked :print-id-and-empty-board {:times 1})
@@ -140,15 +145,16 @@
                                   :player-2 {:kind :human :token "O"}}))))
 
   (it "checks end game"
-    (let [game {:game-id  1
-                :player-1 {:kind :human :token "X"}
-                :player-2 {:kind :human :token "O"}
-                :size     :3x3 :moves [1 2 3 4 5 6 7]}]
-      (with-in-str "blah\n"
-        (should= (str "X is the winner!\n"
-                      "Would you like to play a new game?\n"
-                      "  Please press 1 for a new game or anything else to exit.\n")
-                 (with-out-str (sut/end-game game :json))))))
+    (with-redefs [data/get-next-game-id (stub :next-id)]
+      (let [game {:game-id  1
+                  :player-1 {:kind :human :token "X"}
+                  :player-2 {:kind :human :token "O"}
+                  :size     :3x3 :moves [1 2 3 4 5 6 7]}]
+        (with-in-str "blah\n"
+          (should= (str "X is the winner!\n"
+                        "Would you like to play a new game?\n"
+                        "  Please press 1 for a new game or anything else to exit.\n")
+                   (with-out-str (sut/end-game game :json)))))))
 
   (it "checks if it's not possible to continue"
     (let [game {:game-id  1

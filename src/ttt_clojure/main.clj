@@ -2,7 +2,6 @@
   (:require [ttt-clojure.game :as game]
             [ttt-clojure.game-modes :as gm]
             [ttt-clojure.board :as board]
-            [ttt-clojure.gui :as gui]
             [ttt-clojure.data :as data]
             [ttt-clojure.ui :as ui]))
 
@@ -76,7 +75,7 @@
   (let [[game id] (continue-game? game-id)]
     (ui/print-id-and-board id game)
     (loop [game game]
-      (let [game (gm/play-round db-type game)
+      (let [game (gm/play-round game)
             new-board (game/convert-moves-to-board game)]
         (if (board/game-over? new-board game)
           (end-game game db-type)

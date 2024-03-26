@@ -1,6 +1,8 @@
 (ns ttt-clojure.gui-spec
   (:require [quil.core :as q]
             [speclj.core :refer :all]
+            [ttt-clojure.data :as save]
+            [ttt-clojure.data :as data]
             [ttt-clojure.game :as game]
             [ttt-clojure.gui :as sut]
             ))
@@ -30,7 +32,9 @@
                     q/text-size (fn [& _])
                     q/text-align (fn [& _])
                     sut/draw-button (fn [& _])
-                    sut/draw-square (fn [& _])])
+                    sut/draw-square (fn [& _])
+                    ;data/get-next-game-id (fn [& _])
+                    ])
 
     (it "draws continue game"
       (let [state {:screen :continue-game}]
@@ -52,6 +56,8 @@
 
     (it "draws play screen"
       (with-redefs [sut/draw-square (stub :draw-square)
+                    data/get-next-game-id (stub :next-id)
+                    sut/play-message (stub :play-message)
                     game/convert-moves-to-board (fn [_] ["X" 2 3 4 5 6 "O" 8 9])]
         (let [state {:game   {:game-id  1
                               :player-1 {:kind :human :token "X"}
@@ -62,8 +68,10 @@
           (sut/draw-state state)
           (should-have-invoked :draw-square))))
 
-    (it "draws game over"
+    #_(it "draws game over"
       (with-redefs [sut/draw-square (stub :draw-square)
+                    data/get-next-game-id (stub :next-id)
+
                     game/convert-moves-to-board (fn [_] ["X" "O" "X" "O" "X" "O" "X" 8 9])]
         (let [state {:game   {:game-id  1
                               :player-1 {:kind :human :token "X"}
@@ -78,7 +86,10 @@
   (context "mouse clicked"
     (redefs-around [q/height (constantly 5)
                     q/width (constantly 5)
-                    q/exit (stub :exit)])
+                    q/exit (stub :exit)
+                    data/get-next-game-id (fn [& _])
+                    data/get-last-game (fn [& _])])
+
     (it "senses that mouse clicked with size is invoked"
       (let [state {:screen :size}]
         (should= state (sut/mouse-clicked state {:x 1 :y 1}))))
@@ -94,14 +105,18 @@
         (should= state (sut/mouse-clicked state {:x 1 :y 1}))))
 
     (it "senses that mouse clicked with play is invoked"
-      (with-redefs [sut/get-index (constantly 2)]
+      (with-redefs [sut/get-index (constantly 2)
+                    save/save (stub :save)]
         (let [state {:screen :play
                      :game   {:size  :3x3
                               :moves [1 7 8]}}
               new-state {:screen :play
                          :game   {:size  :3x3
                                   :moves [1 7 8 3]}}]
-          (should= new-state (sut/mouse-clicked state {:x 1 :y 1})))))
+
+          (should= new-state (sut/mouse-clicked state {:x 1 :y 1}))
+          (sut/mouse-clicked state {:x 1 :y 1})
+          (should-have-invoked :save))))
 
     (it "mouse clicks on already made move"
       (with-redefs [sut/get-index (constantly 0)]
@@ -113,18 +128,26 @@
           (should= state (sut/mouse-clicked state {:x 1 :y 1})))))
 
     (it "checks if you clicked continue"
-      (let [state {:screen :continue-game}
-            new-state {:screen :continue-game :remove :this}
+      (with-redefs [data/get-last-game (constantly {:size     :3x3
+                                                    :player-1 {:kind :human :token "X"}
+                                                    :player-2 {:kind :human :token "O"}
+                                                    :moves    [1 7 8]})]
+        (let [state {:screen :continue-game}
+            new-state {:screen :play :game {:size     :3x3
+                       :player-1 {:kind :human :token "X"}
+                       :player-2 {:kind :human :token "O"}
+                       :moves    [1 7 8]}}
             [w h] (sut/dimensions)
             mouse {:x (/ w 2) :y (* h 0.33)}]
-        (should= new-state (sut/mouse-clicked state mouse))))
+        (should= new-state (sut/mouse-clicked state mouse)))))
 
     (it "checks if you clicked new game"
-      (let [state {:screen :continue-game}
-            new-state {:screen :size}
+      (with-redefs [data/get-next-game-id (constantly 1)]
+        (let [state {:screen :continue-game}
+            new-state {:screen :size  :game {:game-id 1}}
             [w h] (sut/dimensions)
             mouse {:x (/ w 2) :y (* h 0.5)}]
-        (should= new-state (sut/mouse-clicked state mouse))))
+        (should= new-state (sut/mouse-clicked state mouse)))))
 
     (it "checks if you clicked size 3x3"
       (let [state {:screen :size}

@@ -62,8 +62,11 @@
         games (map psql-to-map games-from-db)]
     (into {} (map (fn [game] [(:game-id game) game]) games))))
 
+(def db-atom (atom nil))
 (def log (atom {}))
-(defn load-db [db-type] (reset! log (fetch-the-games db-type)))
+(defn load-db [db-type]
+  (reset! db-atom db-type)
+  (reset! log (fetch-the-games db-type)))
 
 (defn max-game-id-edn [games]
   (->> games
@@ -104,3 +107,6 @@
                    ;" ON CONFLICT(game_id) DO UPDATE SET moves = EXCLUDED.moves" ;possible error
                    )]
     (j/execute! ds [query])))
+
+
+(defn save! [game] (save game @db-atom))
