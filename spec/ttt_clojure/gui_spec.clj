@@ -1,7 +1,6 @@
 (ns ttt-clojure.gui-spec
   (:require [quil.core :as q]
             [speclj.core :refer :all]
-            [speclj.stub :as stub]
             [ttt-clojure.game :as game]
             [ttt-clojure.gui :as sut]
             ))
@@ -65,9 +64,7 @@
 
     (it "draws game over"
       (with-redefs [sut/draw-square (stub :draw-square)
-                    game/convert-moves-to-board (fn [_] ["X" "O" "X" "O" "X" "O" "X" 8 9])
-                   ; sut/end-message (stub :end-message)
-                    ]
+                    game/convert-moves-to-board (fn [_] ["X" "O" "X" "O" "X" "O" "X" 8 9])]
         (let [state {:game   {:game-id  1
                               :player-1 {:kind :human :token "X"}
                               :player-2 {:kind :human :token "O"}
@@ -76,13 +73,12 @@
                      :screen :play
                      :winner :X}]
           (sut/draw-state state)
-          (should-have-invoked :draw-square)
-          #_(should-have-invoked :end-message {:with ["Player 1 Wins!"]})
-          #_(should= "Player 1 Wins!" (sut/end-message state) )))))
+          (should-have-invoked :draw-square)))))
 
   (context "mouse clicked"
     (redefs-around [q/height (constantly 5)
-                    q/width (constantly 5)])
+                    q/width (constantly 5)
+                    q/exit (stub :exit)])
     (it "senses that mouse clicked with size is invoked"
       (let [state {:screen :size}]
         (should= state (sut/mouse-clicked state {:x 1 :y 1}))))
@@ -118,7 +114,7 @@
 
     (it "checks if you clicked continue"
       (let [state {:screen :continue-game}
-            new-state  {:screen :continue-game :remove :this}
+            new-state {:screen :continue-game :remove :this}
             [w h] (sut/dimensions)
             mouse {:x (/ w 2) :y (* h 0.33)}]
         (should= new-state (sut/mouse-clicked state mouse))))
@@ -208,46 +204,24 @@
                               :player-2 {:kind :human :token "O"}
                               :moves    [1 2 3 4 5 6 7]}}
               new-state {:screen :again
-
-                         :winner :X
                          :game   {:size     :3x3
                                   :player-1 {:kind :human :token "X"}
                                   :player-2 {:kind :human :token "O"}
-                                  :moves    [1 2 3 4 5 6 7]}}
-              ]
-          ;[X 2 3 4 5 6 O X 9]
+                                  :moves    [1 2 3 4 5 6 7]}}]
           (should= new-state (sut/mouse-clicked state {:x 1 :y 1})))))
 
-
-    #_(it "checks if you clicked again"
-      (with-redefs [sut/get-index (constantly 1)]
-       (let [state {:screen :play :winner :X
-                    :game   {:size     :3x3
-                             :player-1 {:kind :human :token "X"}
-                             :player-2 {:kind :human :token "O"}
-                             :moves    [1 2 3 4 5 6 7]}}
-            new-state  {:screen :again, :winner :X}
-             [w h] (sut/dimensions)
+    (it "checks if you clicked again"
+      (let [state {:screen :again}
+            new-state {:screen :size, :game {:moves []}}
+            [w h] (sut/dimensions)
             mouse {:x (/ w 2) :y (* h 0.33)}]
-        (should= new-state (sut/mouse-clicked state mouse)))))
+        (should= new-state (sut/mouse-clicked state mouse))))
 
-    ;(it "checks if you clicked new game"
-    ;  (let [state {:screen :play :winner :tie}
-    ;        new-state {:screen :size}
-    ;        [w h] (sut/dimensions)
-    ;        mouse {:x (/ w 2) :y (* h 0.5)}]
-    ;    (should= new-state (sut/mouse-clicked state mouse))))
-
+    (it "checks if you clicked no"
+      (let [state {:screen :again}
+            [w h] (sut/dimensions)
+            mouse {:x (/ w 2) :y (* h 0.5)}]
+        (sut/mouse-clicked state mouse)
+        (should-have-invoked :exit)))
     )
-
-
-  ;tests for
-  ;draw player screem
-  ;draw state all parts
-  ;mouse clicked
-
   )
-;3 22
-;find a way to know who wins, most likely in human vs huma
-; say who's turn it is
-; say who wins and keep the board up to see the moves

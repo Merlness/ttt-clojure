@@ -15,34 +15,6 @@
   (q/fill 0 0 250)
   (q/ellipse (+ (* x w) (/ w 2)) (+ (* y h) (/ h 2)) (/ w 1.33) (/ h 1.33)))
 
-;---------
-; | new game |
-; | continue |
-;-------
-
-;---------
-; New Game
-; Size
-; |3x3| |4x4|
-; |next|
-; ------
-
-; ------
-; Player 1
-; |Human| |Easy AI| |Medium AI| |Hard AI|
-; |next|
-; ------
-
-; ------
-; Player 2
-; |Human| |Easy AI| |Medium AI| |Hard AI|
-; | Play |
-;-------
-
-;---
-; You win! AI is thinking... Your turn!
-; |ttt board|
-;---
 (defn dimensions [] [(q/width) (q/height)])
 
 (defn setup []
@@ -88,27 +60,10 @@
          (or (= token "X") (= token "O")))
        (<= index (* size size))))
 
-(defn get-winner [game]
-  (let [player-1 (:player-1 game)
-        player-2 (:player-2 game)
-        board (game/convert-moves-to-board game)
-        token-1 (board/player-token player-1)
-        token-2 (board/player-token player-2)]
-    (cond
-      (board/token-wins board token-1) :X
-      (board/token-wins board token-2) :O
-      (board/tie board) :tie)))
-
 (defn header [text x y]
   (q/text-size 38)
   (q/text-align :center :center)
   (q/text text x y))
-
-(defn end-message [string]
-  (let [[w h] (dimensions)]
-    (q/fill 255 255 255)
-    (header (str string) (/ w 2) (/ h 3))
-    (header "Click anywhere to see the final board!" (/ w 2) (/ h 2))))
 
 (defn draw-player-screen [player-number]
   (let [[w h] (dimensions)
@@ -128,32 +83,36 @@
         token-2 (board/player-token player-2)
         [w h] (dimensions)]
     (cond
-      (board/token-wins board token-1) (do
-                                         (q/text-size 30)
-                                         (q/fill 255 0 0)
-                                         (q/text "Player 1 wins!" (/ w 2) (- h 25)))
-      (board/token-wins board token-2) (do
-                                         (q/text-size 30)
-                                         (q/fill 0 0 255)
-                                         (q/text "Player 2 wins!" (/ w 2) (- h 25)))
-      (board/tie board) (do
-                          (q/text-size 30)
-                          (q/fill 128 0 128)
-                          (q/text "It's a tie!" (/ w 2) (- h 25))))))
+      (board/token-wins board token-1)
+      (do (q/text-size 30)
+          (q/fill 255 0 0)
+          (q/text "Player 1 wins!"
+                  (/ w 2) (- h 25)))
+
+      (board/token-wins board token-2)
+      (do (q/text-size 30)
+          (q/fill 0 0 255)
+          (q/text "Player 2 wins!"
+                  (/ w 2) (- h 25)))
+
+      (board/tie board)
+      (do (q/text-size 30)
+          (q/fill 128 0 128)
+          (q/text "It's a tie!" (/ w 2) (- h 25))))))
 
 (defn play-message [state w h]
-  (let [moves (count (:moves (:game state)))
+  (let [moves (:moves (:game state))
         game (:game state)
         board (game/convert-moves-to-board game)]
     (q/text-size 20)
     (q/text-align :center :center)
     (cond
-
       (board/game-over? board game) (winner-message game)
 
-      (even? moves) (do
-                      (q/fill 255 0 0)
-                      (q/text "Player 1's turn" (/ w 2) (- h 25)))
+      (even? (count moves)) (do
+                              (q/fill 255 0 0)
+                              (q/text "Player 1's turn"
+                                      (/ w 2) (- h 25)))
       :else (do
               (q/fill 0 0 255)
               (q/text "Player 2's turn" (/ w 2) (- h 25))))))
@@ -164,9 +123,8 @@
 (defmethod draw-state :continue-game [state]
   (let [[w h] (dimensions)]
     (q/background 255)
-    (header (str "Would you like to continue your old game,\n or start a new one?")
-            (/ w 2)
-            (/ h 5))
+    (header (str "Would you like to continue your old game,\n"
+                 "or start a new one?") (/ w 2) (/ h 5))
     (draw-button "Continue" (/ w 2) (* h 0.33) (/ w 5) (/ h 10))
     (draw-button "New Game" (/ w 2) (* h 0.5) (/ w 5) (/ h 10)))
   state)
@@ -193,12 +151,12 @@
   (let [size (size (:game state))
         game (:game state)
         board (game/convert-moves-to-board game)
-        [w h] (dimensions)]                                 ;[1 "X" 2 3 4 5 6 "O"]
+        [w h] (dimensions)]
     (doseq [y (range size)
             x (range size)]
       (let [index (+ x (* y size))
             token (get board index)]
-        (draw-square size token x y)))                      ; should be called 9-16 times
+        (draw-square size token x y)))
     (play-message state w h))
   state)
 
@@ -218,7 +176,7 @@
        (>= y-mouse y)
        (<= y-mouse (+ y height))))
 
-(defmulti mouse-clicked (fn [state _mouse] (:screen state))) ;multi
+(defmulti mouse-clicked (fn [state _mouse] (:screen state)))
 
 (defmethod mouse-clicked :continue-game [state mouse]
   (let [x (:x mouse)
@@ -235,11 +193,10 @@
 
       :else state)))
 
-
-(defn update-state [state screen player map]
+(defn update-state [state screen game-key value]
   (-> state
       (assoc :screen screen)
-      (assoc-in [:game player] map)))
+      (assoc-in [:game game-key] value)))
 
 (defmethod mouse-clicked :size [state mouse]
   (let [x (:x mouse)
@@ -251,6 +208,7 @@
 
       (area-clicked x y (/ w 2) (* h 0.5) (/ w 10) (/ h 10))
       (update-state state :player-1 :size :4x4)
+
       :else state)))
 
 
@@ -261,20 +219,17 @@
         divisor 8]
     (cond
       (area-clicked x y (/ w 2) (* h 0.33) (/ w (- divisor 3)) (/ h divisor))
-      (update-state state :player-2 :player-1
-                    {:kind :human :token "X"})
+      (update-state state :player-2 :player-1 {:kind :human :token "X"})
 
       (area-clicked x y (/ w 2) (* h 0.5) (/ w (- divisor 3)) (/ h divisor))
-      (update-state state :player-2 :player-1
-                    {:kind :ai :token "X" :difficulty :easy})
+      (update-state state :player-2 :player-1 {:kind :ai :token "X" :difficulty :easy})
 
       (area-clicked x y (/ w 2) (* h 0.67) (/ w (- divisor 3)) (/ h divisor))
-      (update-state state :player-2 :player-1
-                    {:kind :ai :token "X" :difficulty :medium})
+      (update-state state :player-2 :player-1 {:kind :ai :token "X" :difficulty :medium})
 
       (area-clicked x y (/ w 2) (* h 0.84) (/ w (- divisor 3)) (/ h divisor))
-      (update-state state :player-2 :player-1
-                    {:kind :ai :token "X" :difficulty :hard})
+      (update-state state :player-2 :player-1 {:kind :ai :token "X" :difficulty :hard})
+
       :else state)))
 
 (defmethod mouse-clicked :player-2 [state mouse]
@@ -294,6 +249,7 @@
 
       (area-clicked x y (/ w 2) (* h 0.84) (/ w (- divisor 3)) (/ h divisor))
       (update-state state :play :player-2 {:kind :ai :token "O" :difficulty :hard})
+
       :else state)))
 
 (defmethod mouse-clicked :play [state mouse]
@@ -310,15 +266,16 @@
 
         new-moves (conj (:moves game) move)]
     (cond
-      ;(:winner state) (assoc state :screen :again)
-      (board/game-over? board game) (assoc state :screen :again :winner (get-winner game))
-      (= :ai (:kind player)) (assoc-in state [:game :moves] new-moves)
-      (available-move? token size move) (do
-                                          ;(prn "game:" game)
-                                          ;(prn "size:" size)
-                                          (assoc-in state [:game :moves] new-moves))
-      :else state))
-  )
+      (board/game-over? board game)
+      (assoc state :screen :again)
+
+      (= :ai (:kind player))
+      (assoc-in state [:game :moves] new-moves)
+
+      (available-move? token size move)
+      (assoc-in state [:game :moves] new-moves)
+
+      :else state)))
 
 (defmethod mouse-clicked :again [state mouse]
   (let [x (:x mouse)
@@ -326,18 +283,12 @@
         [w h] (dimensions)]
     (cond
       (area-clicked x y (/ w 2) (* h 0.33) (/ w 5) (/ h 10))
-      (do
-        (println "again")
-        (assoc-in state [:game :moves] [])
-        (prn "state:" state)
-        state)                               ;continue the old game
+      (update-state state :size :moves [])
 
       (area-clicked x y (/ w 2) (* h 0.5) (/ w 5) (/ h 10))
-      (do (println "no")
-          state)
+      (q/exit)
 
-      :else state)
-    ))
+      :else state)))
 
 
 (q/defsketch ttt_test
@@ -355,28 +306,3 @@
   ;(let [db nil]
   ;  (reset! db-impl db))
   )
-
-;get rid of update state done
-;Any vs Any - Click for every move
-;AI move "AI is thinking"
-;possible new play round function, or 2 play round functions
-;all features present
-;I do need Xs and Os
-
-
-;3-18
-; save
-; check for wins
-; allow player to start previous game
-;ai to make moves
-
-
-
-
-;(defn get-selection [board]
-;  (reset! state board)
-;  (reset! selection nil)
-;  (wait-for-selection) ;keep recurring until selection is not nil
-;  @selection) ;
-
-;(Thread/sleep 10 )
