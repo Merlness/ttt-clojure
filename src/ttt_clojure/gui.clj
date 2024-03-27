@@ -251,7 +251,7 @@
         (continue?))
       (-> new-state
           (assoc :game game-to-continue)
-          (assoc :screen :recap))                           ;possible to continue? yes :screen play                                                ;no? screen :size                      ;continue the old game
+          (assoc :screen :recap))
 
       :else state)))
 

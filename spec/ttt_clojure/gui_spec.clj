@@ -311,7 +311,6 @@
                                 :player-1 {:kind :human :token "X"}
                                 :player-2 {:kind :human :token "O"}
                                 :moves    [1 2 3 4 5 6 7]}}]
-
         (should= new-state (sut/mouse-clicked state mouse))))
     )
   )
