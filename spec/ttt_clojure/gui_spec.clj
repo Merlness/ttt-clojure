@@ -69,6 +69,22 @@
           (sut/draw-state state)
           (should-have-invoked :draw-square))))
 
+    (it " recap screen"
+      (with-redefs [sut/player-display (stub :player-display)
+                    sut/moves-display (stub :moves-display)
+                    q/line (stub :line)
+                    ]
+        (let [state {:game   {:game-id  1
+                              :player-1 {:kind :human :token "X"}
+                              :player-2 {:kind :human :token "O"}
+                              :size     :3x3
+                              :moves    [1 7]}
+                     :screen :recap}]
+          (sut/draw-state state)
+          (should-have-invoked :player-display {:with                     [{:kind :human :token "X"} 0.25]
+                                                {:kind :human :token "O"} 0.75})
+          (should-have-invoked :moves-display {:with [[1 7]]}))))
+
     )
 
   (context "mouse clicked"
@@ -166,11 +182,11 @@
                                                      :player-2 {:kind :human :token "O"}
                                                      :moves    [1 7 8]})]
         (let [state {:screen :continue-game}
-              new-state {:screen :play :game {:game-id  10
-                                              :size     :3x3
-                                              :player-1 {:kind :human :token "X"}
-                                              :player-2 {:kind :human :token "O"}
-                                              :moves    [1 7 8]}}
+              new-state {:screen :recap :game {:game-id  10
+                                               :size     :3x3
+                                               :player-1 {:kind :human :token "X"}
+                                               :player-2 {:kind :human :token "O"}
+                                               :moves    [1 7 8]}}
               [w h] (sut/dimensions)
               mouse {:x (/ w 2) :y (* h 0.33)}]
           (should= new-state (sut/mouse-clicked state mouse)))))
@@ -268,8 +284,9 @@
           (should= new-state (sut/mouse-clicked state {:x 1 :y 1})))))
 
     (it "checks if you clicked again"
-      (let [state {:screen :again}
-            new-state {:screen :size, :game {:moves []}}
+      (let [state {:screen :again :game {:game-id 1 :moves []}}
+            new-state {:screen :size, :game {:game-id 2
+                                             :moves   []}}
             [w h] (sut/dimensions)
             mouse {:x (/ w 2) :y (* h 0.33)}]
         (should= new-state (sut/mouse-clicked state mouse))))
@@ -280,5 +297,21 @@
             mouse {:x (/ w 2) :y (* h 0.5)}]
         (sut/mouse-clicked state mouse)
         (should-have-invoked :exit)))
+
+    (it "checks if you clicked anywhere on recap"
+      (let [state {:screen :recap
+                   :game   {:size     :3x3
+                            :player-1 {:kind :human :token "X"}
+                            :player-2 {:kind :human :token "O"}
+                            :moves    [1 2 3 4 5 6 7]}}
+            [w h] (sut/dimensions)
+            mouse {:x (/ w 2) :y (* h 0.5)}
+            new-state {:screen :play
+                       :game   {:size     :3x3
+                                :player-1 {:kind :human :token "X"}
+                                :player-2 {:kind :human :token "O"}
+                                :moves    [1 2 3 4 5 6 7]}}]
+
+        (should= new-state (sut/mouse-clicked state mouse))))
     )
   )

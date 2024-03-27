@@ -112,7 +112,7 @@
   (let [moves (:moves (:game state))
         game (:game state)
         board (game/convert-moves-to-board game)
-         game-id (:game-id game)]
+        game-id (:game-id game)]
     (q/text-size 20)
     (q/text-align :center :center)
     (cond
@@ -127,6 +127,24 @@
               (q/text "Player 2's turn" (/ w 2) (- h 25))))
     (message-game-id game-id h)))
 
+(defn player-display [player w1]
+  (let [[w h] (dimensions)
+        kind (:kind player)
+        token (:token player)
+        message (if (= :ai kind)
+                  (str (name (:difficulty player)) " ai")
+                  (str (name kind)))
+        number (if (= "X" token) 1 2)]
+    (q/fill 0)
+    (q/text (str "Player " number " " token) (* w w1) (* h 0.2))
+    (q/text message (* w w1) (* h 0.25))))
+
+(defn moves-display [moves]
+  (let [[w h] (dimensions)]
+    (q/text-size 30)
+    (q/text (str "Positions chosen in order") (* w 0.5) (* h 0.5))
+    (q/text (str (clojure.string/join "  " moves)) (* w 0.5) (* h 0.6))))
+
 
 (defmulti draw-state :screen)
 
@@ -138,6 +156,22 @@
     (draw-button "Continue" (/ w 2) (* h 0.33) (/ w 5) (/ h 10))
     (draw-button "New Game" (/ w 2) (* h 0.5) (/ w 5) (/ h 10)))
   state)
+
+(defmethod draw-state :recap [state]
+  (let [[w h] (dimensions)
+        game (:game state)
+        player-1 (:player-1 game)
+        player-2 (:player-2 game)
+        size (:size game)
+        moves (:moves game)]
+    (q/background 255)
+    (q/text (str (name size)) (* w 0.5) (* h 0.06))
+    (q/line (* w 0.15) (* h 0.23) (* w 0.35) (* h 0.23))
+    (q/line (* w 0.65) (* h 0.23) (* w 0.85) (* h 0.23))
+    (player-display player-1 0.25)
+    (player-display player-2 0.75)
+    (moves-display moves)
+    state))
 
 (defmethod draw-state :size [state]
   (let [[w h] (dimensions)]
@@ -167,7 +201,7 @@
       (let [index (+ x (* y size))
             token (get board index)]
         (draw-square size token x y)))
-    (play-message state w h)) ;here
+    (play-message state w h))
   state)
 
 (defmethod draw-state :again [state]
@@ -207,9 +241,7 @@
         [w h] (dimensions)
         game-id (data/get-next-game-id)
         new-state (assoc-in state [:game :game-id] game-id)
-        game-to-continue (continue?)
-        b (prn "game-to-continue:" game-to-continue)
-        ]
+        game-to-continue (continue?)]
     (cond
       (area-clicked x y (/ w 2) (* h 0.5) (/ w 5) (/ h 10))
       (assoc new-state :screen :size)
@@ -219,15 +251,17 @@
         (continue?))
       (-> new-state
           (assoc :game game-to-continue)
-          (assoc :screen :play))                            ;possible to continue? yes :screen play                                                ;no? screen :size                      ;continue the old game
+          (assoc :screen :recap))                           ;possible to continue? yes :screen play                                                ;no? screen :size                      ;continue the old game
 
       :else state)))
-
 
 (defn update-state [state screen game-key value]
   (-> state
       (assoc :screen screen)
       (assoc-in [:game game-key] value)))
+
+(defmethod mouse-clicked :recap [state _mouse]
+  (assoc state :screen :play))
 
 (defmethod mouse-clicked :size [state mouse]
   (let [x (:x mouse)
@@ -303,12 +337,12 @@
 
       (= :ai (:kind player))
       (do
-        (data/save! (assoc game :moves new-moves) )
+        (data/save! (assoc game :moves new-moves))
         (assoc-in state [:game :moves] new-moves))
 
       (available-move? token size move)
       (do
-        (data/save! (assoc game :moves new-moves) )
+        (data/save! (assoc game :moves new-moves))
         (assoc-in state [:game :moves] new-moves))
 
       :else state)))
@@ -323,19 +357,9 @@
       (area-clicked x y (/ w 2) (* h 0.33) (/ w 5) (/ h 10))
       (-> state
           (assoc-in [:game :game-id] (inc game-id))
-          (update-state  :size :moves []))
+          (update-state :size :moves []))
 
       (area-clicked x y (/ w 2) (* h 0.5) (/ w 5) (/ h 10))
       (q/exit)
 
       :else state)))
-
-
-;(q/defsketch ttt_test
-;  :title "Merl's tic Tac Toe"
-;  :size [1000 1000]
-;  :setup setup
-;  :draw draw-state
-;  :mouse-clicked mouse-clicked
-;  :features [:keep-on-top]
-;  :middleware [m/fun-mode])
