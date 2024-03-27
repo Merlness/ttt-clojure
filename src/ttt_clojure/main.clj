@@ -75,7 +75,7 @@
   (let [[game id] (continue-game? game-id)]
     (ui/print-id-and-board id game)
     (loop [game game]
-      (let [game (gm/play-round game)
+      (let [game (gm/play-round game db-type)
             new-board (game/convert-moves-to-board game)]
         (if (board/game-over? new-board game)
           (end-game game db-type)

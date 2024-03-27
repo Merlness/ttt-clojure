@@ -80,6 +80,8 @@
 
 (defmulti save (fn [_game db-type] db-type))
 
+(defmethod save :memory [game _db-type]
+  )
 (defmethod save :edn [game _db-type]
   (->> game
        (swap! log assoc (:game-id game))
@@ -107,6 +109,5 @@
                    ;" ON CONFLICT(game_id) DO UPDATE SET moves = EXCLUDED.moves" ;possible error
                    )]
     (j/execute! ds [query])))
-
 
 (defn save! [game] (save game @db-atom))

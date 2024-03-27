@@ -15,13 +15,14 @@
   :middleware [m/fun-mode])
 
 (defn -main [& args]
-  ;(let [db nil]  ;initialize db in main
-  ;  (reset! db-impl db))
   (let [[game-id DB] args
         ;gui? (if (= args "–gui") :gui :ui)
         game-id (when game-id (read-string game-id))
+        a (prn "game-id:" game-id)
         db-type (main/select-db (last args))
         _load-db (data/load-db db-type)
+        _input-id (when (and game-id (integer? game-id)) (reset! gui/input-id game-id))
+        b (prn "_input-id:" _input-id)
         _requested-game (data/get-game-by-id game-id)])
 
   )

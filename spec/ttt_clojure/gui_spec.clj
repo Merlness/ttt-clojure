@@ -1,6 +1,7 @@
 (ns ttt-clojure.gui-spec
   (:require [quil.core :as q]
             [speclj.core :refer :all]
+            [ttt-clojure.board :as board]
             [ttt-clojure.data :as save]
             [ttt-clojure.data :as data]
             [ttt-clojure.game :as game]
@@ -68,22 +69,11 @@
           (sut/draw-state state)
           (should-have-invoked :draw-square))))
 
-    #_(it "draws game over"
-      (with-redefs [sut/draw-square (stub :draw-square)
-                    data/get-next-game-id (stub :next-id)
-
-                    game/convert-moves-to-board (fn [_] ["X" "O" "X" "O" "X" "O" "X" 8 9])]
-        (let [state {:game   {:game-id  1
-                              :player-1 {:kind :human :token "X"}
-                              :player-2 {:kind :human :token "O"}
-                              :size     :3x3
-                              :moves    [1 2 3 4 5 6 7]}
-                     :screen :play
-                     :winner :X}]
-          (sut/draw-state state)
-          (should-have-invoked :draw-square)))))
+    )
 
   (context "mouse clicked"
+    (before (reset! sut/input-id 10))
+
     (redefs-around [q/height (constantly 5)
                     q/width (constantly 5)
                     q/exit (stub :exit)
@@ -127,27 +117,71 @@
                               :moves    [1 7 8]}}]          ;[X 2 3 4 5 6 O X 9]
           (should= state (sut/mouse-clicked state {:x 1 :y 1})))))
 
-    (it "checks if you clicked continue"
-      (with-redefs [data/get-last-game (constantly {:size     :3x3
+    (it "returns the requested game when it is not over"
+      (with-redefs [data/get-game-by-id (constantly {:game-id  10
+                                                     :size     :3x3
+                                                     :player-1 {:kind :human :token "X"}
+                                                     :player-2 {:kind :human :token "O"}
+                                                     :moves    [1 7 8]})
+                    board/game-over? (constantly false)]
+        (let [expected-game {:game-id  10
+                             :size     :3x3
+                             :player-1 {:kind :human :token "X"}
+                             :player-2 {:kind :human :token "O"}
+                             :moves    [1 7 8]}
+              actual-game (sut/continue?)]
+          (should= expected-game actual-game))))
+
+    (it "returns the last game when it is not over"
+      (with-redefs [data/get-game-by-id (stub :game-by-id)
+                    data/get-last-game (constantly {:game-id  10
+                                                    :size     :3x3
                                                     :player-1 {:kind :human :token "X"}
                                                     :player-2 {:kind :human :token "O"}
-                                                    :moves    [1 7 8]})]
+                                                    :moves    [1 7 8]})
+                    board/game-over? (constantly false)]
+        (let [expected-game {:game-id  10
+                             :size     :3x3
+                             :player-1 {:kind :human :token "X"}
+                             :player-2 {:kind :human :token "O"}
+                             :moves    [1 7 8]}
+              actual-game (sut/continue?)]
+          (should= expected-game actual-game))))
+
+    (it "returns  nil for the last game when it is  over"
+      (with-redefs [data/get-game-by-id (stub :game-by-id)
+                    data/get-last-game (constantly {:game-id  10
+                                                    :size     :3x3
+                                                    :player-1 {:kind :human :token "X"}
+                                                    :player-2 {:kind :human :token "O"}
+                                                    :moves    [1 2 3 4 5 6 7]})]
+        (let [actual-game (sut/continue?)]
+          (should= false actual-game))))
+
+    (it "checks if you clicked continue"
+      (with-redefs [data/get-last-game (stub :last:game)
+                    data/get-game-by-id (constantly {:game-id  10
+                                                     :size     :3x3
+                                                     :player-1 {:kind :human :token "X"}
+                                                     :player-2 {:kind :human :token "O"}
+                                                     :moves    [1 7 8]})]
         (let [state {:screen :continue-game}
-            new-state {:screen :play :game {:size     :3x3
-                       :player-1 {:kind :human :token "X"}
-                       :player-2 {:kind :human :token "O"}
-                       :moves    [1 7 8]}}
-            [w h] (sut/dimensions)
-            mouse {:x (/ w 2) :y (* h 0.33)}]
-        (should= new-state (sut/mouse-clicked state mouse)))))
+              new-state {:screen :play :game {:game-id  10
+                                              :size     :3x3
+                                              :player-1 {:kind :human :token "X"}
+                                              :player-2 {:kind :human :token "O"}
+                                              :moves    [1 7 8]}}
+              [w h] (sut/dimensions)
+              mouse {:x (/ w 2) :y (* h 0.33)}]
+          (should= new-state (sut/mouse-clicked state mouse)))))
 
     (it "checks if you clicked new game"
       (with-redefs [data/get-next-game-id (constantly 1)]
         (let [state {:screen :continue-game}
-            new-state {:screen :size  :game {:game-id 1}}
-            [w h] (sut/dimensions)
-            mouse {:x (/ w 2) :y (* h 0.5)}]
-        (should= new-state (sut/mouse-clicked state mouse)))))
+              new-state {:screen :size :game {:game-id 1}}
+              [w h] (sut/dimensions)
+              mouse {:x (/ w 2) :y (* h 0.5)}]
+          (should= new-state (sut/mouse-clicked state mouse)))))
 
     (it "checks if you clicked size 3x3"
       (let [state {:screen :size}

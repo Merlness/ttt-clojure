@@ -1,11 +1,11 @@
 (ns ttt-clojure.gui
   (:require [quil.core :as q]
-            [quil.middleware :as m]
             [ttt-clojure.board :as board]
-            [ttt-clojure.data :as save]
             [ttt-clojure.data :as data]
             [ttt-clojure.game-modes :as gm]
             [ttt-clojure.game :as game]))
+
+(def input-id (atom nil))
 
 (defn X [x y w h]
   (q/fill 250 0 0)
@@ -102,12 +102,17 @@
           (q/fill 128 0 128)
           (q/text "It's a tie!" (/ w 2) (- h 25))))))
 
+(defn message-game-id [game-id h]
+  (q/fill 0 0 0)
+  (q/text-size 12)
+  (q/text-align :left :center)
+  (q/text (str "Game id:" game-id) 0 (- h 25)))
+
 (defn play-message [state w h]
   (let [moves (:moves (:game state))
         game (:game state)
         board (game/convert-moves-to-board game)
-        ; game-id (data/get-next-game-id)
-        ]
+         game-id (:game-id game)]
     (q/text-size 20)
     (q/text-align :center :center)
     (cond
@@ -120,10 +125,7 @@
       :else (do
               (q/fill 0 0 255)
               (q/text "Player 2's turn" (/ w 2) (- h 25))))
-    #_((q/fill 0 0 0)
-       (q/text-size 12)
-       (q/text-align :left :center)
-       (q/text (str "Game id:" game-id) 0 (- h 25)))))
+    (message-game-id game-id h)))
 
 
 (defmulti draw-state :screen)
@@ -165,8 +167,7 @@
       (let [index (+ x (* y size))
             token (get board index)]
         (draw-square size token x y)))
-    (play-message state w h))
-
+    (play-message state w h)) ;here
   state)
 
 (defmethod draw-state :again [state]
@@ -185,12 +186,18 @@
        (>= y-mouse y)
        (<= y-mouse (+ y height))))
 
-;(defn continue? []
-;  (let [_ (data/load-db :edn)
-;        last-game (data/get-last-game)
-;        new-board (game/convert-moves-to-board last-game)
-;        true? (not (board/game-over? new-board last-game))]
-;    last-game (and last-game true?)))
+(defn continue? []
+  (let [input-id (some-> @input-id int)
+        requested-game-map (when input-id (data/get-game-by-id input-id))
+        last-game-map (data/get-last-game)
+        requested-board (when requested-game-map (game/convert-moves-to-board requested-game-map))
+        last-board (when last-game-map (game/convert-moves-to-board last-game-map))
+        requested-game-over? (board/game-over? requested-board requested-game-map)
+        last-game-over? (board/game-over? last-board last-game-map)]
+    (cond
+      (and requested-game-map (not requested-game-over?)) requested-game-map
+      (and last-game-map (not last-game-over?)) last-game-map
+      :else false)))
 
 (defmulti mouse-clicked (fn [state _mouse] (:screen state)))
 
@@ -198,13 +205,10 @@
   (let [x (:x mouse)
         y (:y mouse)
         [w h] (dimensions)
-        _ (data/load-db :edn)
         game-id (data/get-next-game-id)
         new-state (assoc-in state [:game :game-id] game-id)
-        last-game (data/get-last-game)
-        new-board (game/convert-moves-to-board last-game)
-        true? (not (board/game-over? new-board last-game))
-        continue? (and last-game true?)
+        game-to-continue (continue?)
+        b (prn "game-to-continue:" game-to-continue)
         ]
     (cond
       (area-clicked x y (/ w 2) (* h 0.5) (/ w 5) (/ h 10))
@@ -212,9 +216,9 @@
 
       (and
         (area-clicked x y (/ w 2) (* h 0.33) (/ w 5) (/ h 10))
-        continue?)
+        (continue?))
       (-> new-state
-          (assoc :game last-game)
+          (assoc :game game-to-continue)
           (assoc :screen :play))                            ;possible to continue? yes :screen play                                                ;no? screen :size                      ;continue the old game
 
       :else state)))
@@ -299,12 +303,12 @@
 
       (= :ai (:kind player))
       (do
-        (save/save! (assoc game :moves new-moves) )
+        (data/save! (assoc game :moves new-moves) )
         (assoc-in state [:game :moves] new-moves))
 
       (available-move? token size move)
       (do
-        (save/save! (assoc game :moves new-moves) )
+        (data/save! (assoc game :moves new-moves) )
         (assoc-in state [:game :moves] new-moves))
 
       :else state)))
@@ -312,10 +316,14 @@
 (defmethod mouse-clicked :again [state mouse]
   (let [x (:x mouse)
         y (:y mouse)
-        [w h] (dimensions)]
+        [w h] (dimensions)
+        game-id (:game-id (:game state))
+        _ (prn "game-id:" game-id)]
     (cond
       (area-clicked x y (/ w 2) (* h 0.33) (/ w 5) (/ h 10))
-      (update-state state :size :moves [])
+      (-> state
+          (assoc-in [:game :game-id] (inc game-id))
+          (update-state  :size :moves []))
 
       (area-clicked x y (/ w 2) (* h 0.5) (/ w 5) (/ h 10))
       (q/exit)
