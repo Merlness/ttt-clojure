@@ -312,5 +312,33 @@
                                 :player-2 {:kind :human :token "O"}
                                 :moves    [1 2 3 4 5 6 7]}}]
         (should= new-state (sut/mouse-clicked state mouse))))
+
+    (it "area-clicked for a point within the area"
+      (should (sut/area-clicked 5 5 5 5 10 10)))
+
+    (it "area-clicked for a point on the area on the left"
+      (should-not (sut/area-clicked 4 8 10 5 10 10)))
+
+    (it "area-clicked for a point outside the area on the left"
+      (should-not (sut/area-clicked 0 4 5 5 10 10)))
+
+    (it "area-clicked for a point outside the area on the right"
+      (should-not (sut/area-clicked 11 6 5 5 10 10)))
+
+    (it "area-clicked for a point on the area on the right"
+      (should (sut/area-clicked 10 5 5 5 10 10)))
+
+    (it "area-clicked for a point outside the area on the top"
+      (should-not (sut/area-clicked 5 0 5 5 10 10)))
+
+    (it "area-clicked for a point on the area on the bottom"
+      (should (sut/area-clicked 5 10 5 5 10 10)))
+
+    (it "area-clicked for a point outside the area on the bottom"
+      (should-not (sut/area-clicked 5 1 5 5 10 10)))
+
+    (it "area-clicked for a point on the edge of the area"
+      (should (sut/area-clicked 5 5 5 5 0 0)))
+
     )
   )

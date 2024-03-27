@@ -145,7 +145,6 @@
     (q/text (str "Positions chosen in order") (* w 0.5) (* h 0.5))
     (q/text (str (clojure.string/join "  " moves)) (* w 0.5) (* h 0.6))))
 
-
 (defmulti draw-state :screen)
 
 (defmethod draw-state :continue-game [state]
@@ -351,8 +350,7 @@
   (let [x (:x mouse)
         y (:y mouse)
         [w h] (dimensions)
-        game-id (:game-id (:game state))
-        _ (prn "game-id:" game-id)]
+        game-id (:game-id (:game state))]
     (cond
       (area-clicked x y (/ w 2) (* h 0.33) (/ w 5) (/ h 10))
       (-> state

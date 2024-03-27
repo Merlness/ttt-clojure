@@ -64,6 +64,7 @@
 
 (def db-atom (atom nil))
 (def log (atom {}))
+
 (defn load-db [db-type]
   (reset! db-atom db-type)
   (reset! log (fetch-the-games db-type)))

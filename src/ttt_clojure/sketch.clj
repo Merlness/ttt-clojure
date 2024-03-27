@@ -16,7 +16,6 @@
 
 (defn -main [& args]
   (let [[game-id DB] args
-        ;gui? (if (= args "–gui") :gui :ui)
         game-id (when game-id (read-string game-id))
         db-type (main/select-db (last args))
         _load-db (data/load-db db-type)
